@@ -39,10 +39,10 @@ struct Bala
 {
   esat::Vec2 pos;
   esat::Vec2 dir;
-  float speed; 
+  float speed;
   bool activa;
+  float tiempo_vida;
 };
-
 
 Sprites *AsignarMemoriaSprites(int cantidad)
 {
@@ -50,7 +50,7 @@ Sprites *AsignarMemoriaSprites(int cantidad)
 }
 Bala *AsignarMemoriaBalas(int cantidad)
 {
-  return (Bala*)malloc(cantidad * sizeof(Bala));
+  return (Bala *)malloc(cantidad * sizeof(Bala));
 }
 
 void InstanciarSpritesColores(Sprites *punteroSprites)
@@ -89,16 +89,63 @@ void InstanciarBalas(Bala *bala)
   {
     bala[i].activa = false;
   }
-  bala->speed = 3.0f;
 }
 
-void CrearDisparos(Bala *bala)
+void CrearDisparos(Bala *bala, Jugador player)
 {
-  if (esat::IsSpecialKeyPressed(esat::kSpecialKey_Space))
+  if (esat::IsSpecialKeyDown(esat::kSpecialKey_Space))
   {
     for (int i = 0; i < 20; i++)
     {
-      if (bala->activa)
+      if (!bala[i].activa)
+      {
+        bala[i].activa = true;
+        bala[i].pos.x = player.pos.x + (spritewidth / 2);
+        bala[i].pos.y = player.pos.y + (spriteheight / 2);
+        bala[i].speed = 16.0f;
+        bala[i].tiempo_vida = 0.0f;
+        if (player.mirandoDerecha)
+          bala[i].dir = {1, 0};
+        else
+        {
+          bala[i].dir = {-1, 0};
+          bala[i].pos.x = player.pos.x - (spritewidth / 2);
+        }
+        break;
+      }
+    }
+  }
+}
+
+void DibujarDisparos(Bala *bala)
+{
+  for (int i = 0; i < 20; i++)
+  {
+    if (bala[i].activa)
+    {
+      float balas[8] = {bala[i].pos.x, bala[i].pos.y, bala[i].pos.x + 50, bala[i].pos.y, bala[i].pos.x + 50, bala[i].pos.y + 2, bala[i].pos.x, bala[i].pos.y + 2};
+      esat::DrawSetFillColor(255, 255, 255);
+      esat::DrawSolidPath(balas, 4);
+    }
+  }
+}
+
+void ActualizarDisparos(Bala *bala, Jugador player)
+{
+  float duracion_bala = 3.0f;
+
+  for (int i = 0; i < 20; i++)
+  {
+    if (bala[i].activa)
+    {
+      bala[i].pos.x += bala[i].dir.x * bala[i].speed;
+      //! si sale de pantalla (funcion carlos)
+
+      bala[i].tiempo_vida += delta_time;
+      if (bala[i].tiempo_vida >= duracion_bala)
+      {
+        bala[i].activa = false;
+      }
     }
   }
 }
@@ -110,7 +157,6 @@ void DibujarColoresJugador(Sprites *punteroSprites, Jugador jugador)
   float frame_time = 0.15f;
 
   timer += delta_time;
-  //! Cambiar posteriormente !!!!!!!!
   if (timer >= frame_time)
   {
     timer = 0.0f;
@@ -121,6 +167,7 @@ void DibujarColoresJugador(Sprites *punteroSprites, Jugador jugador)
 
 void ControlarLimitesPantalla(Jugador *player)
 {
+  //! (funcion carlos)
   if (player->pos.x >= windowX - spritewidth)
     player->pos.x = windowX - spritewidth;
   if (player->pos.x <= 0)
@@ -192,8 +239,7 @@ int esat::main(int argc, char **argv)
   Bala *punteroBalas = AsignarMemoriaBalas(20);
   InstanciarSpritesColores(spritesColores);
   InstanciarSpritesPlayer(spritesPersonaje);
-
-  InstanciarBalas(&punteroBalas);
+  InstanciarBalas(punteroBalas);
 
   Jugador player;
   InstanciarPlayer(&player);
@@ -219,6 +265,8 @@ int esat::main(int argc, char **argv)
     bool ascender = (esat::IsKeyPressed('W') || esat::IsKeyPressed('w'));
     Ascender_Gravedad(&player, ascender);
     ControlarLimitesPantalla(&player);
+    CrearDisparos(punteroBalas, player);
+    ActualizarDisparos(punteroBalas, player);
     if (moverLeft || moverRight)
     {
       player.isMoving = true;
@@ -233,6 +281,7 @@ int esat::main(int argc, char **argv)
 
     DibujarColoresJugador(spritesColores, player);
     DibujarJugador(spritesPersonaje, player);
+    DibujarDisparos(punteroBalas);
 
     // Finish drawing
     esat::DrawEnd();
