@@ -23,6 +23,12 @@ unsigned char fps = 25;
 double current_time;
 double last_time;
 
+enum Direction{
+  UP,
+  DOWN,
+  NONE
+};
+
 struct Sprite{
   esat::SpriteHandle sprite;
 };
@@ -63,16 +69,18 @@ void InitSpriteNave(Sprite *punteroSprites)
 
 void InstanciarNave(Nave *nave)
 {
-  nave->activada = ;
-  nave->direccion = ;
-  nave->pos.x = ;
-  nave->pos.y = ;
+  int height = 32;
+
+  nave->activada = false;
+  nave->direccion = Direction::NONE;
+  nave->pos.x = KWindow_Width/2;
+  nave->pos.y = KWindow_Height-height;
 }
 
 // void DibujarNave()
-{
+//{
   // esat::DrawSprite(punteroSprites[0], pos x, pos y);
-}
+//}
 // mover nave (trigger nave)
 
 
