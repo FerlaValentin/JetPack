@@ -37,6 +37,8 @@ int esat::main(int argc, char **argv) {
   // load font
   LoadFonts();
 
+  InitPlatformSprites();
+
   // Main game loop
   while(esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape)) {
     
@@ -52,7 +54,7 @@ int esat::main(int argc, char **argv) {
     esat::DrawClear(0,0,0);
 
     // Change screen
-    ScreenSelector(MAIN_MENU);
+    ScreenSelector(GAME_SCREEN);
 
     TestMousePosition();
 
