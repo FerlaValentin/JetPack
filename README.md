@@ -40,3 +40,20 @@ Uso en `main.cc`:
 ```cpp
 printf("Test2: %d\n", test2);
 ```
+
+## 4 Pasar variables usando `extern`
+
+Si quieres usar una variable global en un script y desde `main.cc`, puedes declararla como `extern` en el script.
+
+Ejemplo en `main.cc` tenemos:
+
+```cpp
+int test = 10; // definicion de la variable
+```
+
+Ejemplo en `jhony.cc` lo podemos llamar así:
+
+```cpp
+extern int test; // busqueda de la variable en otro archivo (main.cc)
+printf("Test: %d\n", test);
+```
