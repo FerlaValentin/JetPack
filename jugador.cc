@@ -35,10 +35,22 @@ struct Jugador
   bool isShooting;
   bool mirandoDerecha;
 };
+struct Bala
+{
+  esat::Vec2 pos;
+  esat::Vec2 dir;
+  float speed; 
+  bool activa;
+};
+
 
 Sprites *AsignarMemoriaSprites(int cantidad)
 {
   return (Sprites *)malloc(cantidad * sizeof(Sprites));
+}
+Bala *AsignarMemoriaBalas(int cantidad)
+{
+  return (Bala*)malloc(cantidad * sizeof(Bala));
 }
 
 void InstanciarSpritesColores(Sprites *punteroSprites)
@@ -69,6 +81,26 @@ void InstanciarPlayer(Jugador *player)
   player->isShooting = false;
   player->speed = 5.0f;
   player->mirandoDerecha = true;
+}
+
+void InstanciarBalas(Bala *bala)
+{
+  for (int i = 0; i < 20; i++)
+  {
+    bala[i].activa = false;
+  }
+  bala->speed = 3.0f;
+}
+
+void CrearDisparos(Bala *bala)
+{
+  if (esat::IsSpecialKeyPressed(esat::kSpecialKey_Space))
+  {
+    for (int i = 0; i < 20; i++)
+    {
+      if (bala->activa)
+    }
+  }
 }
 
 void DibujarColoresJugador(Sprites *punteroSprites, Jugador jugador)
@@ -157,8 +189,11 @@ int esat::main(int argc, char **argv)
   // puntero a sprites
   Sprites *spritesColores = AsignarMemoriaSprites(4);
   Sprites *spritesPersonaje = AsignarMemoriaSprites(8);
+  Bala *punteroBalas = AsignarMemoriaBalas(20);
   InstanciarSpritesColores(spritesColores);
   InstanciarSpritesPlayer(spritesPersonaje);
+
+  InstanciarBalas(&punteroBalas);
 
   Jugador player;
   InstanciarPlayer(&player);
