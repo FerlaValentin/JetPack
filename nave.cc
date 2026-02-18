@@ -11,7 +11,6 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "jugador.cc"
 
 // Windows dimensions with default values
 const int KWindow_Width = 800;
@@ -26,7 +25,6 @@ double last_time;
 enum Direction{
   UP,
   DOWN,
-  NONE
 };
 
 struct Sprite{
@@ -36,17 +34,10 @@ struct Sprite{
 struct Nave{
     float vel;
     esat::Vec2 pos;
-    int direccion;
+    Direction direccion;
     bool activada;
+    int height = 32;
 };
-
-// void ReservaMemoria(){
-//     spritesNave = (nave*) malloc(sizeof(nave) * 9);
-// }
-
-// void SpritesNave(){
-//     (spritesNave) = 
-// }
 
 Sprite *InstanciarSpritesNave(int numSprite){
   return (Sprite*)malloc(sizeof(Sprite)*numSprite);
@@ -54,35 +45,46 @@ Sprite *InstanciarSpritesNave(int numSprite){
 
 void InitSpriteNave(Sprite *punteroSprites)
 {
-  punteroSprites[0].sprite = esat::SpriteFromFile("./SPRITES/nave_cabeza_1_2x.png");
-  punteroSprites[1].sprite = esat::SpriteFromFile("./SPRITES/nave_cabeza_1_2x.png");
-  punteroSprites[2].sprite = esat::SpriteFromFile("./SPRITES/nave_cabeza_1_2x.png");
-  punteroSprites[3].sprite = esat::SpriteFromFile("./SPRITES/nave_cabeza_1_2x.png");
-  punteroSprites[4].sprite = esat::SpriteFromFile("./SPRITES/nave_cabeza_1_2x.png");
-  punteroSprites[5].sprite = esat::SpriteFromFile("./SPRITES/nave_cabeza_1_2x.png");
-  punteroSprites[6].sprite = esat::SpriteFromFile("./SPRITES/nave_cabeza_1_2x.png");
-  punteroSprites[7].sprite = esat::SpriteFromFile("./SPRITES/nave_cabeza_1_2x.png");
-  punteroSprites[8].sprite = esat::SpriteFromFile("./SPRITES/nave_cabeza_1_2x.png");
-  punteroSprites[9].sprite = esat::SpriteFromFile("./SPRITES/rosita.png");
-  punteroSprites[10].sprite = esat::SpriteFromFile("./SPRITES/blanquito.png");
+  punteroSprites[0].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cola_nave_1_2x.png");
+  punteroSprites[1].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cuerpo_nave_1_2x.png");
+  punteroSprites[2].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cabeza_nave_1_2x.png");
+  punteroSprites[3].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cola_nave_2_2x.png");
+  punteroSprites[4].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cuerpo_nave_2_2x.png");
+  punteroSprites[5].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cabeza_nave_2_2x.png");
+  punteroSprites[6].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cola_nave_3_2x.png");
+  punteroSprites[7].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cuerpo_nave_3_2x.png");
+  punteroSprites[8].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cabeza_nave_3_2x.png");
+  punteroSprites[9].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cola_nave_4_2x.png");
+  punteroSprites[10].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cuerpo_nave_4_2x.png");
+  punteroSprites[11].sprite = esat::SpriteFromFile("./SPRITES/NAVE/cabeza_nave_4_2x.png");
+  punteroSprites[12].sprite = esat::SpriteFromFile("./SPRITES/NAVE/fondo_blanco.png");
+  //punteroSprites[13].sprite = esat::SpriteFromFile("./SPRITES/rosita.png");
 }
 
 void InstanciarNave(Nave *nave)
 {
-  int height = 32;
-
   nave->activada = false;
-  nave->direccion = Direction::NONE;
+  nave->vel = 20;
   nave->pos.x = KWindow_Width/2;
-  nave->pos.y = KWindow_Height-height;
+  nave->pos.y = KWindow_Height - nave->height;
 }
 
-// void DibujarNave()
-//{
-  // esat::DrawSprite(punteroSprites[0], pos x, pos y);
-//}
-// mover nave (trigger nave)
+void DibujarNave(Nave *nave, Sprite *punteroSprites){
+  for(int i=0; i<3; i++){
+      esat::DrawSprite(punteroSprites[12].sprite, nave->pos.x, nave->pos.y-(nave->height*i));
+      esat::DrawSprite(punteroSprites[i].sprite, nave->pos.x, nave->pos.y-(nave->height*i));
+  }
+}
 
+// void TriggerNave(Nave *nave){
+//   if(esat::kSpecialKey_Up){
+//     nave->direccion = Direction::UP;
+//     nave->pos.y -= nave->vel;
+//   }else if(esat::kSpecialKey_Down){
+//     nave->direccion = Direction::DOWN;
+//     nave->pos.y -= nave->vel;
+//   }
+// }
 
 
 int esat::main(int argc, char **argv) {
@@ -93,13 +95,13 @@ int esat::main(int argc, char **argv) {
 	srand((unsigned)time(nullptr));
 	last_time = esat::Time();
 
-  Sprite *punteroSprites = InstanciarSpritesNave(11);
+  Sprite *punteroSprites = InstanciarSpritesNave(14);
   InitSpriteNave(punteroSprites);
 
   Nave nave;
   InstanciarNave(&nave);
 
-
+  //TriggerNave(&nave);
 
   // Main game loop
   while(esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape)) {
@@ -115,7 +117,7 @@ int esat::main(int argc, char **argv) {
     esat::DrawBegin();
     esat::DrawClear(0,0,0);
 
-
+    DibujarNave(&nave, punteroSprites);
 
     // Finish drawing
     esat::DrawEnd();
