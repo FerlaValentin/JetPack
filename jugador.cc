@@ -46,6 +46,11 @@ struct Bala
   bool activa;
   float tiempo_vida;
   COL::object config_bala;
+  // animacion bala
+  float longitud_actual;
+  float longitud_maxima;
+  float velocidad_crecimiento;
+  unsigned char r, g, b;
 };
 
 Sprites *AsignarMemoriaSprites(int cantidad)
@@ -141,13 +146,49 @@ void CrearDisparos(Bala *bala, Jugador player)
         bala[i].pos.y = player.pos.y + (spriteheight / 2);
         bala[i].speed = 16.0f;
         bala[i].tiempo_vida = 0.0f;
-        
+
+        int tipo = rand() % 4;
+        switch (tipo)
+        {
+        case 0: // CiAN
+          bala[i].r = 0;
+          bala[i].g = 255;
+          bala[i].b = 255;
+          break;
+
+        case 1: // MAGENTA
+          bala[i].r = 255;
+          bala[i].g = 0;
+          bala[i].b = 255;
+          break;
+
+        case 2: // AMARILLO
+          bala[i].r = 255;
+          bala[i].g = 255;
+          bala[i].b = 0;
+          break;
+
+        case 3: // verd
+          bala[i].r = 0;
+          bala[i].g = 255;
+          bala[i].b = 0;
+          break;
+        }
+
+        // animacion bala
+        bala[i].longitud_actual = 0.0f;
+        bala[i].longitud_maxima = 200.0f;
+        bala[i].velocidad_crecimiento = 350.0f;
+
         if (player.mirandoDerecha)
+        {
           bala[i].dir = {1, 0};
+          bala[i].pos.x = player.pos.x + spritewidth;
+        }
         else
         {
           bala[i].dir = {-1, 0};
-          bala[i].pos.x = player.pos.x - (spritewidth / 2);
+          bala[i].pos.x = player.pos.x;
         }
         break;
       }
@@ -168,11 +209,16 @@ void ActualizarDisparos(Bala *bala, Jugador player)
       bala[i].config_bala.position.x = bala[i].pos.x;
       bala[i].config_bala.position.y = bala[i].pos.y;
       bala[i].config_bala.colision = CreateColision(bala[i].config_bala);
-      
+
       bala[i].tiempo_vida += delta_time;
       if (bala[i].tiempo_vida >= duracion_bala)
       {
         bala[i].activa = false;
+      }
+      // dejar rastro chulo
+      if (bala[i].longitud_actual < bala[i].longitud_maxima)
+      {
+        bala[i].longitud_actual += bala[i].velocidad_crecimiento * delta_time;
       }
     }
   }
@@ -197,12 +243,61 @@ void DibujarDisparos(Bala *bala)
 {
   for (int i = 0; i < 20; i++)
   {
-    if (bala[i].activa)
+    if (!bala[i].activa)
+      continue;
+
+    float punta_x = bala[i].pos.x;
+    float punta_y = bala[i].pos.y;
+    float dir = bala[i].dir.x;
+
+    float alto = 3.0f;
+    float espacio = 20.0f;
+    float largo_segmento = 18.0f;
+
+    float distancia = bala[i].longitud_actual;
+
+    if (distancia <= 0.0f)
+      continue;
+
+    // Dibujar desde la punta hacia atras
+    for (float d = 0; d < distancia; d += espacio)
     {
-      float balas[8] = {bala[i].pos.x, bala[i].pos.y, bala[i].pos.x + 50, bala[i].pos.y, bala[i].pos.x + 50, bala[i].pos.y + 2, bala[i].pos.x, bala[i].pos.y + 2};
-      esat::DrawSetFillColor(255, 255, 255);
-      esat::DrawSolidPath(balas, 4);
+      float inicio = punta_x - dir * d;
+
+      // gradiente
+      float factor = 1.0f - (d / distancia);
+
+      if (factor < 0.0f)
+        factor = 0.0f;
+
+      // brillo cerca de la punta
+      float brillo = powf(factor, 0.5f);
+
+      unsigned char r = (unsigned char)(bala[i].r * brillo);
+      unsigned char g = (unsigned char)(bala[i].g * brillo);
+      unsigned char b = (unsigned char)(bala[i].b * brillo);
+
+      esat::DrawSetFillColor(r, g, b);
+
+      float segmento[8] = {
+          inicio, punta_y,
+          inicio - dir * largo_segmento, punta_y,
+          inicio - dir * largo_segmento, punta_y + alto,
+          inicio, punta_y + alto};
+
+      esat::DrawSolidPath(segmento, 4);
     }
+
+    // punta
+    esat::DrawSetFillColor(255, 255, 255);
+
+    float punta[8] = {
+        punta_x, punta_y,
+        punta_x - dir * 25.0f, punta_y,
+        punta_x - dir * 25.0f, punta_y + alto,
+        punta_x, punta_y + alto};
+
+    esat::DrawSolidPath(punta, 4);
   }
 }
 
@@ -238,12 +333,10 @@ void DibujarColoresJugador(Sprites *punteroSprites, Jugador jugador, int frame)
 
 void DibujarJugador(Sprites *punteroSprites, Jugador jugador, int frame)
 {
-  int base = jugador.volando ? 
-  (jugador.mirandoDerecha ? 8 : 12) : (jugador.mirandoDerecha ? 0 : 4);
+  int base = jugador.volando ? (jugador.mirandoDerecha ? 8 : 12) : (jugador.mirandoDerecha ? 0 : 4);
 
   esat::DrawSprite(punteroSprites[base + frame].sprite, jugador.pos.x, jugador.pos.y);
 }
-
 
 //_____________________________
 // LIMITES PANTALLA
@@ -394,9 +487,9 @@ int esat::main(int argc, char **argv)
     ColisionDisparos(punteroBalas, cubo_prueba);
 
     int frame = ActualizarAnimacionJugador(player);
+    DibujarDisparos(punteroBalas);
     DibujarColoresJugador(spritesColores, player, frame);
     DibujarJugador(spritesPersonaje, player, frame);
-    DibujarDisparos(punteroBalas);
 
     // DebuggingCubo(cubo_prueba, *spritesColores);
     // DebuggingCubo(player.config_colision, *spritesColores);
