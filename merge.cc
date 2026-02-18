@@ -12,6 +12,9 @@
 #include <time.h>
 #include <math.h>
 
+//FUNCIONES PARA ABSTRAER
+#include "valentin.h"
+
 //JUGADOR.CC BELTRAN
 #include "jugador.cc"
 
@@ -25,28 +28,37 @@ unsigned char fps = 25;
 double current_time;
 double last_time;
 
-int esat::main(int argc, char **argv) {
-
-    esat::WindowInit(KWindow_Width, KWindow_Height);
-	esat::WindowSetMouseVisibility(true);
-
+void Init(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Jugador *player){
 	srand((unsigned)time(nullptr));
 	last_time = esat::Time();
+    *spritesColores = (Sprites*)VFL::AllocateMemory(4, sizeof(Sprites));
+    *spritesPersonaje = (Sprites*)VFL::AllocateMemory(16, sizeof(Sprites));
+    *punteroBalas = (Bala*)VFL::AllocateMemory(20, sizeof(Bala));
+    InstanciarSpritesColores(*spritesColores);
+    InstanciarSpritesPlayer(*spritesPersonaje);
+    InstanciarBalas(*punteroBalas);
+    InstanciarPlayer(player);
+    esat::WindowInit(KWindow_Width, KWindow_Height);
+	esat::WindowSetMouseVisibility(true);
+}
 
-    // puntero a sprites
-    Sprites *spritesColores = AsignarMemoriaSprites(4);
-    Sprites *spritesPersonaje = AsignarMemoriaSprites(16);
-    Bala *punteroBalas = AsignarMemoriaBalas(20);
-    InstanciarSpritesColores(spritesColores);
-    InstanciarSpritesPlayer(spritesPersonaje);
-    InstanciarBalas(punteroBalas);
+void GetInput(bool* moverLeft, bool* moverRight, bool* ascender){
+    *moverLeft = (esat::IsKeyPressed('A') || esat::IsKeyPressed('a'));
+    *moverRight = (esat::IsKeyPressed('D') || esat::IsKeyPressed('d'));
+    *ascender = (esat::IsKeyPressed('W') || esat::IsKeyPressed('w'));
+}
 
+void Update(Jugador* player, bool ascender){
+    Ascender_Gravedad(player, ascender);
+}
+
+int esat::main(int argc, char **argv) {
+    Sprites *spritesColores = nullptr, *spritesPersonaje = nullptr;
+    Bala *punteroBalas = nullptr;
     Jugador player;
-    InstanciarPlayer(&player);
+    bool moverLeft, moverRight, ascender;
 
-    COL::object cubo_prueba;
-    InstanciarCubo(&cubo_prueba, *spritesPersonaje);
-
+    Init(&spritesColores, &spritesPersonaje, &punteroBalas, &player);
     // Main game loop
     while(esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape)) {
         
@@ -60,6 +72,9 @@ int esat::main(int argc, char **argv) {
 
         esat::DrawBegin();
         esat::DrawClear(0,0,0);
+
+        GetInput(&moverLeft, &moverRight, &ascender);
+        Update(&player, ascender);
 
         // Finish drawing
         esat::DrawEnd();
