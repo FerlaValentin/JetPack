@@ -14,8 +14,8 @@
 #include "colisiones.h"
 #define spritewidth 34
 #define spriteheight 50
-#define windowX 800
-#define windowY 800
+#define windowX 256 * 2
+#define windowY 192 * 2
 
 // FPS
 double delta_time;

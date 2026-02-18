@@ -1,3 +1,5 @@
+//supuestamente esto es pa que todos los archivos .cc que hayan incluido este header no lo compilen por cada archivo
+#pragma once 
 // ESAT Libraries
 #include <esat/window.h>
 #include <esat/draw.h>
