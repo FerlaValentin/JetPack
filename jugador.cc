@@ -277,6 +277,22 @@ void MoverJugador(Jugador *jugador, bool moverLeft, bool moverRight)
     jugador->pos.x += jugador->speed;
   }
 }
+
+void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player)
+{
+  if (moverLeft || moverRight)
+  {
+    player->isMoving = true;
+    MoverJugador(player, moverLeft, moverRight);
+    if (moverLeft)
+      player->mirandoDerecha = false;
+    else
+      player->mirandoDerecha = true;
+  }
+  else
+    player->isMoving = false;
+}
+
 void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
 {
   float suelo = windowY - spriteheight;
@@ -295,6 +311,7 @@ void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
     jugador->volando = true;
   }
 }
+
 void ActualizarColisiones(Jugador *player, object &cubo_prueba)
 {
   player->config_colision.position.x = player->pos.x;
@@ -326,7 +343,7 @@ int esat::main(int argc, char **argv)
   srand((unsigned)time(nullptr));
   last_time = esat::Time();
 
-  // puntero a sprites
+  // Asignar memoria e inicializar objetos
   Sprites *spritesColores = AsignarMemoriaSprites(4);
   Sprites *spritesPersonaje = AsignarMemoriaSprites(16);
   Bala *punteroBalas = AsignarMemoriaBalas(20);
@@ -336,14 +353,12 @@ int esat::main(int argc, char **argv)
 
   Jugador player;
   InstanciarPlayer(&player);
-
   object cubo_prueba;
   InstanciarCubo(&cubo_prueba, *spritesPersonaje);
 
   // Main game loop
   while (esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape))
   {
-
     // Calculate time elapsed since the last frame
     current_time = esat::Time();
     delta_time = (current_time - last_time) / 1000.0;
@@ -356,33 +371,26 @@ int esat::main(int argc, char **argv)
     esat::DrawBegin();
     esat::DrawClear(0, 0, 0);
 
+    // Inputs
     bool moverLeft = (esat::IsKeyPressed('A') || esat::IsKeyPressed('a'));
     bool moverRight = (esat::IsKeyPressed('D') || esat::IsKeyPressed('d'));
     bool ascender = (esat::IsKeyPressed('W') || esat::IsKeyPressed('w'));
+
+    // Movimiento del jugador, colisiones, disparos
     Ascender_Gravedad(&player, ascender);
     CrearDisparos(punteroBalas, player);
     ActualizarDisparos(punteroBalas, player);
-
-    if (moverLeft || moverRight)
-    {
-      player.isMoving = true;
-      MoverJugador(&player, moverLeft, moverRight);
-      if (moverLeft)
-        player.mirandoDerecha = false;
-      else
-        player.mirandoDerecha = true;
-    }
-    else
-      player.isMoving = false;
-
+    LoopMoverJugador(moverLeft, moverRight, &player);
     ControlarLimitesPantalla(&player, punteroBalas);
     ActualizarColisiones(&player, cubo_prueba);
     ColisionPlayer(player, cubo_prueba);
 
+    // Funciones dibujado
     DibujarColoresJugador(spritesColores, player);
     DibujarJugador(spritesPersonaje, player);
     DibujarDisparos(punteroBalas);
 
+    // Debugging
     DebuggingCubo(cubo_prueba, *spritesColores);
     DebuggingCubo(player.config_colision, *spritesColores);
 
