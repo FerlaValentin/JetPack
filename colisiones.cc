@@ -19,7 +19,7 @@ struct vec2
 
 struct colision
 {
-    float x1, y1, x2, y2;
+    vec2 p1, p2;
 };
 
 struct object
@@ -44,16 +44,16 @@ vec2 mymouse;
 colision CreateColision(object object)
 {
     colision final;
-    final.x1 = object.position.x;
-    final.y1 = object.position.y;
-    final.x2 = object.position.x + object.width;
-    final.y2 = object.position.y + object.height;
+    final.p1.x = object.position.x;
+    final.p1.y = object.position.y;
+    final.p2.x = object.position.x + object.width;
+    final.p2.y = object.position.y + object.height;
     return final;
 }
 
 bool CheckColision(colision colision1, colision colision2)
 {
-    if (colision1.x2 > colision2.x1 && colision1.x1 < colision2.x2 && colision1.y2 > colision2.y1 && colision1.y1 < colision2.y2)
+    if (colision1.p2.x > colision2.p1.x && colision1.p1.x < colision2.p2.x && colision1.p2.y > colision2.p1.y && colision1.p1.y < colision2.p2.y)
     {
         return true;
     }
