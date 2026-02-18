@@ -48,10 +48,17 @@ struct Bala
   COL::object config_bala;
 };
 
+/*Asigna memoria a las instancias de Sprites
+  param cantidad: el numero de elementos que tiene ese bloque
+  devuelve el puntero*/
 Sprites *AsignarMemoriaSprites(int cantidad)
 {
   return (Sprites *)malloc(cantidad * sizeof(Sprites));
 }
+
+/*Asigna memoria a las instancias de Bala
+  param cantidad: el numero de elementos que tiene ese bloque
+  devuelve el puntero*/
 Bala *AsignarMemoriaBalas(int cantidad)
 {
   return (Bala *)malloc(cantidad * sizeof(Bala));
@@ -60,6 +67,9 @@ Bala *AsignarMemoriaBalas(int cantidad)
 // INSTANCIAR
 // ________________________________
 
+/*Carga sprites en el puntero de los sprites colores
+  param *punteroSprites El puntero donde se cargan los sprites colores
+*/
 void InstanciarSpritesColores(Sprites *punteroSprites)
 {
   punteroSprites[0].sprite = esat::SpriteFromFile("SPRITES/JUGADOR/amarillo1.png");
@@ -67,6 +77,10 @@ void InstanciarSpritesColores(Sprites *punteroSprites)
   punteroSprites[2].sprite = esat::SpriteFromFile("SPRITES/JUGADOR/azul1.png");
   punteroSprites[3].sprite = esat::SpriteFromFile("SPRITES/JUGADOR/verde1.png");
 }
+
+/*Carga sprites en el puntero de los sprites del jugador
+  param *punteroSprites El puntero donde se cargan los sprites del jugador
+*/
 void InstanciarSpritesPlayer(Sprites *punteroSprites)
 {
   // suelo
@@ -89,6 +103,9 @@ void InstanciarSpritesPlayer(Sprites *punteroSprites)
   punteroSprites[15].sprite = esat::SpriteFromFile("SPRITES/JUGADOR/left4.png");
 }
 
+/*Instancia el Player
+  param *player puntero a la instancia Player
+*/
 void InstanciarPlayer(Jugador *player)
 {
   player->pos.x = windowX / 2;
@@ -104,6 +121,9 @@ void InstanciarPlayer(Jugador *player)
   player->config_colision.height = spriteheight;
 }
 
+/*Instancia las balas del puntero de las balas
+  param *bala Puntero de las balas
+*/
 void InstanciarBalas(Bala *bala)
 {
   for (int i = 0; i < 20; i++)
@@ -114,6 +134,10 @@ void InstanciarBalas(Bala *bala)
   }
 }
 
+/*Instancia el cubo para hacer pruebas
+  param *cubo_prueba puntero al cubo para hacer pruebas
+  param 
+*/
 void InstanciarCubo(COL::object *cubo_prueba, Sprites punteroSprites)
 {
   cubo_prueba->sprite = punteroSprites.sprite;

@@ -15,10 +15,6 @@
 //JUGADOR.CC BELTRAN
 #include "jugador.cc"
 
-//MAIN.CC JONATHAN
-#include "hud.cc"
-#include "interface.cc"
-
 // Windows dimensions with default values
 const int KWindow_Width = 256 * 2;
 const int KWindow_Height = 192 * 2;
@@ -36,6 +32,7 @@ int esat::main(int argc, char **argv) {
 
 	srand((unsigned)time(nullptr));
 	last_time = esat::Time();
+
     // puntero a sprites
     Sprites *spritesColores = AsignarMemoriaSprites(4);
     Sprites *spritesPersonaje = AsignarMemoriaSprites(16);
@@ -47,13 +44,8 @@ int esat::main(int argc, char **argv) {
     Jugador player;
     InstanciarPlayer(&player);
 
-    object cubo_prueba;
+    COL::object cubo_prueba;
     InstanciarCubo(&cubo_prueba, *spritesPersonaje);
-
-    // load font
-    LoadFonts();
-
-    InitPlatformSprites();
 
     // Main game loop
     while(esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape)) {
@@ -68,11 +60,6 @@ int esat::main(int argc, char **argv) {
 
         esat::DrawBegin();
         esat::DrawClear(0,0,0);
-
-        // Change screen
-        ScreenSelector(GAME_SCREEN);
-
-        TestMousePosition();
 
         // Finish drawing
         esat::DrawEnd();
