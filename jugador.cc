@@ -14,6 +14,8 @@
 #include "colisiones.h"
 #include "interface.cc"
 
+#include "audio.cc"
+#include <esat_extra/soloud/soloud.h>
 #define spritewidth 34
 #define spriteheight 50
 #define windowX 256 * 2
@@ -27,6 +29,8 @@ double delta_time;
 unsigned char fps = 25;
 double current_time;
 double last_time;
+extern SoLoud::Soloud Soloud;
+
 struct Sprites
 {
   esat::SpriteHandle sprite;
@@ -142,6 +146,7 @@ void CrearDisparos(Bala *bala, Jugador player)
 {
   if (esat::IsSpecialKeyDown(esat::kSpecialKey_Space))
   {
+    PlayAudio(shoot);
     for (int i = 0; i < 20; i++)
     {
       if (!bala[i].activa)
@@ -464,6 +469,7 @@ void ColisionPlayerPlatforma(Jugador &player){
 
 int esat::main(int argc, char **argv)
 {
+  AudioInit();
   esat::WindowInit(windowX, windowY);
   esat::WindowSetMouseVisibility(true);
 
@@ -534,7 +540,7 @@ int esat::main(int argc, char **argv)
     } while ((current_time - last_time) <= 1000.0 / fps);
     esat::WindowFrame();
   }
-
+  FreeAudio();
   // Destroy window
   esat::WindowDestroy();
   return 0;
