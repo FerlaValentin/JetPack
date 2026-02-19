@@ -12,10 +12,9 @@
 #include <time.h>
 #include <math.h>
 #include "colisiones.h"
+#include "globalfunctions.h"
 #define spritewidth 34
 #define spriteheight 50
-#define windowX 512
-#define windowY 384
 
 // FPS
 double delta_time;
@@ -108,8 +107,8 @@ void InstanciarSpritesPlayer(Sprites *punteroSprites)
 */
 void InstanciarPlayer(Jugador *player)
 {
-  player->pos.x = windowX / 2;
-  player->pos.y = windowY - spriteheight;
+  player->pos.x = GLO::kScreenWidth / 2;
+  player->pos.y = GLO::kScreenHeight - spriteheight;
   player->dir = {0, 0};
   player->isMoving = false;
   player->isShooting = false;
@@ -144,8 +143,8 @@ void InstanciarCubo(COL::object *cubo_prueba, Sprites punteroSprites)
   cubo_prueba->width = esat::SpriteWidth(punteroSprites.sprite);
   cubo_prueba->height = esat::SpriteHeight(punteroSprites.sprite);
 
-  cubo_prueba->position.x = windowX - spritewidth;
-  cubo_prueba->position.y = windowY - spriteheight;
+  cubo_prueba->position.x = GLO::kScreenWidth - spritewidth;
+  cubo_prueba->position.y = GLO::kScreenHeight - spriteheight;
 }
 
 // ________________________________
@@ -187,7 +186,7 @@ void ActualizarDisparos(Bala *bala, Jugador player)
   {
     if (bala[i].activa)
     {
-      bala[i].pos.x += bala[i].dir.x * bala[i].speed;
+      bala[i].pos.x += bala[i].dir.x * bala[i].speed * delta_time;
       //! si sale de pantalla (funcion carlos)
       bala[i].config_bala.position.x = bala[i].pos.x;
       bala[i].config_bala.position.y = bala[i].pos.y;
@@ -275,22 +274,23 @@ void DibujarJugador(Sprites *punteroSprites, Jugador jugador, int frame)
 //______________________________
 void ControlarLimitesPantalla(Jugador *player, Bala *bala)
 {
+  const int terrain_height = 16;
   //! (funcion carlos)
-  if (player->pos.x > windowX)
+  if (player->pos.x > GLO::kScreenWidth)
     player->pos.x = -spritewidth;
   if (player->pos.x < -spritewidth)
-    player->pos.x = windowX;
-  if (player->pos.y >= windowY - spriteheight)
-    player->pos.y = 0;
+    player->pos.x = GLO::kScreenWidth;
+  if (player->pos.y >= GLO::kScreenHeight - terrain_height)
+    player->pos.y = GLO::kScreenHeight - (terrain_height + spriteheight);
   if (player->pos.y <= 0)
-    player->pos.y = windowY - spriteheight;
+    player->pos.y = GLO::kScreenHeight - spriteheight;
 
   for (int i = 0; i < 20; i++)
   {
-    if (bala[i].pos.x > windowX)
+    if (bala[i].pos.x > GLO::kScreenWidth)
       bala[i].pos.x = -50;
     if (bala[i].pos.x < -50) // lo que mida la bala, en este caso 50
-      bala[i].pos.x = windowX;
+      bala[i].pos.x = GLO::kScreenWidth;
   }
 }
 //_____________________________
@@ -304,12 +304,12 @@ void MoverJugador(Jugador *jugador, bool moverLeft, bool moverRight)
   if (moverLeft)
   {
     jugador->isMoving = true;
-    jugador->pos.x -= jugador->speed;
+    jugador->pos.x -= jugador->speed * delta_time;
   }
   if (moverRight)
   {
     jugador->isMoving = true;
-    jugador->pos.x += jugador->speed;
+    jugador->pos.x += jugador->speed * delta_time;
   }
 }
 
@@ -330,11 +330,12 @@ void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player)
 
 void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
 {
-  float suelo = windowY - spriteheight;
+  const int terrain_height = 16;
+  const float suelo = GLO::kScreenHeight - terrain_height;
   if (ascendiendo)
-    jugador->pos.y -= jugador->speed;
+    jugador->pos.y -= jugador->speed * delta_time;
   else
-    jugador->pos.y += jugador->speed;
+    jugador->pos.y += jugador->speed * delta_time;
 
   if (jugador->pos.y >= suelo)
   {
@@ -370,7 +371,7 @@ void ColisionPlayer(Jugador &player, COL::object &objeto)
 
 int esat::main(int argc, char **argv)
 {
-  esat::WindowInit(windowX, windowY);
+  esat::WindowInit(GLO::kScreenWidth, GLO::kScreenHeight);
   esat::WindowSetMouseVisibility(true);
 
   srand((unsigned)time(nullptr));

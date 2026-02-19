@@ -1,6 +1,11 @@
 #pragma once
 
-namespace VFL{
+namespace GLO{
+    //Ancho de la pantalla
+    extern const int kScreenWidth;
+    //Altura de la pantalla
+    extern const int kScreenHeight;
+
     /*Crea un bloque de memoria de tipo void para después castearlo a cualquier tipo de puntero
         param num_of_elements Cuántos elementos debe tener el bloque de memoria
         param size_of_elements Un sizeof del tipo de dato que va a guardar el puntero
