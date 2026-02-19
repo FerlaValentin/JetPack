@@ -7,7 +7,7 @@
 @echo ---------------------------------------------------
 @echo off
 
-cl /nologo /Zi /GR- /EHs /MD %2 -I %1\Desarrollo\Lib_Graph\ESAT_rev248\include %1\Desarrollo\Lib_Graph\ESAT_rev248\bin\ESAT.lib   opengl32.lib user32.lib gdi32.lib shell32.lib Ws2_32.lib
+cl /nologo /Zi /GR- /EHs /MD %2 %3 -I %1\Desarrollo\Lib_Graph\ESAT_rev248\include %1\Desarrollo\Lib_Graph\ESAT_rev248\bin\ESAT.lib   opengl32.lib user32.lib gdi32.lib shell32.lib Ws2_32.lib
  
 @echo ---------------------------------------------------
 @echo  Proceso por lotes finalizado.

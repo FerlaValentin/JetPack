@@ -12,15 +12,9 @@
 #include <time.h>
 #include <math.h>
 
-//FUNCIONES PARA ABSTRAER
 #include "globalfunctions.h"
-
-//JUGADOR.CC BELTRAN
 #include "jugador.cc"
-
-// Windows dimensions with default values
-const int KWindow_Width = 256 * 2;
-const int KWindow_Height = 192 * 2;
+#include "nave.cc"
 
 // FPS
 double delta_time;
@@ -41,21 +35,23 @@ void InitiateFrame(){
     esat::DrawClear(0,0,0);
 }
 
-//!Si object prueba se queda, descomentar parametro
-void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Jugador *player/*, COL::object *cubo_prueba*/){
+void InstantiateSprites(Sprites *spritesColores, Sprites *spritesPersonaje, esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa){
+    CargarSprites(nave1, nave2, nave3, rosa);
+    InstanciarSpritesColores(spritesColores);
+    InstanciarSpritesPlayer(spritesPersonaje);
+}
+
+void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Jugador *player, esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa){
+    esat::WindowInit(GLO::kScreenWidth, GLO::kScreenHeight);
+	esat::WindowSetMouseVisibility(true);
 	srand((unsigned)time(nullptr));
 	last_time = esat::Time();
     *spritesColores = (Sprites*)GLO::AllocateMemory(4, sizeof(Sprites));
     *spritesPersonaje = (Sprites*)GLO::AllocateMemory(16, sizeof(Sprites));
     *punteroBalas = (Bala*)GLO::AllocateMemory(20, sizeof(Bala));
-    InstanciarSpritesColores(*spritesColores);
-    InstanciarSpritesPlayer(*spritesPersonaje);
+    InstantiateSprites(*spritesColores, *spritesPersonaje, nave1, nave2, nave3, rosa);
     InstanciarBalas(*punteroBalas);
     InstanciarPlayer(player);
-    //!No se si es algo que se va a quedar o es solo testeo
-    //InstanciarCubo(cubo_prueba, *spritesPersonaje);
-    esat::WindowInit(GLO::kScreenWidth, GLO::kScreenHeight);
-	esat::WindowSetMouseVisibility(true);
 }
 
 void GetInput(bool* moverLeft, bool* moverRight, bool* ascender, Bala* punteroBalas, Jugador player){
@@ -66,19 +62,12 @@ void GetInput(bool* moverLeft, bool* moverRight, bool* ascender, Bala* punteroBa
 }
 
 void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, bool moverRight, int* frame/*, COL::object* */){
-    Ascender_Gravedad(player, ascender);
-    //!Dónde se define object.width/height de las balas para CreateColision?
-    //!Hablar con Beltran para quitar ese break. El for debe para al encontrar la primera bala inactiva 
-    ActualizarDisparos(punteroBalas, *player);
-    LoopMoverJugador(moverLeft, moverRight, player);
-    //!He cambiado algunos valores que incluian la altura del terreno
+    Ascender_Gravedad(player, ascender, delta_time);
+    ActualizarDisparos(punteroBalas, *player, delta_time);
+    LoopMoverJugador(moverLeft, moverRight, player, delta_time);
     //!Cambiar también el tope de la altura para que no toque el HUD
     ControlarLimitesPantalla(player, punteroBalas);
-    //!No se si es algo que se va a quedar o es solo testeo
-    /*ActualizarColisiones(&player, cubo_prueba);
-    ColisionPlayer(player, cubo_prueba);
-    ColisionDisparos(punteroBalas, cubo_prueba);*/
-    *frame = ActualizarAnimacionJugador(*player);
+    *frame = ActualizarAnimacionJugador(*player, delta_time);
 }
 
 void DrawAll(Sprites* spritesColores, Sprites* spritesPersonaje, Bala* punteroBalas, Jugador player, int frame){
@@ -97,16 +86,28 @@ void FinishFrame(){
     esat::WindowFrame();
 }
 
+void FreeAll(Sprites **spritesColores, Sprites **spritesPersonaje, esat::SpriteHandle* nave1,
+            esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa, Bala **punteroBalas){
+    for(int i = 0; i < 4; ++i)
+        esat::SpriteRelease((**spritesColores).sprite);
+}
+
 int esat::main(int argc, char **argv) {
     int frame;
     bool moverLeft, moverRight, ascender;
     Sprites *spritesColores = nullptr, *spritesPersonaje = nullptr;
+    esat::SpriteHandle nave1, nave2, nave3, rosa;
     Bala *punteroBalas = nullptr;
     Jugador player;
-    //!No se si es algo que se va a quedar o es solo testeo. Actualizar parametros Init y Update
-    //COL::object cubo_prueba;
+    //Datos Nave
+    int g_pink_x, g_pink_y;
+    int g_head_x = 600, g_head_y = 704;
+    int g_body_x = 600, g_body_y = 736;
+    int g_tail_x = 600, g_tail_y = 768;
+    int g_speed = 2;
 
-    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &player/*, &cubo_prueba*/);
+    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &player, &nave1, &nave2, &nave3, &rosa);
+    
     // Main game loop
     while(esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape)) {
         InitiateFrame();
@@ -120,5 +121,6 @@ int esat::main(int argc, char **argv) {
 
     // Destroy window
     esat::WindowDestroy();
+    FreeAll(&spritesColores, &spritesPersonaje, &nave1, &nave2, &nave3, &rosa, &punteroBalas);
     return 0;
 }

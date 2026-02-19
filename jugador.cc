@@ -17,10 +17,6 @@
 #define spriteheight 50
 
 // FPS
-double delta_time;
-unsigned char fps = 25;
-double current_time;
-double last_time;
 struct Sprites
 {
   esat::SpriteHandle sprite;
@@ -107,13 +103,14 @@ void InstanciarSpritesPlayer(Sprites *punteroSprites)
 */
 void InstanciarPlayer(Jugador *player)
 {
+  const int terrain_height = 16;
   player->pos.x = GLO::kScreenWidth / 2;
-  player->pos.y = GLO::kScreenHeight - spriteheight;
+  player->pos.y = GLO::kScreenHeight - spriteheight - terrain_height;
   player->dir = {0, 0};
   player->isMoving = false;
   player->isShooting = false;
   player->volando = false;
-  player->speed = 5.0f;
+  player->speed = 15.0f;
   player->mirandoDerecha = true;
 
   player->config_colision.width = spritewidth;
@@ -155,10 +152,12 @@ void CrearDisparos(Bala *bala, Jugador player)
 {
   if (esat::IsSpecialKeyDown(esat::kSpecialKey_Space))
   {
-    for (int i = 0; i < 20; i++)
+    bool inactive_bullet_found = false;
+    for (int i = 0; i < 20 && !inactive_bullet_found; i++)
     {
       if (!bala[i].activa)
       {
+        inactive_bullet_found = true;
         bala[i].activa = true;
         bala[i].pos.x = player.pos.x + (spritewidth / 2);
         bala[i].pos.y = player.pos.y + (spriteheight / 2);
@@ -172,13 +171,12 @@ void CrearDisparos(Bala *bala, Jugador player)
           bala[i].dir = {-1, 0};
           bala[i].pos.x = player.pos.x - (spritewidth / 2);
         }
-        break;
       }
     }
   }
 }
 
-void ActualizarDisparos(Bala *bala, Jugador player)
+void ActualizarDisparos(Bala *bala, Jugador player, double delta_time)
 {
   float duracion_bala = 3.0f;
 
@@ -233,7 +231,7 @@ void DibujarDisparos(Bala *bala)
 // DIBUJADO
 // ________________________________
 
-int ActualizarAnimacionJugador(Jugador jugador)
+int ActualizarAnimacionJugador(Jugador jugador, double delta_time)
 {
   static int frame = 0;
   static float timer = 0.0f;
@@ -297,7 +295,7 @@ void ControlarLimitesPantalla(Jugador *player, Bala *bala)
 // JUGADOR
 //______________________________
 
-void MoverJugador(Jugador *jugador, bool moverLeft, bool moverRight)
+void MoverJugador(Jugador *jugador, bool moverLeft, bool moverRight, double delta_time)
 {
   if (!jugador->isMoving)
     return;
@@ -313,12 +311,12 @@ void MoverJugador(Jugador *jugador, bool moverLeft, bool moverRight)
   }
 }
 
-void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player)
+void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player, double delta_time)
 {
   if (moverLeft || moverRight)
   {
     player->isMoving = true;
-    MoverJugador(player, moverLeft, moverRight);
+    MoverJugador(player, moverLeft, moverRight, delta_time);
     if (moverLeft)
       player->mirandoDerecha = false;
     else
@@ -328,22 +326,19 @@ void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player)
     player->isMoving = false;
 }
 
-void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
+void Ascender_Gravedad(Jugador *jugador, bool ascendiendo, double delta_time)
 {
   const int terrain_height = 16;
-  const float suelo = GLO::kScreenHeight - terrain_height;
+  const float suelo = GLO::kScreenHeight - spriteheight - terrain_height;
   if (ascendiendo)
     jugador->pos.y -= jugador->speed * delta_time;
   else
     jugador->pos.y += jugador->speed * delta_time;
-
-  if (jugador->pos.y >= suelo)
-  {
+  if (jugador->pos.y >= suelo){
     jugador->pos.y = suelo;
     jugador->volando = false;
   }
-  else
-  {
+  else{
     jugador->volando = true;
   }
 }
@@ -368,77 +363,3 @@ void ColisionPlayer(Jugador &player, COL::object &objeto)
 // {
 //   esat::DrawSprite(punteroSprites.sprite, cubo.position.x, cubo.position.y);
 // }  COL::SHOWCOLISION
-
-int esat::main(int argc, char **argv)
-{
-  esat::WindowInit(GLO::kScreenWidth, GLO::kScreenHeight);
-  esat::WindowSetMouseVisibility(true);
-
-  srand((unsigned)time(nullptr));
-  last_time = esat::Time();
-
-  // puntero a sprites
-  Sprites *spritesColores = AsignarMemoriaSprites(4);
-  Sprites *spritesPersonaje = AsignarMemoriaSprites(16);
-  Bala *punteroBalas = AsignarMemoriaBalas(20);
-  InstanciarSpritesColores(spritesColores);
-  InstanciarSpritesPlayer(spritesPersonaje);
-  InstanciarBalas(punteroBalas);
-
-  Jugador player;
-  InstanciarPlayer(&player);
-
-  COL::object cubo_prueba;
-  InstanciarCubo(&cubo_prueba, *spritesPersonaje);
-
-  // Main game loop
-  while (esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape))
-  {
-    // Calculate time elapsed since the last frame
-    current_time = esat::Time();
-    delta_time = (current_time - last_time) / 1000.0;
-    // Limit delta_time to avoid large jumps
-    if (delta_time > 0.1)
-      delta_time = 0.1;
-
-    last_time = current_time;
-
-    esat::DrawBegin();
-    esat::DrawClear(0, 0, 0);
-
-    bool moverLeft = (esat::IsKeyPressed('A') || esat::IsKeyPressed('a'));
-    bool moverRight = (esat::IsKeyPressed('D') || esat::IsKeyPressed('d'));
-    bool ascender = (esat::IsKeyPressed('W') || esat::IsKeyPressed('w'));
-    Ascender_Gravedad(&player, ascender);
-    CrearDisparos(punteroBalas, player);
-    ActualizarDisparos(punteroBalas, player);
-    LoopMoverJugador(moverLeft, moverRight, &player);
-    ControlarLimitesPantalla(&player, punteroBalas);
-    ActualizarColisiones(&player, cubo_prueba);
-
-    ColisionPlayer(player, cubo_prueba);
-    ColisionDisparos(punteroBalas, cubo_prueba);
-
-    int frame = ActualizarAnimacionJugador(player);
-    DibujarColoresJugador(spritesColores, player, frame);
-    DibujarJugador(spritesPersonaje, player, frame);
-    DibujarDisparos(punteroBalas);
-
-    // DebuggingCubo(cubo_prueba, *spritesColores);
-    // DebuggingCubo(player.config_colision, *spritesColores);
-    // SHOWcOLISION()
-
-    // Finish drawing
-    esat::DrawEnd();
-    // Control frame speed (fps)
-    do
-    {
-      current_time = esat::Time();
-    } while ((current_time - last_time) <= 1000.0 / fps);
-    esat::WindowFrame();
-  }
-
-  // Destroy window
-  esat::WindowDestroy();
-  return 0;
-}

@@ -1,4 +1,5 @@
 #pragma once
+#include <esat/sprite.h>
 
 namespace GLO{
     //Ancho de la pantalla
@@ -11,4 +12,6 @@ namespace GLO{
         param size_of_elements Un sizeof del tipo de dato que va a guardar el puntero
     */
     void* AllocateMemory(int num_of_elements, size_t size_of_elements);
+
+    void InstantiateSprites(Sprites *spritesColores, Sprites *spritesPersonaje, esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa);
 }
