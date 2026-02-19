@@ -12,10 +12,15 @@
 #include <time.h>
 #include <math.h>
 #include "colisiones.h"
+#include "interface.cc"
+
 #define spritewidth 34
 #define spriteheight 50
-#define windowX 800
-#define windowY 800
+#define windowX 256 * 2
+#define windowY 192 * 2
+
+const int KWindow_Width = 256 * 2;
+const int KWindow_Height = 192 * 2;
 
 // FPS
 double delta_time;
@@ -431,6 +436,27 @@ void ColisionPlayer(Jugador &player, COL::object &objeto)
   }
 }
 
+void ColisionPlayerPlatforma(Jugador &player){
+  for (int i = 0; i < kplatform_numbers; ++i){
+    TPlatform* p = g_platforms + i;
+    
+    if (CheckColision(player.config_colision.colision, p->collision_platform.colision)){
+      if (player.config_colision.colision.p2.y >= p->collision_platform.colision.p1.y &&
+          player.config_colision.colision.p2.y <= p->collision_platform.colision.p2.y){
+
+        player.pos.y = p->collision_platform.position.y - (float)spriteheight;
+        player.volando = false;
+
+      }else if (player.config_colision.colision.p1.y <= p->collision_platform.colision.p2.y &&
+                player.config_colision.colision.p1.y >= p->collision_platform.colision.p1.y){
+
+        player.pos.y = p->collision_platform.position.y + p->collision_platform.height;
+
+      }
+    }
+  }
+}
+
 // void DebuggingCubo(object cubo, Sprites punteroSprites)
 // {
 //   esat::DrawSprite(punteroSprites.sprite, cubo.position.x, cubo.position.y);
@@ -443,6 +469,8 @@ int esat::main(int argc, char **argv)
 
   srand((unsigned)time(nullptr));
   last_time = esat::Time();
+
+  InitPlatformSprites();
 
   // puntero a sprites
   Sprites *spritesColores = AsignarMemoriaSprites(4);
@@ -483,7 +511,9 @@ int esat::main(int argc, char **argv)
     ControlarLimitesPantalla(&player, punteroBalas);
     ActualizarColisiones(&player, cubo_prueba);
 
+    GameScreen();
     ColisionPlayer(player, cubo_prueba);
+    ColisionPlayerPlatforma(player);
     ColisionDisparos(punteroBalas, cubo_prueba);
 
     int frame = ActualizarAnimacionJugador(player);
