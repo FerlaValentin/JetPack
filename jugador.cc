@@ -63,6 +63,14 @@ struct Bala
   unsigned char r, g, b;
 };
 
+struct ItemDrop
+{
+  COL::object item_config;
+  int tipo;
+  bool recogido;
+  float cooldown;
+};
+
 Sprites *AsignarMemoriaSprites(int cantidad)
 {
   return (Sprites *)malloc(cantidad * sizeof(Sprites));
@@ -107,6 +115,11 @@ void InstanciarSpritesPlayer(Sprites *punteroSprites)
 void InstanciarSpritesItems(Sprites *punteroSprites)
 {
   punteroSprites[0].sprite = esat::SpriteFromFile("SPRITES/ITEMS/fuel.png");
+  punteroSprites[1].sprite = esat::SpriteFromFile("SPRITES/ITEMS/chafada.png");
+  punteroSprites[2].sprite = esat::SpriteFromFile("SPRITES/ITEMS/diamante.png");
+  punteroSprites[3].sprite = esat::SpriteFromFile("SPRITES/ITEMS/oro.png");
+  punteroSprites[4].sprite = esat::SpriteFromFile("SPRITES/ITEMS/radioa.png");
+  punteroSprites[5].sprite = esat::SpriteFromFile("SPRITES/ITEMS/triangulo.png");
 }
 
 void InstanciarPlayer(Jugador *player)
@@ -135,7 +148,7 @@ void InstanciarBalas(Bala *bala)
   }
 }
 
-void InstanciarGasofa(COL::object *gasofa, Sprites punteroSprites)
+void InstanciarItems(COL::object *gasofa, COL::object *prueba_nave, Sprites punteroSprites)
 {
   gasofa->sprite = punteroSprites.sprite;
   gasofa->width = esat::SpriteWidth(punteroSprites.sprite);
@@ -143,6 +156,11 @@ void InstanciarGasofa(COL::object *gasofa, Sprites punteroSprites)
 
   gasofa->position.x = windowX - spritewidth;
   gasofa->position.y = windowY - spriteheight;
+
+  prueba_nave->position.x = windowX - 100;
+  prueba_nave->position.y = windowY - 180;
+  prueba_nave->width = 80;
+  prueba_nave->height = 180;
 }
 
 // ________________________________
@@ -357,7 +375,7 @@ void DibujarJugador(Sprites *punteroSprites, Jugador jugador, int frame)
 
 void DibujarGasofa(COL::object gasofa, Sprites *punteroSprites)
 {
-  float puntos[8]= {gasofa.position.x, gasofa.position.y, gasofa.position.x + 32, gasofa.position.y, gasofa.position.x + 32, gasofa.position.y + 32, gasofa.position.x, gasofa.position.y + 32};
+  float puntos[8] = {gasofa.position.x, gasofa.position.y, gasofa.position.x + 32, gasofa.position.y, gasofa.position.x + 32, gasofa.position.y + 32, gasofa.position.x, gasofa.position.y + 32};
 
   esat::DrawSetFillColor(255, 0, 255);
   esat::DrawSolidPath(puntos, 4);
@@ -440,54 +458,94 @@ void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
     jugador->volando = true;
   }
 }
+// _____________________________________
+//              ITEMS
+// _______________________________________
+
+void SpawnItem(COL::object &item)
+{
+  float x = rand() % windowX - spritewidth;
+  float y = rand() % windowY - spriteheight;
+  item.position.x = x;
+  item.position.y = y;
+}
+
+void GravedadItem(COL::object &item)
+{
+  float speed = 5.0f;
+  item.position.y += speed;
+  if (item.position.y + 32 >= windowY - 16)
+  {
+    item.position.y = windowY - 16 - 32;
+  }
+}
 
 void UpdateGasofaPosition(Jugador player, COL::object &gasofa)
 {
-  gasofa.position.x = player.pos.x;
-  gasofa.position.y = player.pos.y;
+  gasofa.position.x = player.pos.x + spritewidth / 2;
+  gasofa.position.y = player.pos.y + spriteheight / 2;
 }
-void LoopGasofa(Jugador &player, COL::object &gasofa)
+
+void LoopGasofa(Jugador &player, COL::object &gasofa, COL::object prueba_nave, int &contador_gasofa, int &numero_max_gasofa)
 {
-  if (!player.tiene_gasofa)
+  GravedadItem(gasofa);
+  if (COL::CheckColision(player.config_colision.colision, gasofa.colision))
   {
-    if (COL::CheckColision(player.config_colision.colision, gasofa.colision))
+    player.tiene_gasofa = true;
+    UpdateGasofaPosition(player, gasofa);
+    printf("Colision gasolinas \n");
+  }
+  if (player.tiene_gasofa)
+  {
+    if (COL::CheckColision(player.config_colision.colision, prueba_nave.colision))
     {
-      player.tiene_gasofa = true;
-      UpdateGasofaPosition(player, gasofa);
-      printf("Colision gasolinas \n");
+      player.tiene_gasofa = false;
+      contador_gasofa++;
+      if (contador_gasofa >= numero_max_gasofa)
+      {
+        contador_gasofa = 0;
+        printf("%d bidones de gasofa colocados \n", numero_max_gasofa);
+      }
+      SpawnItem(gasofa);
     }
   }
 }
-void ColisionGasofa(Jugador *player, COL::object &gasofa)
+
+void ActualizarColisionesItems(Jugador *player, COL::object &gasofa, COL::object &prueba_nave)
 {
-  player->config_colision.colision = COL::CreateColision(player->config_colision);
+  // player->config_colision.colision = COL::CreateColision(player->config_colision);
   gasofa.colision = COL::CreateColision(gasofa);
+  prueba_nave.colision = COL::CreateColision(prueba_nave);
 }
 
-void ColisionPlayer(Jugador &player, COL::object &objeto)
+void ColisionJugador(Jugador *player)
 {
-  if (CheckColision(player.config_colision.colision, objeto.colision))
-  {
-    printf("colision player \n");
-  }
+  player->config_colision.position.x = player->pos.x;
+  player->config_colision.position.y = player->pos.y;
+  // Crear la colisión
+  player->config_colision.colision = COL::CreateColision(player->config_colision);
 }
 
-void ColisionPlayerPlatforma(Jugador &player){
-  for (int i = 0; i < kplatform_numbers; ++i){
-    TPlatform* p = g_platforms + i;
-    
-    if (CheckColision(player.config_colision.colision, p->collision_platform.colision)){
+void ColisionPlayerPlatforma(Jugador &player)
+{
+  for (int i = 0; i < kplatform_numbers; ++i)
+  {
+    TPlatform *p = g_platforms + i;
+
+    if (CheckColision(player.config_colision.colision, p->collision_platform.colision))
+    {
       if (player.config_colision.colision.p2.y >= p->collision_platform.colision.p1.y &&
-          player.config_colision.colision.p2.y <= p->collision_platform.colision.p2.y){
+          player.config_colision.colision.p2.y <= p->collision_platform.colision.p2.y)
+      {
 
         player.pos.y = p->collision_platform.position.y - (float)spriteheight;
         player.volando = false;
-
-      }else if (player.config_colision.colision.p1.y <= p->collision_platform.colision.p2.y &&
-                player.config_colision.colision.p1.y >= p->collision_platform.colision.p1.y){
+      }
+      else if (player.config_colision.colision.p1.y <= p->collision_platform.colision.p2.y &&
+               player.config_colision.colision.p1.y >= p->collision_platform.colision.p1.y)
+      {
 
         player.pos.y = p->collision_platform.position.y + p->collision_platform.height;
-
       }
     }
   }
@@ -512,8 +570,10 @@ int esat::main(int argc, char **argv)
   // puntero a sprites
   Sprites *spritesColores = AsignarMemoriaSprites(4);
   Sprites *spritesPersonaje = AsignarMemoriaSprites(16);
-  Sprites *spritesItems = AsignarMemoriaSprites(1); 
+  Sprites *spritesItems = AsignarMemoriaSprites(6);
   Bala *punteroBalas = AsignarMemoriaBalas(20);
+  int contador_gasofa = 0;
+  int numero_max_gasofa = 3;
   InstanciarSpritesColores(spritesColores);
   InstanciarSpritesPlayer(spritesPersonaje);
   InstanciarSpritesItems(spritesItems);
@@ -523,7 +583,10 @@ int esat::main(int argc, char **argv)
   InstanciarPlayer(&player);
 
   COL::object gasofa;
-  InstanciarGasofa(&gasofa, spritesItems[0]);
+  COL::object prueba_nave;
+  ItemDrop itemdrop;
+
+  InstanciarItems(&gasofa, &prueba_nave, spritesItems[0]);
 
   // Main game loop
   while (esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape))
@@ -549,14 +612,23 @@ int esat::main(int argc, char **argv)
     LoopMoverJugador(moverLeft, moverRight, &player);
     ControlarLimitesPantalla(&player, punteroBalas);
 
-    ColisionGasofa(&player, gasofa);
-    LoopGasofa(player, gasofa);
+    // Hacer aparecer objetos cayendose
+    // funcion (object objeto)
 
+    // Crear puntos
+    // Añadir objeto triangulo, bola chafada, y otro mas
+    // que aparezcan cada cierto tiempo random (funcion caida)
+    // den puntos
+
+    // ! Colisiones
+    ColisionJugador(&player); // Actualizar colider a player
+    ActualizarColisionesItems(&player, gasofa, prueba_nave);
+    LoopGasofa(player, gasofa, prueba_nave, contador_gasofa, numero_max_gasofa);
     GameScreen();
-    //ColisionPlayer(player, cubo_prueba);
     ColisionPlayerPlatforma(player);
-    //ColisionDisparos(punteroBalas, cubo_prueba);
+    // ColisionDisparos();
 
+    // Animaciones Dibujado
     int frame = ActualizarAnimacionJugador(player);
     DibujarDisparos(punteroBalas);
     DibujarColoresJugador(spritesColores, player, frame);
@@ -566,6 +638,7 @@ int esat::main(int argc, char **argv)
     COL::ShowColision(player.config_colision.colision);
     COL::ShowColision(gasofa.colision);
     COL::ShowColision(punteroBalas->config_bala.colision);
+    COL::ShowColision(prueba_nave.colision);
     // Finish drawing
     esat::DrawEnd();
     // Control frame speed (fps)
