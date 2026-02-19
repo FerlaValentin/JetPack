@@ -37,10 +37,17 @@ struct Nave{
     Direction direccion;
     bool activada;
     int height = 32;
-};
+  };
+  
+int alTFuel = 16, contFuel = 0;
+
 
 Sprite *InstanciarSpritesNave(int numSprite){
   return (Sprite*)malloc(sizeof(Sprite)*numSprite);
+}
+
+Sprite *InstanciarFuelSprite(int totalFuel){
+    return (Sprite*)malloc(sizeof(Sprite)*totalFuel);
 }
 
 void InitSpriteNave(Sprite *punteroSprites)
@@ -71,30 +78,38 @@ void InstanciarNave(Nave *nave)
   nave->pos.y = KWindow_Height - nave->height;
 }
 
+void DrawFuel(Nave *nave, Sprite *punteroSprites, int j){
+  int posY = KWindow_Height;
+
+  for(int i=j*2+1; i<=contFuel && contFuel<=6; i++){
+    esat::DrawSprite(punteroSprites[13].sprite, nave->pos.x, posY - (i*alTFuel));
+
+  }
+}
+
 void DibujarNave(Nave *nave, Sprite *punteroSprites){
 //  esat::DrawSprite(punteroSprites[12].sprite, nave->pos.x-100, nave->pos.y-(nave->height));
 //   esat::DrawSprite(punteroSprites[14].sprite, nave->pos.x-100, nave->pos.y + (nave->height));
 
-  for(int i=0; i<3; i++){
-      // for(int j=0; j<2; j++){
-      //   int altFuel = 16;
-        
-      //   esat::DrawSprite(punteroSprites[13].sprite, nave->pos.x, KWindow_Height - (altFuel*j));
-      // }
-      esat::DrawSprite(punteroSprites[12].sprite, nave->pos.x, nave->pos.y-(nave->height*i));
-      esat::DrawSprite(punteroSprites[i].sprite, nave->pos.x, nave->pos.y-(nave->height*i));
+
+for(int i=0; i<3; i++){
+  // for(int j=0; j<2; j++){
+    //   int altFuel = 16;
+    
+    //   esat::DrawSprite(punteroSprites[13].sprite, nave->pos.x, KWindow_Height - (altFuel*j));
+    // }
+    esat::DrawSprite(punteroSprites[12].sprite, nave->pos.x, nave->pos.y-(nave->height*i));
+    DrawFuel(nave, punteroSprites, i);
+    esat::DrawSprite(punteroSprites[i].sprite, nave->pos.x, nave->pos.y-(nave->height*i));
   }
  
 }
 
-void DibujarFuel(Nave *nave, Sprite *punteroSprites){
-  int altFuel = 16, contFuel = 1;
-  int posY = KWindow_Height-altFuel;
-
-  for(int i=0; i<6; i++){
-    esat::DrawSprite(punteroSprites[13].sprite, nave->pos.x, posY);
+void InitFuel(Nave *nave, Sprite *spriteFuel){
+  //bool encendido = false;
+  
+  if(esat::IsSpecialKeyDown(esat::SpecialKey::kSpecialKey_F1)){
     contFuel++;
-    posY = KWindow_Height - (altFuel*contFuel);
   }
 }
 
@@ -103,10 +118,6 @@ void TriggerNave(Nave *nave, Sprite *punteroSprites){
     nave->activada = true;
     nave->direccion = Direction::UP;
   }
-
-  //if(esat::IsSpecialKeyDown(esat::SpecialKey::kSpecialKey_Space)){
-
-  //}
 }
 
 void MoverNave(Nave *nave){
@@ -141,9 +152,8 @@ int esat::main(int argc, char **argv) {
 
   Nave nave;
   InstanciarNave(&nave);
-
- 
-
+  
+  
   // Main game loop
   while(esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape)) {
     
@@ -154,9 +164,11 @@ int esat::main(int argc, char **argv) {
     if (delta_time > 0.1) delta_time = 0.1;
     
     last_time = current_time;
-
+    
     esat::DrawBegin();
     esat::DrawClear(0,0,0);
+    
+    InitFuel(&nave, punteroSprites);
 
     DibujarNave(&nave, punteroSprites);
     TriggerNave(&nave, punteroSprites);
