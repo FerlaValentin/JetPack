@@ -9,9 +9,9 @@ enum TScreen {
   GAME_SCREEN
 };
 
-// Platform collition = sprite_width * size x sprite_height
 struct TPlatform {
-  esat::Vec2 pos;
+  // esat::Vec2 pos;
+  COL::object collision_platform;
   int size;
 };
 
@@ -34,19 +34,34 @@ struct TPlayerGame {
 // test
 const unsigned char kplatform_numbers = 3;
 
-esat::SpriteHandle* platform = nullptr;
+esat::SpriteHandle* platform_sprite = nullptr;
+TPlatform* g_platforms = nullptr;
 
 TGame game;
 
 void FreeMemory(){
-  free(platform);
-  platform = nullptr;
+  free(g_platforms);
+  g_platforms = nullptr;
+  free(platform_sprite);
+  platform_sprite = nullptr;
+}
+
+void InitPlatforms(){
+  if (g_platforms != nullptr) return;
+  int w = esat::SpriteWidth(*(platform_sprite));
+  int h = esat::SpriteHeight(*(platform_sprite));
+  g_platforms = (TPlatform*)malloc(kplatform_numbers * sizeof(TPlatform));
+  
+  // (@jhony) TODO: fix this
+  *(g_platforms + 0) = {nullptr, w, h, 70.0f, 150.0f, 70.0f, 150.0f, 70.0f + w*6, 150.0f + h, 6};
+  *(g_platforms + 1) = {nullptr, w, h, 240.0f, 180.0f, 240.0f, 180.0f, 240.0f + w*4, 180.0f + h, 4};
+  *(g_platforms + 2) = {nullptr, w, h, 390.0f, 100.0f, 390.0f, 100.0f, 390.0f + w*6, 100.0f + h, 6};
 }
 
 void ReserveMemory(){
   printf("[DEBUG] sizeof(esat::SpriteHandle) %d\n", sizeof(esat::SpriteHandle));
-  platform = (esat::SpriteHandle*)malloc(4 * sizeof(esat::SpriteHandle));
-  if (platform == nullptr){
+  platform_sprite = (esat::SpriteHandle*)malloc(4 * sizeof(esat::SpriteHandle));
+  if (platform_sprite == nullptr){
     printf("Error: reserve memory\n");
   }else{
     printf("All ok\n");
@@ -60,15 +75,16 @@ void InitGameVariables(){
 void InitPlatformSprites(){
   ReserveMemory();
 
-  *(platform + 0) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_1_2x.png"); // First platform
-  *(platform + 1) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_2_2x.png"); // Middle platform
-  *(platform + 2) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_3_2x.png"); // Last platform
+  *(platform_sprite + 0) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_1_2x.png"); // First platform_sprite
+  *(platform_sprite + 1) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_2_2x.png"); // Middle platform_sprite
+  *(platform_sprite + 2) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_3_2x.png"); // Last platform_sprite
 
   for (int i = 0; i < 4;  ++i){
-    if ((platform + i) == nullptr){
+    if ((platform_sprite + i) == nullptr){
       printf("Error: on sprite %d\n", i);
     }
   }
+  InitPlatforms();
 }
 
 void LoadFonts(){
@@ -110,55 +126,47 @@ void MainMenu(){
 }
 
 void GeneratePlatform(){ 
-  TPlatform* platforms = nullptr;
-  platforms = (TPlatform*)malloc(kplatform_numbers * sizeof(TPlatform));
-  *(platforms + 0) = {70.0f, 150.0f, 6};
-  *(platforms + 1) = {240.0f, 180.0f, 4};
-  *(platforms + 2) = {390.0f, 100.0f, 6};
+  if (g_platforms == nullptr) return;
+  int w = esat::SpriteWidth(*(platform_sprite));
+  int h = esat::SpriteHeight(*(platform_sprite));
 
   float* bg = (float*)malloc(8 * sizeof(float));
 
-  int w = esat::SpriteWidth(*(platform));
-  int h = esat::SpriteHeight(*(platform));
-
   for (int i = 0; i < kplatform_numbers; ++i){
-    TPlatform* p = platforms + i;
+    TPlatform* p = g_platforms + i;
 
-    *(bg + 0) = p->pos.x;
-    *(bg + 1) = p->pos.y;
-    *(bg + 2) = p->pos.x + (w * p->size);
-    *(bg + 3) = p->pos.y;
-    *(bg + 4) = p->pos.x + (w * p->size);
-    *(bg + 5) = p->pos.y + h;
-    *(bg + 6) = p->pos.x;
-    *(bg + 7) = p->pos.y + h;
+    *(bg + 0) = p->collision_platform.position.x;
+    *(bg + 1) = p->collision_platform.position.y;
+    *(bg + 2) = p->collision_platform.position.x + (w * p->size);
+    *(bg + 3) = p->collision_platform.position.y;
+    *(bg + 4) = p->collision_platform.position.x + (w * p->size);
+    *(bg + 5) = p->collision_platform.position.y + h;
+    *(bg + 6) = p->collision_platform.position.x;
+    *(bg + 7) = p->collision_platform.position.y + h;
 
     esat::DrawSetStrokeColor(0, 0, 0, 0); // hide borders
     esat::DrawSetFillColor(0, 255, 0, 255);
     esat::DrawSolidPath(bg, 4);
 
-    SetPlatFormCollision(bg);
 
     // Draw platforms
     for (int j = 0; j < p->size; ++j){
       if (j == 0){
-        esat::DrawSprite(*(platform + 0), p->pos.x, p->pos.y);
+        esat::DrawSprite(*(platform_sprite + 0), p->collision_platform.position.x, p->collision_platform.position.y);
       }else if (j == p->size - 1){
-        esat::DrawSprite(*(platform + 2), p->pos.x + (j * w), p->pos.y);
+        esat::DrawSprite(*(platform_sprite + 2), p->collision_platform.position.x + (j * w), p->collision_platform.position.y);
       }else{
-        esat::DrawSprite(*(platform + 1), p->pos.x + (j * w), p->pos.y);
+        esat::DrawSprite(*(platform_sprite + 1), p->collision_platform.position.x + (j * w), p->collision_platform.position.y);
       }
     }
   }
 
-  free(platforms);
   free(bg);
-
 }
 
 void GenerateFloor(){
   float* floor = (float*)malloc(8 * sizeof(float));
-  float h = esat::SpriteHeight(*(platform));
+  float h = esat::SpriteHeight(*(platform_sprite));
 
   *(floor + 0) = 0.0f;
   *(floor + 1) = (float)(KWindow_Height - (int)h);
@@ -173,15 +181,11 @@ void GenerateFloor(){
   esat::DrawSetFillColor(208, 208, 0, 255);
   esat::DrawSolidPath(floor, 4);
 
-  for (int j = 0; j < KWindow_Width/esat::SpriteWidth(*(platform)); ++j){
-    esat::DrawSprite(*(platform + 0), j * esat::SpriteWidth(*(platform)), KWindow_Height - h);
+  for (int j = 0; j < KWindow_Width/esat::SpriteWidth(*(platform_sprite)); ++j){
+    esat::DrawSprite(*(platform_sprite + 0), j * esat::SpriteWidth(*(platform_sprite)), KWindow_Height - h);
   }
 
   free(floor);
-}
-
-void SetPlatFormCollision(float* bg){
-  
 }
 
 // Basic game screen
