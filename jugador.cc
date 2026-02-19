@@ -45,6 +45,7 @@ struct Jugador
   bool isShooting;
   bool mirandoDerecha;
   bool volando;
+  bool tiene_gasofa;
   COL::object config_colision;
 };
 struct Bala
@@ -103,6 +104,11 @@ void InstanciarSpritesPlayer(Sprites *punteroSprites)
   punteroSprites[15].sprite = esat::SpriteFromFile("SPRITES/JUGADOR/left4.png");
 }
 
+void InstanciarSpritesItems(Sprites *punteroSprites)
+{
+  punteroSprites[0].sprite = esat::SpriteFromFile("SPRITES/ITEMS/fuel.png");
+}
+
 void InstanciarPlayer(Jugador *player)
 {
   player->pos.x = windowX / 2;
@@ -113,6 +119,7 @@ void InstanciarPlayer(Jugador *player)
   player->volando = false;
   player->speed = 5.0f;
   player->mirandoDerecha = true;
+  player->tiene_gasofa = false;
 
   player->config_colision.width = spritewidth;
   player->config_colision.height = spriteheight;
@@ -128,14 +135,14 @@ void InstanciarBalas(Bala *bala)
   }
 }
 
-void InstanciarCubo(COL::object *cubo_prueba, Sprites punteroSprites)
+void InstanciarGasofa(COL::object *gasofa, Sprites punteroSprites)
 {
-  cubo_prueba->sprite = punteroSprites.sprite;
-  cubo_prueba->width = esat::SpriteWidth(punteroSprites.sprite);
-  cubo_prueba->height = esat::SpriteHeight(punteroSprites.sprite);
+  gasofa->sprite = punteroSprites.sprite;
+  gasofa->width = esat::SpriteWidth(punteroSprites.sprite);
+  gasofa->height = esat::SpriteHeight(punteroSprites.sprite);
 
-  cubo_prueba->position.x = windowX - spritewidth;
-  cubo_prueba->position.y = windowY - spriteheight;
+  gasofa->position.x = windowX - spritewidth;
+  gasofa->position.y = windowY - spriteheight;
 }
 
 // ________________________________
@@ -348,6 +355,15 @@ void DibujarJugador(Sprites *punteroSprites, Jugador jugador, int frame)
   esat::DrawSprite(punteroSprites[base + frame].sprite, jugador.pos.x, jugador.pos.y);
 }
 
+void DibujarGasofa(COL::object gasofa, Sprites *punteroSprites)
+{
+  float puntos[8]= {gasofa.position.x, gasofa.position.y, gasofa.position.x + 32, gasofa.position.y, gasofa.position.x + 32, gasofa.position.y + 32, gasofa.position.x, gasofa.position.y + 32};
+
+  esat::DrawSetFillColor(255, 0, 255);
+  esat::DrawSolidPath(puntos, 4);
+  esat::DrawSprite(punteroSprites[0].sprite, gasofa.position.x, gasofa.position.y);
+}
+
 //_____________________________
 // LIMITES PANTALLA
 //______________________________
@@ -408,7 +424,7 @@ void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player)
 
 void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
 {
-  float suelo = windowY - spriteheight;
+  float suelo = windowY - spriteheight - 16;
   if (ascendiendo)
     jugador->pos.y -= jugador->speed;
   else
@@ -425,12 +441,27 @@ void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
   }
 }
 
-void ActualizarColisiones(Jugador *player, COL::object &cubo_prueba)
+void UpdateGasofaPosition(Jugador player, COL::object &gasofa)
 {
-  player->config_colision.position.x = player->pos.x;
-  player->config_colision.position.y = player->pos.y;
+  gasofa.position.x = player.pos.x;
+  gasofa.position.y = player.pos.y;
+}
+void LoopGasofa(Jugador &player, COL::object &gasofa)
+{
+  if (!player.tiene_gasofa)
+  {
+    if (COL::CheckColision(player.config_colision.colision, gasofa.colision))
+    {
+      player.tiene_gasofa = true;
+      UpdateGasofaPosition(player, gasofa);
+      printf("Colision gasolinas \n");
+    }
+  }
+}
+void ColisionGasofa(Jugador *player, COL::object &gasofa)
+{
   player->config_colision.colision = COL::CreateColision(player->config_colision);
-  cubo_prueba.colision = COL::CreateColision(cubo_prueba);
+  gasofa.colision = COL::CreateColision(gasofa);
 }
 
 void ColisionPlayer(Jugador &player, COL::object &objeto)
@@ -481,16 +512,18 @@ int esat::main(int argc, char **argv)
   // puntero a sprites
   Sprites *spritesColores = AsignarMemoriaSprites(4);
   Sprites *spritesPersonaje = AsignarMemoriaSprites(16);
+  Sprites *spritesItems = AsignarMemoriaSprites(1); 
   Bala *punteroBalas = AsignarMemoriaBalas(20);
   InstanciarSpritesColores(spritesColores);
   InstanciarSpritesPlayer(spritesPersonaje);
+  InstanciarSpritesItems(spritesItems);
   InstanciarBalas(punteroBalas);
 
   Jugador player;
   InstanciarPlayer(&player);
 
-  COL::object cubo_prueba;
-  InstanciarCubo(&cubo_prueba, *spritesPersonaje);
+  COL::object gasofa;
+  InstanciarGasofa(&gasofa, spritesItems[0]);
 
   // Main game loop
   while (esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape))
@@ -515,22 +548,24 @@ int esat::main(int argc, char **argv)
     ActualizarDisparos(punteroBalas, player);
     LoopMoverJugador(moverLeft, moverRight, &player);
     ControlarLimitesPantalla(&player, punteroBalas);
-    ActualizarColisiones(&player, cubo_prueba);
+
+    ColisionGasofa(&player, gasofa);
+    LoopGasofa(player, gasofa);
 
     GameScreen();
-    ColisionPlayer(player, cubo_prueba);
+    //ColisionPlayer(player, cubo_prueba);
     ColisionPlayerPlatforma(player);
-    ColisionDisparos(punteroBalas, cubo_prueba);
+    //ColisionDisparos(punteroBalas, cubo_prueba);
 
     int frame = ActualizarAnimacionJugador(player);
     DibujarDisparos(punteroBalas);
     DibujarColoresJugador(spritesColores, player, frame);
     DibujarJugador(spritesPersonaje, player, frame);
+    DibujarGasofa(gasofa, spritesItems);
 
-    // DebuggingCubo(cubo_prueba, *spritesColores);
-    // DebuggingCubo(player.config_colision, *spritesColores);
-    // SHOWcOLISION()
-
+    COL::ShowColision(player.config_colision.colision);
+    COL::ShowColision(gasofa.colision);
+    COL::ShowColision(punteroBalas->config_bala.colision);
     // Finish drawing
     esat::DrawEnd();
     // Control frame speed (fps)
