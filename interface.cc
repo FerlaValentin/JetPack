@@ -35,15 +35,26 @@ struct TPlayerGame {
 const unsigned char kplatform_numbers = 3;
 
 esat::SpriteHandle* platform_sprite = nullptr;
+esat::SpriteHandle* loading_sprite = nullptr;
 TPlatform* g_platforms = nullptr;
 
 TGame game;
+
+// TODO: move top
+float timer = 0;
+
+int menu_selection_player = 0;   /* 0 = 1 player, 1 = 2 player */
+int menu_selection_control = 0;   /* 0 = keyboard, 1 = kempston */
+float menu_blink_timer = 0.0f;
+bool menu_highlight_white = true;
 
 void FreeMemory(){
   free(g_platforms);
   g_platforms = nullptr;
   free(platform_sprite);
   platform_sprite = nullptr;
+  free(loading_sprite);
+  loading_sprite = nullptr;
 }
 
 void InitPlatforms(){
@@ -70,6 +81,12 @@ void ReserveMemory(){
 
 void InitGameVariables(){
   game = {IMAGE,0,0,0,0};
+}
+
+void InitLoadingSprites(){
+  loading_sprite = (esat::SpriteHandle*)malloc(2 * sizeof(esat::SpriteHandle));
+  *(loading_sprite + 0) = esat::SpriteFromFile("assets/sprites/loader/jetpac_frame1.png");
+  *(loading_sprite + 1) = esat::SpriteFromFile("assets/sprites/loader/jetpac_frame2.png");
 }
 
 void InitPlatformSprites(){
@@ -107,22 +124,58 @@ void DrawHeader(){
   esat::DrawText(436, 32, "000000"); // score 2up placeholder
 }
 
-// TODO: fix color bg
-void MainMenu(){
-  printf("[DEBUG] call MainMenu\n");
+static void DrawHighlightRect(float x, float y, float w, float h, bool white) {
+  float* pts = (float*)malloc(8 * sizeof(float));
+  *(pts + 0) = x;     *(pts + 1) = y;
+  *(pts + 2) = x + w; *(pts + 3) = y;
+  *(pts + 4) = x + w; *(pts + 5) = y + h;
+  *(pts + 6) = x;     *(pts + 7) = y + h;
+  esat::DrawSetStrokeColor(0, 0, 0, 0);
+  esat::DrawSetFillColor(white ? 255 : 0, white ? 255 : 0, white ? 255 : 0, 255);
+  esat::DrawSolidPath(pts, 4);
+  free(pts);
+}
+
+void MainMenu(int selected_player, int selected_control, bool highlight_white) {
   DrawHeader();
 
   esat::DrawSetTextSize(20);
+  esat::DrawSetFillColor(255, 255, 255);
   esat::DrawText(60, 70, "JETPAC GAME SELECTION");
 
-  esat::DrawText(60, 110, "1  1 PLAYER GAME");
-  esat::DrawText(60, 140, "2  2 PLAYER GAME");
-  esat::DrawText(60, 170, "3  KEYBOARD");
-  esat::DrawText(60, 200, "4  KEMPSTON JOYSTICK"); // not selectable
+  const int num_rows = 5;
+  float* y_pos = (float*)malloc(num_rows * sizeof(float));
+  *(y_pos + 0) = 110.0f;
+  *(y_pos + 1) = 140.0f;
+  *(y_pos + 2) = 170.0f;
+  *(y_pos + 3) = 200.0f;
+  *(y_pos + 4) = 250.0f;
 
-  esat::DrawText(60, 250, "5  START GAME");
-  
-  esat::DrawText(10, 350, "@1983 A.C.G. ALL RIGHTS RESERVED");
+  const char** rows = (const char**)malloc(num_rows * sizeof(const char*));
+  *(rows + 0) = "1  1 PLAYER GAME";
+  *(rows + 1) = "2  2 PLAYER GAME";
+  *(rows + 2) = "3  KEYBOARD";
+  *(rows + 3) = "4  KEMPSTON JOYSTICK";
+  *(rows + 4) = "5  START GAME";
+
+  esat::DrawSetTextSize(20);
+  for (int i = 0; i < num_rows; ++i) {
+    float y = *(y_pos + i);
+    int is_highlighted = (i <= 1 && i == selected_player) || (i >= 2 && i <= 3 && (i - 2) == selected_control);
+    if (is_highlighted) {
+      DrawHighlightRect(70.0f - 4, y - 18, 320.0f, 22.0f, highlight_white);
+      esat::DrawSetFillColor(highlight_white ? 0 : 255, highlight_white ? 0 : 255, highlight_white ? 0 : 255, 255);
+    } else {
+      esat::DrawSetFillColor(255, 255, 255, 255);
+    }
+    esat::DrawText(70.0f, y, *(rows + i));
+  }
+  free(y_pos);
+  free(rows);
+
+  esat::DrawSetFillColor(255, 255, 255, 255);
+  esat::DrawSetTextSize(18);
+  esat::DrawText(10, 360, "@1983 A.C.G. ALL RIGHTS RESERVED");
 }
 
 void GeneratePlatform(){ 
@@ -147,7 +200,7 @@ void GeneratePlatform(){
     esat::DrawSetStrokeColor(0, 0, 0, 0); // hide borders
     esat::DrawSetFillColor(0, 255, 0, 255);
     esat::DrawSolidPath(bg, 4);
-
+    // esat::DrawSolidPath(p->collision_platform.colision, 4);
 
     // Draw platforms
     for (int j = 0; j < p->size; ++j){
@@ -196,38 +249,37 @@ void GameScreen(){
 }
 
 void InitialImage(){
-  printf("Add image here\n");
+  esat::DrawSprite(*(loading_sprite + 0), 0, 0);
 }
 
-// TODO: move top
-float timer = 0;
-
 // function to select the screen to show
-void ScreenSelector(float dt){
-
-  timer += dt;
-  printf("%f\n", timer);
-  if (timer > 5.0f && timer < 10.0f){
-    game.current_screen = MAIN_MENU;
-  }else if (timer > 10.0f){
-    game.current_screen = GAME_SCREEN;
-  }
-
-  switch (game.current_screen){
+void ScreenSelector(float dt) {
+  switch (game.current_screen) {
     case IMAGE:
+      timer += dt;
+      if (timer >= 5.0f) game.current_screen = MAIN_MENU;
       InitialImage();
       break;
-    case MAIN_MENU:
-      // printf("[DEBUG] Main menu selected\n");
-      MainMenu();
+    case MAIN_MENU: {
+      menu_blink_timer += dt;
+      if (menu_blink_timer >= 0.5f) {
+        menu_blink_timer = 0.0f;
+        menu_highlight_white = !menu_highlight_white;
+      }
+      if (esat::IsKeyPressed('1')) menu_selection_player = 0;
+      if (esat::IsKeyPressed('2')) menu_selection_player = 1;
+      if (esat::IsKeyPressed('3')) menu_selection_control = 0;
+      if (esat::IsKeyPressed('4')) menu_selection_control = 1;
+      if (esat::IsKeyPressed('5')) game.current_screen = GAME_SCREEN;
+      MainMenu(menu_selection_player, menu_selection_control, menu_highlight_white);
       break;
+    }
     case GAME_SCREEN:
       GameScreen();
       break;
     default:
-      printf("[DEBUG] not screen\n");
       break;
-  }  
+  }
 }
 
 void TestMousePosition(){
