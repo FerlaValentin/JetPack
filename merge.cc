@@ -56,22 +56,23 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     InstanciarPlayer(player);
 }
 
-void GetInput(bool* moverLeft, bool* moverRight, bool* ascender, Bala* punteroBalas, Jugador player){
+void GetInput(bool* moverLeft, bool* moverRight, bool* ascender, Bala* punteroBalas, Jugador player, bool* rocket_started){
     *moverLeft = (esat::IsKeyPressed('A') || esat::IsKeyPressed('a'));
     *moverRight = (esat::IsKeyPressed('D') || esat::IsKeyPressed('d'));
     *ascender = (esat::IsKeyPressed('W') || esat::IsKeyPressed('w'));
+    if((esat::IsKeyDown('P')) || (esat::IsKeyDown('p'))) *rocket_started = true;
     CrearDisparos(punteroBalas, player);
 }
 
 void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, bool moverRight, int* frame,
-            int* head_y, int* body_y, int* tail_y, int speed){
+            int* head_y, int* body_y, int* tail_y, int speed, bool rocket_started){
     Ascender_Gravedad(player, ascender, delta_time);
     ActualizarDisparos(punteroBalas, *player, delta_time);
     LoopMoverJugador(moverLeft, moverRight, player, delta_time);
     //!Cambiar también el tope de la altura para que no toque el HUD
     ControlarLimitesPantalla(player, punteroBalas);
     *frame = ActualizarAnimacionJugador(*player, delta_time);
-    MoverNave(head_y, body_y, tail_y, speed);
+    MoverNave(head_y, body_y, tail_y, speed, delta_time, rocket_started);
 }
 
 void DrawAll(Sprites* spritesColores, Sprites* spritesPersonaje, Bala* punteroBalas, Jugador player, int frame, 
@@ -122,21 +123,23 @@ int esat::main(int argc, char **argv){
     esat::SpriteHandle nave1, nave2, nave3, rosa;
     Bala *punteroBalas = nullptr;
     Jugador player;
-    //Datos Nave
-    int pink_x, pink_y;
-    int tail_x = 600, tail_y = GLO::kScreenWidth - terrain_height;
-    int body_x = 600, body_y = 736;
-    int head_x = 600, head_y = 704;
-    int speed = 2;
 
     InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &player, &nave1, &nave2, &nave3, &rosa);
-    
+
+    //Datos Nave
+    int pink_x, pink_y;
+    int tail_x = 420, tail_y = GLO::kScreenHeight - esat::SpriteHeight(nave3) - terrain_height;
+    int body_x = 420, body_y = tail_y - esat::SpriteHeight(nave3);
+    int head_x = 420, head_y = body_y - esat::SpriteHeight(nave2);
+    int speed = 1;
+    bool rocket_started = false;
+
     // Main game loop
     while(esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape)) {
         InitiateFrame();
 
-        GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, player);
-        Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame, &head_y, &body_y, &tail_y, speed);
+        GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, player, &rocket_started);
+        Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame, &head_y, &body_y, &tail_y, speed, rocket_started);
         DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, nave1, nave2, nave3, rosa, head_x, head_y,
                 body_x, body_y, tail_x, tail_y);
         FinishFrame();

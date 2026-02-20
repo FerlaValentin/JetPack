@@ -33,19 +33,10 @@ void DrawShip(esat::SpriteHandle nave1, esat::SpriteHandle nave2, esat::SpriteHa
   esat::DrawSprite(nave3, tail_x, tail_y);
 }
 
-void MoverNave(int* head_y, int* body_y, int* tail_y, int speed){
-  if(esat::IsKeyDown('P')){
-    while (*head_y <= 100){
-      *head_y -= speed;
-      *body_y -= speed;
-      *tail_y -= speed;
-    }
+void MoverNave(int* head_y, int* body_y, int* tail_y, int speed, double delta_time, bool rocket_started){
+  if(rocket_started && *head_y >= 60){
+    *head_y -= speed * delta_time;
+    *body_y -= speed * delta_time;
+    *tail_y -= speed * delta_time;
   }
-}
-
-void Liberar(esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa){
-  esat::SpriteRelease(*nave1);
-  esat::SpriteRelease(*nave2);
-  esat::SpriteRelease(*nave3);
-  esat::SpriteRelease(*rosa);
 }
