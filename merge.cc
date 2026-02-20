@@ -35,21 +35,23 @@ void InitiateFrame(){
     esat::DrawClear(0,0,0);
 }
 
-void InstantiateSprites(Sprites *spritesColores, Sprites *spritesPersonaje, esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa){
-    CargarSprites(nave1, nave2, nave3, rosa);
-    InstanciarSpritesColores(spritesColores);
-    InstanciarSpritesPlayer(spritesPersonaje);
-}
-
 void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Jugador *player, esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa){
     esat::WindowInit(GLO::kScreenWidth, GLO::kScreenHeight);
 	esat::WindowSetMouseVisibility(true);
 	srand((unsigned)time(nullptr));
 	last_time = esat::Time();
+
+    //MALLOCS
     *spritesColores = (Sprites*)GLO::AllocateMemory(4, sizeof(Sprites));
     *spritesPersonaje = (Sprites*)GLO::AllocateMemory(16, sizeof(Sprites));
     *punteroBalas = (Bala*)GLO::AllocateMemory(20, sizeof(Bala));
-    InstantiateSprites(*spritesColores, *spritesPersonaje, nave1, nave2, nave3, rosa);
+
+    //SPRITES
+    LoadShipSprites(nave1, nave2, nave3, rosa);
+    InstanciarSpritesColores(*spritesColores);
+    InstanciarSpritesPlayer(*spritesPersonaje);
+
+    //INSTANCIAR
     InstanciarBalas(*punteroBalas);
     InstanciarPlayer(player);
 }
@@ -61,19 +63,24 @@ void GetInput(bool* moverLeft, bool* moverRight, bool* ascender, Bala* punteroBa
     CrearDisparos(punteroBalas, player);
 }
 
-void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, bool moverRight, int* frame/*, COL::object* */){
+void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, bool moverRight, int* frame,
+            int* head_y, int* body_y, int* tail_y, int speed){
     Ascender_Gravedad(player, ascender, delta_time);
     ActualizarDisparos(punteroBalas, *player, delta_time);
     LoopMoverJugador(moverLeft, moverRight, player, delta_time);
     //!Cambiar también el tope de la altura para que no toque el HUD
     ControlarLimitesPantalla(player, punteroBalas);
     *frame = ActualizarAnimacionJugador(*player, delta_time);
+    MoverNave(head_y, body_y, tail_y, speed);
 }
 
-void DrawAll(Sprites* spritesColores, Sprites* spritesPersonaje, Bala* punteroBalas, Jugador player, int frame){
+void DrawAll(Sprites* spritesColores, Sprites* spritesPersonaje, Bala* punteroBalas, Jugador player, int frame, 
+        esat::SpriteHandle nave1, esat::SpriteHandle nave2, esat::SpriteHandle nave3, esat::SpriteHandle rosa,
+        int head_x, int head_y, int body_x, int body_y, int tail_x, int tail_y){
     DibujarColoresJugador(spritesColores, player, frame);
     DibujarJugador(spritesPersonaje, player, frame);
     DibujarDisparos(punteroBalas);
+    DrawShip(nave1, nave2, nave3, rosa, head_x, head_y, body_x, body_y, tail_x, tail_y);
 }
 
 void FinishFrame(){
@@ -90,9 +97,25 @@ void FreeAll(Sprites **spritesColores, Sprites **spritesPersonaje, esat::SpriteH
             esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa, Bala **punteroBalas){
     for(int i = 0; i < 4; ++i)
         esat::SpriteRelease((**spritesColores).sprite);
+    free(*spritesColores);
+    *spritesColores = nullptr;
+
+    for(int i = 0; i < 16; ++i)
+        esat::SpriteRelease((**spritesPersonaje).sprite);
+    free(*spritesPersonaje);
+    *spritesPersonaje = nullptr;
+
+    free(*punteroBalas);
+    *punteroBalas = nullptr;
+
+    esat::SpriteRelease(*nave1);
+    esat::SpriteRelease(*nave2);
+    esat::SpriteRelease(*nave3);
+    esat::SpriteRelease(*rosa);
 }
 
-int esat::main(int argc, char **argv) {
+int esat::main(int argc, char **argv){
+    const int terrain_height = 16;
     int frame;
     bool moverLeft, moverRight, ascender;
     Sprites *spritesColores = nullptr, *spritesPersonaje = nullptr;
@@ -100,11 +123,11 @@ int esat::main(int argc, char **argv) {
     Bala *punteroBalas = nullptr;
     Jugador player;
     //Datos Nave
-    int g_pink_x, g_pink_y;
-    int g_head_x = 600, g_head_y = 704;
-    int g_body_x = 600, g_body_y = 736;
-    int g_tail_x = 600, g_tail_y = 768;
-    int g_speed = 2;
+    int pink_x, pink_y;
+    int tail_x = 600, tail_y = GLO::kScreenWidth - terrain_height;
+    int body_x = 600, body_y = 736;
+    int head_x = 600, head_y = 704;
+    int speed = 2;
 
     InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &player, &nave1, &nave2, &nave3, &rosa);
     
@@ -113,9 +136,9 @@ int esat::main(int argc, char **argv) {
         InitiateFrame();
 
         GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, player);
-        Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame);
-        DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame);
-
+        Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame, &head_y, &body_y, &tail_y, speed);
+        DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, nave1, nave2, nave3, rosa, head_x, head_y,
+                body_x, body_y, tail_x, tail_y);
         FinishFrame();
     }
 
