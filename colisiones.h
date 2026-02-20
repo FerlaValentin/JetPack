@@ -62,33 +62,33 @@ namespace COL{
         }
     }
 
-    bool WindowsColision(colision colision1, dir dir){
-        colision screen={0,0,800,800};
+    bool WindowsColision(colision colision1, dir dir, int offset){
+        colision screen={0,0,256*2,192*2};
 
         switch(dir){
             case left:
-            if (colision1.p1.x < screen.p1.x)
+            if (colision1.p1.x < screen.p1.x-offset)
             {return true;}
             else
             {return false;}
             break;
 
             case down:
-            if (colision1.p2.y > screen.p2.y)
+            if (colision1.p2.y > screen.p2.y+offset)
             {return true;}
             else
             {return false;}
             break;
 
             case top:
-            if (colision1.p1.y < screen.p1.y)
+            if (colision1.p1.y < screen.p1.y-offset)
             {return true;}
             else
             {return false;}
             break;
 
             case right:
-            if (colision1.p2.x > screen.p2.x)
+            if (colision1.p2.x > screen.p2.x+offset)
             {return true;}
             else
             {return false;}
