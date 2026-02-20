@@ -47,6 +47,10 @@ struct Jugador
   bool volando;
   bool tiene_gasofa;
   COL::object config_colision;
+  int vidas;
+  bool muerto;
+  float tiempo_aparicion;
+  float tiempo_invulnerable;
 };
 struct Bala
 {
@@ -133,6 +137,9 @@ void InstanciarPlayer(Jugador *player)
   player->speed = 5.0f;
   player->mirandoDerecha = true;
   player->tiene_gasofa = false;
+  player->muerto = false;
+  player->tiempo_aparicion = 5.0f;
+  player->tiempo_invulnerable = 3.0f;
 
   player->config_colision.width = spritewidth;
   player->config_colision.height = spriteheight;
@@ -399,7 +406,7 @@ void DibujarItems(ItemDrop item, Sprites *punteroSprites)
 
   esat::DrawSetFillColor(rand() % 255, rand() % 255, rand() % 255);
   esat::DrawSolidPath(puntos, 4);
-  esat::DrawSprite(punteroSprites[0].sprite, item.item_config.position.x, item.item_config.position.y);
+  esat::DrawSprite(punteroSprites[item.tipo].sprite, item.item_config.position.x, item.item_config.position.y);
 }
 
 //_____________________________
@@ -484,8 +491,8 @@ void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
 
 void SpawnItem(COL::object &item)
 {
-  float x = rand() % windowX - spritewidth;
-  float y = rand() % windowY - spriteheight;
+  float x = rand() % (windowX - item.width);
+  float y = rand() % (windowY - item.height);
   item.position.x = x;
   item.position.y = y;
 }
@@ -498,6 +505,14 @@ void GravedadItem(COL::object &item)
   {
     item.position.y = windowY - 16 - 32;
   }
+}
+
+void CambiarTipoItem(ItemDrop *item, Sprites *sprites)
+{
+  item->tipo = rand() % 5;
+  item->item_config.sprite = sprites[item->tipo].sprite;
+  item->item_config.width = esat::SpriteWidth(item->item_config.sprite);
+  item->item_config.height = esat::SpriteHeight(item->item_config.sprite);
 }
 
 void UpdateGasofaPosition(Jugador player, COL::object &gasofa)
@@ -539,7 +554,7 @@ void ActualizarColisionesItems(Jugador *player, COL::object &gasofa, COL::object
   item.item_config.colision = COL::CreateColision(item.item_config);
 }
 
-void LoopPickItems(Jugador player, ItemDrop *item)
+void LoopPickItems(Jugador player, ItemDrop *item, Sprites *sprites)
 {
   static float timer = 0.0f;
   if (!item->recogido)
@@ -557,6 +572,7 @@ void LoopPickItems(Jugador player, ItemDrop *item)
     {
       timer = 0.0f;
       item->recogido = false;
+      CambiarTipoItem(item, sprites);
       SpawnItem(item->item_config);
     }
   }
@@ -591,6 +607,31 @@ void ColisionPlayerPlatforma(Jugador &player)
 
         player.pos.y = p->collision_platform.position.y + p->collision_platform.height;
       }
+    }
+  }
+}
+void ResetPlayer_OnDead(Jugador *player, bool colision_player)
+{
+  static float timer = 0.0f;
+  static float timer_invulnerable = 0.0f;
+  player->muerto = true;
+  timer += delta_time;
+  // si esta muerto no dibujar ni detectar inputs
+  if (timer >= player->tiempo_aparicion)
+  {
+    timer = 0.0f;
+    player->pos.x = windowX / 2;
+    player->pos.y = windowY - 16;
+    player->muerto = false;
+  }
+
+  if (!player->muerto)
+  {
+    timer_invulnerable += delta_time;
+    // no detectar colisiones con enemigos
+    if (timer >= timer_invulnerable)
+    {
+      // empezar a detectar colisiones con enemigos
     }
   }
 }
@@ -657,19 +698,11 @@ int esat::main(int argc, char **argv)
     LoopMoverJugador(moverLeft, moverRight, &player);
     ControlarLimitesPantalla(&player, punteroBalas);
 
-    // Hacer aparecer objetos cayendose
-    // funcion (object objeto)
-
-    // Crear puntos
-    // Añadir objeto triangulo, bola chafada, y otro mas
-    // que aparezcan cada cierto tiempo random (funcion caida)
-    // den puntos
-
     // ! Colisiones
     ColisionJugador(&player); // Actualizar colider a player
     ActualizarColisionesItems(&player, gasofa, prueba_nave, itemdrop);
     LoopGasofa(player, gasofa, prueba_nave, contador_gasofa, numero_max_gasofa);
-    LoopPickItems(player, &itemdrop);
+    LoopPickItems(player, &itemdrop, spritesItems);
     GameScreen();
     ColisionPlayerPlatforma(player);
     // ColisionDisparos();
