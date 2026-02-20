@@ -114,12 +114,12 @@ void InstanciarSpritesPlayer(Sprites *punteroSprites)
 
 void InstanciarSpritesItems(Sprites *punteroSprites)
 {
-  punteroSprites[0].sprite = esat::SpriteFromFile("SPRITES/ITEMS/fuel.png");
   punteroSprites[1].sprite = esat::SpriteFromFile("SPRITES/ITEMS/chafada.png");
   punteroSprites[2].sprite = esat::SpriteFromFile("SPRITES/ITEMS/diamante.png");
   punteroSprites[3].sprite = esat::SpriteFromFile("SPRITES/ITEMS/oro.png");
   punteroSprites[4].sprite = esat::SpriteFromFile("SPRITES/ITEMS/radioa.png");
   punteroSprites[5].sprite = esat::SpriteFromFile("SPRITES/ITEMS/triangulo.png");
+  punteroSprites[0].sprite = esat::SpriteFromFile("SPRITES/ITEMS/fuel.png");
 }
 
 void InstanciarPlayer(Jugador *player)
@@ -148,7 +148,7 @@ void InstanciarBalas(Bala *bala)
   }
 }
 
-void InstanciarItems(COL::object *gasofa, COL::object *prueba_nave, Sprites punteroSprites)
+void InstaciarGasofa_Nave(COL::object *gasofa, COL::object *prueba_nave, Sprites punteroSprites)
 {
   gasofa->sprite = punteroSprites.sprite;
   gasofa->width = esat::SpriteWidth(punteroSprites.sprite);
@@ -161,6 +161,15 @@ void InstanciarItems(COL::object *gasofa, COL::object *prueba_nave, Sprites punt
   prueba_nave->position.y = windowY - 180;
   prueba_nave->width = 80;
   prueba_nave->height = 180;
+}
+void InstanciarItems(ItemDrop *item, Sprites *punteroSprites)
+{
+  item->tipo = rand() % 5; // 0 1 2 3 4
+  item->cooldown = 5.0f;
+  item->recogido = false;
+  item->item_config.sprite = punteroSprites[item->tipo].sprite;
+  item->item_config.width = esat::SpriteWidth(punteroSprites[0].sprite);
+  item->item_config.height = esat::SpriteHeight(punteroSprites[0].sprite);
 }
 
 // ________________________________
@@ -381,6 +390,17 @@ void DibujarGasofa(COL::object gasofa, Sprites *punteroSprites)
   esat::DrawSolidPath(puntos, 4);
   esat::DrawSprite(punteroSprites[0].sprite, gasofa.position.x, gasofa.position.y);
 }
+// ! convertir gasofa a ItemDrop IMPORTANTE !!!!!!! y ahorrarse una funcion aqui
+void DibujarItems(ItemDrop item, Sprites *punteroSprites)
+{
+  if (item.recogido)
+    return;
+  float puntos[8] = {item.item_config.position.x, item.item_config.position.y, item.item_config.position.x + 32, item.item_config.position.y, item.item_config.position.x + 32, item.item_config.position.y + 32, item.item_config.position.x, item.item_config.position.y + 32};
+
+  esat::DrawSetFillColor(rand() % 255, rand() % 255, rand() % 255);
+  esat::DrawSolidPath(puntos, 4);
+  esat::DrawSprite(punteroSprites[0].sprite, item.item_config.position.x, item.item_config.position.y);
+}
 
 //_____________________________
 // LIMITES PANTALLA
@@ -511,11 +531,35 @@ void LoopGasofa(Jugador &player, COL::object &gasofa, COL::object prueba_nave, i
   }
 }
 
-void ActualizarColisionesItems(Jugador *player, COL::object &gasofa, COL::object &prueba_nave)
+void ActualizarColisionesItems(Jugador *player, COL::object &gasofa, COL::object &prueba_nave, ItemDrop &item)
 {
   // player->config_colision.colision = COL::CreateColision(player->config_colision);
   gasofa.colision = COL::CreateColision(gasofa);
   prueba_nave.colision = COL::CreateColision(prueba_nave);
+  item.item_config.colision = COL::CreateColision(item.item_config);
+}
+
+void LoopPickItems(Jugador player, ItemDrop *item)
+{
+  static float timer = 0.0f;
+  if (!item->recogido)
+    GravedadItem(item->item_config);
+
+  if (COL::CheckColision(player.config_colision.colision, item->item_config.colision))
+  {
+    item->recogido = true;
+    printf("Colision objetos !!!!!!!!!!!!!! \n");
+  }
+  if (item->recogido)
+  {
+    timer += delta_time;
+    if (timer >= item->cooldown)
+    {
+      timer = 0.0f;
+      item->recogido = false;
+      SpawnItem(item->item_config);
+    }
+  }
 }
 
 void ColisionJugador(Jugador *player)
@@ -586,7 +630,8 @@ int esat::main(int argc, char **argv)
   COL::object prueba_nave;
   ItemDrop itemdrop;
 
-  InstanciarItems(&gasofa, &prueba_nave, spritesItems[0]);
+  InstaciarGasofa_Nave(&gasofa, &prueba_nave, spritesItems[0]);
+  InstanciarItems(&itemdrop, spritesItems);
 
   // Main game loop
   while (esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape))
@@ -622,8 +667,9 @@ int esat::main(int argc, char **argv)
 
     // ! Colisiones
     ColisionJugador(&player); // Actualizar colider a player
-    ActualizarColisionesItems(&player, gasofa, prueba_nave);
+    ActualizarColisionesItems(&player, gasofa, prueba_nave, itemdrop);
     LoopGasofa(player, gasofa, prueba_nave, contador_gasofa, numero_max_gasofa);
+    LoopPickItems(player, &itemdrop);
     GameScreen();
     ColisionPlayerPlatforma(player);
     // ColisionDisparos();
@@ -634,6 +680,7 @@ int esat::main(int argc, char **argv)
     DibujarColoresJugador(spritesColores, player, frame);
     DibujarJugador(spritesPersonaje, player, frame);
     DibujarGasofa(gasofa, spritesItems);
+    DibujarItems(itemdrop, spritesItems);
 
     COL::ShowColision(player.config_colision.colision);
     COL::ShowColision(gasofa.colision);
