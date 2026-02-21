@@ -37,8 +37,9 @@ namespace ENE{
     };
 
     struct EnemyTemplate{
-        esat::SpriteHandle sprite;
+        esat::SpriteHandle* sprite = nullptr;
         int width, height;
+        int num_frames;
         COL::vec2 speed;
     };
 
@@ -81,17 +82,37 @@ namespace ENE{
 
     void InitManager(EnemyManager *mgr, int pool_capacity){
 
-        char* paths[] = {
-        "SPRITES/ENEMIGOS/enemigo1_1_2x.png", "SPRITES/ENEMIGOS/enemigo2_1_2x.png",
-        "SPRITES/ENEMIGOS/enemigo3_1_2x.png", "SPRITES/ENEMIGOS/enemigo7_2x.png",
-        "SPRITES/ENEMIGOS/enemigo4_2x.png",   "SPRITES/ENEMIGOS/enemigo5_2x.png",
-        "SPRITES/ENEMIGOS/enemigo6_2x.png",   "SPRITES/ENEMIGOS/enemigo8_2x.png"
-        };
+        for(int i=0; i<KTypeCount; i++){
+            if(i == 0 || i == 1 || i == 2){
+                (mgr->templates+i)->num_frames = 2;
+            }else{
+                (mgr->templates+i)->num_frames = 1;
+            }
+
+            (mgr->templates+i)->sprite = (esat::SpriteHandle*)malloc((mgr->templates+i)->num_frames*sizeof(esat::SpriteHandle));
+        }
+
+
+        *((mgr->templates+0)->sprite+0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo1_1_2x.png");
+        *((mgr->templates+0)->sprite+1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo1_2_2x.png");
+
+        *((mgr->templates+1)->sprite+0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo2_1_2x.png");
+        *((mgr->templates+1)->sprite+1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo2_2_2x.png");
+
+        *((mgr->templates+2)->sprite+0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo3_1_2x.png");
+        *((mgr->templates+2)->sprite+1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo3_2_2x.png");
+
+        *((mgr->templates+3)->sprite+0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo7_2x.png");
+        *((mgr->templates+4)->sprite+0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo4_2x.png");
+        *((mgr->templates+5)->sprite+0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo5_2x.png");
+        *((mgr->templates+6)->sprite+0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo6_2x.png");
+        *((mgr->templates+7)->sprite+0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo8_2x.png");
+
+
 
         for(int i=0;i<KTypeCount;i++){
-            (mgr->templates+i)->sprite = esat::SpriteFromFile(paths[i]);
-            (mgr->templates+i)->width = esat::SpriteWidth((mgr->templates+i)->sprite);
-            (mgr->templates+i)->height = esat::SpriteHeight((mgr->templates+i)->sprite);
+            (mgr->templates+i)->width = esat::SpriteWidth(*((mgr->templates+i)->sprite));
+            (mgr->templates+i)->height = esat::SpriteHeight(*((mgr->templates+i)->sprite));
         }
 
         mgr->pool_size = pool_capacity;
@@ -126,6 +147,7 @@ namespace ENE{
 
         switch(e->type){
             case KMeteorites:
+                if(speedX < 0){speedX*=-1;}
                 if(rand()%2 == 1){
                     e->speed={speedX,0.3}; 
                 }else{
@@ -183,6 +205,7 @@ namespace ENE{
                 (mgr->pool+i)->type = type;
                 (mgr->pool+i)->position = {x,y};
                 SpeedEnemies((mgr->pool+i));
+                (mgr->pool+i)->count = 0;
                 (mgr->pool+i)->Color = static_cast<ENE::ColorType>(rand()%4);
                 found = true;
             }
@@ -191,6 +214,9 @@ namespace ENE{
     
     void EnemiesAI(Enemy *e, COL::colision ecol){
         if(e->type == KMeteorites || e->type == KDarts){
+            if(e->type == KMeteorites){
+
+            }
             if (COL::WindowsColision(ecol,COL::down,0)){
                 e->active=false;
                 ExplodeAt(e->position.x,e->position.y, e->Color);
@@ -298,7 +324,11 @@ namespace ENE{
                 e->col = COL::CreateColision(tempobj);
 
                 BGcolor(e->col, e->Color);
-                esat::DrawSprite(myTemplate->sprite, (mgr->pool+i)->position.x, (mgr->pool+i)->position.y);
+
+                ENE::EnemyTemplate *t = &mgr->templates[e->type];
+                int frame = (int)(esat::Time() / 200) % t->num_frames;
+
+                esat::DrawSprite(*(t->sprite + frame), e->position.x, e->position.y);
 
                 EnemiesAI(e,e->col);
             }
@@ -323,22 +353,22 @@ namespace ENE{
         }
     }
 
-    void FreeManager(EnemyManager *mgr) {
-        if (mgr == nullptr) return;
+void FreeManager(EnemyManager *mgr) {
+    if (mgr == nullptr) return;
 
-        for (int i = 0; i < KTypeCount; i++) {
-            if ((mgr->templates+i)->sprite != nullptr) {
-                esat::SpriteRelease((mgr->templates+i)->sprite);
+    for (int i = 0; i < KTypeCount; i++) {
+        EnemyTemplate *t = (mgr->templates + i);
+        if (t->sprite != nullptr) {
+            for(int j=0; j < t->num_frames; j++){
+                esat::SpriteRelease(*(t->sprite + j));
             }
+            free(t->sprite); 
         }
-
-        if (mgr->pool != nullptr) {
-            free(mgr->pool);
-            mgr->pool = nullptr;
-        }
-
-        free(mgr);
     }
+
+    if (mgr->pool != nullptr) free(mgr->pool);
+    free(mgr);
+}
 
     void FreeVFX(){
         for(int i=0;i<3;i++){
@@ -375,8 +405,8 @@ namespace ENE{
 
 
 
-// int level = 1;
-// bool toogle = false; 
+int level = 1;
+bool toogle = false; 
 
 
 // int esat::main(int argc, char **argv)
@@ -401,17 +431,17 @@ namespace ENE{
 //         if(level == 1 && !toogle){
 //             ENE::ResetEnemies(ENE::enemies);
 //             for(int i=0;i<3;i++){
-//                 ENE::SpawnEnemy(ENE::enemies,ENE::KJets,0,rand()%350);
+//                 ENE::SpawnEnemy(ENE::enemies,ENE::KMeteorites,0,rand()%350);
 //             }
 //             for(int i=0;i<3;i++){
-//                 ENE::SpawnEnemy(ENE::enemies,ENE::KFlower,-32,rand()%350);
+//                 ENE::SpawnEnemy(ENE::enemies,ENE::KFurballs,-32,rand()%350);
 //             }
 //             toogle = true;
 //         }
 //         if(level == 2 && toogle){
 //             ENE::ResetEnemies(ENE::enemies);
 //             for(int i=0;i<3;i++){
-//                 ENE::SpawnEnemy(ENE::enemies,ENE::KBubbles,-32,rand()%360);
+//                 ENE::SpawnEnemy(ENE::enemies,ENE::KUfo,-32,rand()%360);
 //             }
 //             toogle = false;
 //         }
