@@ -20,13 +20,13 @@ struct TGame {
   TScreen current_screen;
   unsigned char current_lives;
   int hi_socore;
-  int score_p1;
-  int score_p2;
+  int score_p1; // actual hi-score for player1
+  int score_p2; // actual hi-score for player2
 };
 
 // (@jhony) check this
 struct TPlayerGame {
-  unsigned char player_id;
+  unsigned char player_id; // player 1 or 2
   unsigned char lives;
   int score;
 };
@@ -63,7 +63,7 @@ void InitPlatforms(){
   int h = esat::SpriteHeight(*(platform_sprite));
   g_platforms = (TPlatform*)malloc(kplatform_numbers * sizeof(TPlatform));
   
-  // (@jhony) TODO: fix this
+  // TODO: (@jhony) fix this
   *(g_platforms + 0) = {nullptr, w, h, 70.0f, 150.0f, 70.0f, 150.0f, 70.0f + w*6, 150.0f + h, 6};
   *(g_platforms + 1) = {nullptr, w, h, 240.0f, 180.0f, 240.0f, 180.0f, 240.0f + w*4, 180.0f + h, 4};
   *(g_platforms + 2) = {nullptr, w, h, 390.0f, 100.0f, 390.0f, 100.0f, 390.0f + w*6, 100.0f + h, 6};
@@ -109,19 +109,27 @@ void LoadFonts(){
   esat::DrawSetTextFont("assets/fonts/zx_spectrum-7.ttf");
 }
 
-// TODO: pass data ??
 void DrawHeader(){
-  esat::DrawSetFillColor(255, 255, 255);
-  esat::DrawSetTextSize(14);
+  char* score_1up = (char*)malloc(7 * sizeof(char));
+  char* hi_score = (char*)malloc(7 * sizeof(char));
+  char* score_2up = (char*)malloc(7 * sizeof(char));
+  itoa(game.score_p1 + 1000000, score_1up, 10);
+  itoa(game.hi_socore + 1000000, hi_score, 10);
+  itoa(game.score_p2 + 1000000, score_2up, 10);
 
-  esat::DrawText(10, 16, "1UP");
-  esat::DrawText(10, 32, "000000"); // score 1up placeholder
-
+  esat::DrawSetTextSize(18);
+  
+  esat::DrawSetFillColor(255, 255, 255, 255);
+  esat::DrawText(30, 16, "1UP");
+  esat::DrawText(438, 16, "2UP");
+  
+  esat::DrawSetFillColor(0, 255, 255, 255);
   esat::DrawText(240, 16, "HI"); 
-  esat::DrawText(220, 32, "000000"); // Hi-Score placeholder
-
-  esat::DrawText(470, 16, "2UP");
-  esat::DrawText(436, 32, "000000"); // score 2up placeholder
+  
+  esat::DrawSetFillColor(208, 208, 0, 255);
+  esat::DrawText(10, 32, score_1up + 1); // score 1up placeholder
+  esat::DrawText(210, 32, hi_score + 1); // Hi-Score placeholder
+  esat::DrawText(413, 32, score_2up + 1); // score 2up placeholder
 }
 
 static void DrawHighlightRect(float x, float y, float w, float h, bool white) {
@@ -149,7 +157,7 @@ void MainMenu(int selected_player, int selected_control, bool highlight_white) {
   *(y_pos + 1) = 140.0f;
   *(y_pos + 2) = 170.0f;
   *(y_pos + 3) = 200.0f;
-  *(y_pos + 4) = 250.0f;
+  *(y_pos + 4) = 280.0f;
 
   const char** rows = (const char**)malloc(num_rows * sizeof(const char*));
   *(rows + 0) = "1  1 PLAYER GAME";
@@ -262,7 +270,7 @@ void ScreenSelector(float dt) {
       break;
     case MAIN_MENU: {
       menu_blink_timer += dt;
-      if (menu_blink_timer >= 0.5f) {
+      if (menu_blink_timer >= 0.4f) {
         menu_blink_timer = 0.0f;
         menu_highlight_white = !menu_highlight_white;
       }
@@ -288,6 +296,19 @@ void TestMousePosition(){
 
 
   
+}
+
+void Testers(){
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_0)) game.score_p1++;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_1)) game.score_p2++;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_2)) game.hi_socore++;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_3)) game.score_p1 = 0;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_4)) game.score_p2 = 0;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_5)) game.hi_socore = 0;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_6)) game.current_screen = IMAGE;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_7)) game.current_screen = MAIN_MENU;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_8)) game.current_screen = GAME_SCREEN;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_9)) timer = 0.0f;
 }
 
 
