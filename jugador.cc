@@ -582,7 +582,7 @@ void ColisionJugador(Jugador *player)
   player->config_colision.colision = COL::CreateColision(player->config_colision);
 }
 
-void ColisionPlayerPlatforma(Jugador &player)
+void ColisionPlayerPlatforma(Jugador &player, TPlatform* g_platforms)
 {
   for (int i = 0; i < kplatform_numbers; ++i)
   {
