@@ -108,8 +108,8 @@ void InstanciarSpritesItems(Sprites *punteroSprites)
   punteroSprites[2].sprite = esat::SpriteFromFile("SPRITES/ITEMS/diamante.png");
   punteroSprites[3].sprite = esat::SpriteFromFile("SPRITES/ITEMS/oro.png");
   punteroSprites[4].sprite = esat::SpriteFromFile("SPRITES/ITEMS/radioa.png");
-  punteroSprites[5].sprite = esat::SpriteFromFile("SPRITES/ITEMS/triangulo.png");
-  punteroSprites[0].sprite = esat::SpriteFromFile("SPRITES/ITEMS/fuel.png");
+  punteroSprites[0].sprite = esat::SpriteFromFile("SPRITES/ITEMS/triangulo.png");
+  punteroSprites[5].sprite = esat::SpriteFromFile("SPRITES/ITEMS/fuel.png");
 }
 
 void InstanciarPlayer(Jugador *player)
@@ -123,7 +123,7 @@ void InstanciarPlayer(Jugador *player)
   player->isMoving = false;
   player->isShooting = false;
   player->volando = false;
-  player->speed = 5.0f;
+  player->speed = 80.0f;
   player->mirandoDerecha = true;
   player->tiene_gasofa = false;
   player->muerto = false;
@@ -162,9 +162,10 @@ void InstaciarGasofa_Nave(COL::object *gasofa, COL::object *prueba_nave, Sprites
 }
 void InstanciarItems(ItemDrop *item, Sprites *punteroSprites)
 {
-  item->tipo = rand() % 5; // 0 1 2 3 4
+  item->tipo = rand() % 5; // 0 1 2 3 4                                                             
   item->cooldown = 5.0f;
   item->recogido = false;
+  item->item_config.position.y = kScreenHeight / 2;
   item->item_config.sprite = punteroSprites[item->tipo].sprite;
   item->item_config.width = esat::SpriteWidth(punteroSprites[0].sprite);
   item->item_config.height = esat::SpriteHeight(punteroSprites[0].sprite);
@@ -240,7 +241,7 @@ void CrearDisparos(Bala *bala, Jugador player)
 
 void ActualizarDisparos(Bala *bala, Jugador player)
 {
-  float duracion_bala = 3.0f;
+  float duracion_bala = 1.5f;
 
   for (int i = 0; i < 20; i++)
   {
@@ -385,7 +386,7 @@ void DibujarGasofa(COL::object gasofa, Sprites *punteroSprites)
 
   esat::DrawSetFillColor(255, 0, 255);
   esat::DrawSolidPath(puntos, 4);
-  esat::DrawSprite(punteroSprites[0].sprite, gasofa.position.x, gasofa.position.y);
+  esat::DrawSprite(punteroSprites[5].sprite, gasofa.position.x, gasofa.position.y);
 }
 // ! convertir gasofa a ItemDrop IMPORTANTE !!!!!!! y ahorrarse una funcion aqui
 void DibujarItems(ItemDrop item, Sprites *punteroSprites)
@@ -547,9 +548,10 @@ void ActualizarColisionesItems(Jugador *player, COL::object &gasofa, COL::object
 void LoopPickItems(Jugador player, ItemDrop *item, Sprites *sprites)
 {
   static float timer = 0.0f;
-  if (!item->recogido)
+  if (!item->recogido){
     GravedadItem(item->item_config);
-
+  }
+  
   if (COL::CheckColision(player.config_colision.colision, item->item_config.colision))
   {
     item->recogido = true;
