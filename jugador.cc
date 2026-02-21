@@ -14,13 +14,13 @@
 #include "colisiones.h"
 #include "interface.cc"
 
-//#include "audio.cc"
+// #include "audio.cc"
 #include <esat_extra/soloud/soloud.h>
-//!ESTO SE VA FUERA
+//! ESTO SE VA FUERA
 // #define spritewidth 34
 // #define spriteheight 50
 
-//extern SoLoud::Soloud Soloud;
+// extern SoLoud::Soloud Soloud;
 
 struct Sprites
 {
@@ -69,7 +69,7 @@ struct ItemDrop
   float cooldown;
 };
 
-//!LAS FUNCIONES DE MALLOC FUERA
+//! LAS FUNCIONES DE MALLOC FUERA
 // ________________________________
 // INSTANCIAR
 // ________________________________
@@ -114,7 +114,7 @@ void InstanciarSpritesItems(Sprites *punteroSprites)
 }
 
 void InstanciarPlayer(Jugador *player)
-{    
+{
   const int terrain_height = 16;
   player->spriteWidth = 34;
   player->spriteHeight = 50;
@@ -164,7 +164,7 @@ void InstaciarGasofa_Nave(COL::object *gasofa, COL::object *prueba_nave, Sprites
 }
 void InstanciarItems(ItemDrop *item, Sprites *punteroSprites)
 {
-  item->tipo = rand() % 5; // 0 1 2 3 4                                                             
+  item->tipo = rand() % 5; // 0 1 2 3 4
   item->cooldown = 5.0f;
   item->recogido = false;
   item->item_config.position.y = kScreenHeight / 2;
@@ -182,7 +182,7 @@ void CrearDisparos(Bala *bala, Jugador player)
   if (esat::IsSpecialKeyDown(esat::kSpecialKey_Space))
   {
     bool inactive_bullet_found = false;
-    //PlayAudio(shoot);
+    // PlayAudio(shoot);
     for (int i = 0; i < 20 && !inactive_bullet_found; i++)
     {
       if (!bala[i].activa)
@@ -288,30 +288,31 @@ void DibujarDisparos(Bala *bala)
 {
   for (int i = 0; i < 20; i++)
   {
-    if (bala[i].activa){
-        float punta_x = bala[i].pos.x;
-        float punta_y = bala[i].pos.y;
-        float dir = bala[i].dir.x;
+    if (bala[i].activa)
+    {
+      float punta_x = bala[i].pos.x;
+      float punta_y = bala[i].pos.y;
+      float dir = bala[i].dir.x;
 
-        float alto = 3.0f;
-        float espacio = 20.0f;
-        float largo_segmento = 18.0f;
+      float alto = 3.0f;
+      float espacio = 20.0f;
+      float largo_segmento = 18.0f;
 
-        float distancia = bala[i].longitud_actual;
+      float distancia = bala[i].longitud_actual;
 
-        if (distancia <= 0.0f)
+      if (distancia <= 0.0f)
         continue;
 
-        // Dibujar desde la punta hacia atras
-        for (float d = 0; d < distancia; d += espacio)
-        {
+      // Dibujar desde la punta hacia atras
+      for (float d = 0; d < distancia; d += espacio)
+      {
         float inicio = punta_x - dir * d;
 
         // gradiente
         float factor = 1.0f - (d / distancia);
 
         if (factor < 0.0f)
-            factor = 0.0f;
+          factor = 0.0f;
 
         // brillo cerca de la punta
         float brillo = powf(factor, 0.5f);
@@ -329,20 +330,20 @@ void DibujarDisparos(Bala *bala)
             inicio, punta_y + alto};
 
         esat::DrawSolidPath(segmento, 4);
-        }
+      }
 
-        // punta
-        esat::DrawSetFillColor(255, 255, 255);
+      // punta
+      esat::DrawSetFillColor(255, 255, 255);
 
-        float punta[8] = {
-            punta_x, punta_y,
-            punta_x - dir * 25.0f, punta_y,
-            punta_x - dir * 25.0f, punta_y + alto,
-            punta_x, punta_y + alto};
+      float punta[8] = {
+          punta_x, punta_y,
+          punta_x - dir * 25.0f, punta_y,
+          punta_x - dir * 25.0f, punta_y + alto,
+          punta_x, punta_y + alto};
 
-        esat::DrawSolidPath(punta, 4);
+      esat::DrawSolidPath(punta, 4);
     }
-    }
+  }
 }
 
 // ________________________________
@@ -550,10 +551,11 @@ void ActualizarColisionesItems(Jugador *player, COL::object &gasofa, COL::object
 void LoopPickItems(Jugador player, ItemDrop *item, Sprites *sprites)
 {
   static float timer = 0.0f;
-  if (!item->recogido){
+  if (!item->recogido)
+  {
     GravedadItem(item->item_config);
   }
-  
+
   if (COL::CheckColision(player.config_colision.colision, item->item_config.colision))
   {
     item->recogido = true;
@@ -580,7 +582,7 @@ void ColisionJugador(Jugador *player)
   player->config_colision.colision = COL::CreateColision(player->config_colision);
 }
 
-void ColisionPlayerPlatforma(Jugador &player)
+void ColisionPlayerPlatforma(Jugador &player, TPlatform* g_platforms)
 {
   for (int i = 0; i < kplatform_numbers; ++i)
   {
@@ -610,7 +612,7 @@ void ResetPlayer_OnDead(Jugador *player)
   static float timer = 0.0f;
   static float timer_invulnerable = 0.0f;
   player->colisiona = false;
-  //player->muerto = true;
+  // player->muerto = true;
   timer += delta_time;
   // si esta muerto no dibujar ni detectar inputs
   if (timer >= player->tiempo_aparicion)
@@ -624,11 +626,11 @@ void ResetPlayer_OnDead(Jugador *player)
   if (!player->muerto)
   {
     timer_invulnerable += delta_time;
-    player.colisiona = false;
+    player->colisiona = false;
     // no detectar colisiones con enemigos
     if (timer >= timer_invulnerable)
     {
-      player.colisiona = true;
+      player->colisiona = true;
       // empezar a detectar colisiones con enemigos
     }
   }

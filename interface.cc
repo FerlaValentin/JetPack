@@ -15,8 +15,8 @@
 #include "colisiones.h"
 
 // TODO(@jhony): Optimize this scripts
-extern const int KWindow_Width;
-extern const int KWindow_Height; 
+extern const int kScreenWidth;
+extern const int kScreenHeight; 
 
 enum TScreen {
   IMAGE,
@@ -49,9 +49,9 @@ struct TPlayerGame {
 // test
 const unsigned char kplatform_numbers = 3;
 
-esat::SpriteHandle* platform_sprite = nullptr;
-esat::SpriteHandle* loading_sprite = nullptr;
-TPlatform* g_platforms = nullptr;
+// esat::SpriteHandle* platform_sprite = nullptr;
+// esat::SpriteHandle* loading_sprite = nullptr;
+// TPlatform* g_platforms = nullptr;
 
 TGame game;
 
@@ -63,25 +63,20 @@ int menu_selection_control = 0;   /* 0 = keyboard, 1 = kempston */
 float menu_blink_timer = 0.0f;
 bool menu_highlight_white = true;
 
-void FreeMemory(){
-  free(g_platforms);
-  g_platforms = nullptr;
-  free(platform_sprite);
-  platform_sprite = nullptr;
-  free(loading_sprite);
-  loading_sprite = nullptr;
-}
 
-void InitPlatforms(TPlatform** g_platforms){
+void InitPlatforms(TPlatform** g_platforms, esat::SpriteHandle* platform_sprite){
+  printf("[DEBUG] call InitPlatforms\n");
   if (*g_platforms != nullptr) return;
-  int w = esat::SpriteWidth(*(platform_sprite));
-  int h = esat::SpriteHeight(*(platform_sprite));
+  int w = esat::SpriteWidth(*(platform_sprite + 0));
+  int h = esat::SpriteHeight(*(platform_sprite + 0));
   *g_platforms = (TPlatform*)malloc(kplatform_numbers * sizeof(TPlatform));
-  
+
   // (@jhony) TODO: fix this
-  **(g_platforms + 0) = {nullptr, w, h, 70.0f, 150.0f, 70.0f, 150.0f, 70.0f + w*6, 150.0f + h, 6};
-  **(g_platforms + 1) = {nullptr, w, h, 240.0f, 180.0f, 240.0f, 180.0f, 240.0f + w*4, 180.0f + h, 4};
-  **(g_platforms + 2) = {nullptr, w, h, 390.0f, 100.0f, 390.0f, 100.0f, 390.0f + w*6, 100.0f + h, 6};
+  (*g_platforms)[0] = { nullptr, w, h, 70.0f, 150.0f, 70.0f, 150.0f, 70.0f + w*6, 150.0f + h, 6 };
+  (*g_platforms)[1] = { nullptr, w, h, 240.0f, 180.0f, 240.0f, 180.0f, 240.0f + w*4, 180.0f + h, 4 };
+  (*g_platforms)[2] = { nullptr, w, h, 390.0f, 100.0f, 390.0f, 100.0f, 390.0f + w*6, 100.0f + h, 6 };
+  
+  printf("[DEBUG] end InitPlatforms\n");
 }
 
 void ReserveMemory(esat::SpriteHandle** platform_sprite){
@@ -98,25 +93,25 @@ void InitGameVariables(){
   game = {IMAGE,0,0,0,0};
 }
 
-void InitLoadingSprites(){
-  loading_sprite = (esat::SpriteHandle*)malloc(2 * sizeof(esat::SpriteHandle));
-  *(loading_sprite + 0) = esat::SpriteFromFile("assets/sprites/loader/jetpac_frame1.png");
-  *(loading_sprite + 1) = esat::SpriteFromFile("assets/sprites/loader/jetpac_frame2.png");
+void InitLoadingSprites(esat::SpriteHandle** loading_sprite){
+  *loading_sprite = (esat::SpriteHandle*)malloc(2 * sizeof(esat::SpriteHandle));
+  *(*loading_sprite + 0) = esat::SpriteFromFile("assets/sprites/loader/jetpac_frame1.png");
+  *(*loading_sprite + 1) = esat::SpriteFromFile("assets/sprites/loader/jetpac_frame2.png");
 }
 
 void InitPlatformSprites(esat::SpriteHandle** platform_sprite, TPlatform** g_platforms){
   ReserveMemory(platform_sprite);
 
-  **(platform_sprite + 0) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_1_2x.png"); // First platform_sprite
-  **(platform_sprite + 1) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_2_2x.png"); // Middle platform_sprite
-  **(platform_sprite + 2) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_3_2x.png"); // Last platform_sprite
+  *(*platform_sprite + 0) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_1_2x.png"); // First platform_sprite
+  *(*platform_sprite + 1) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_2_2x.png"); // Middle platform_sprite
+  *(*platform_sprite + 2) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_3_2x.png"); // Last platform_sprite
 
-  for (int i = 0; i < 4;  ++i){
-    if (**(platform_sprite + i) == nullptr){
+  for (int i = 0; i < 3;  ++i){
+    if (*(*platform_sprite + i) == nullptr){
       printf("Error: on sprite %d\n", i);
     }
   }
-  InitPlatforms(g_platforms);
+  InitPlatforms(g_platforms, *platform_sprite);
 }
 
 void LoadFonts(){
@@ -193,15 +188,15 @@ void MainMenu(int selected_player, int selected_control, bool highlight_white) {
   esat::DrawText(10, 360, "@1983 A.C.G. ALL RIGHTS RESERVED");
 }
 
-void GeneratePlatform(){ 
+void GeneratePlatform(TPlatform* g_platforms, esat::SpriteHandle* platform_sprite){ 
   if (g_platforms == nullptr) return;
-  int w = esat::SpriteWidth(*(platform_sprite));
-  int h = esat::SpriteHeight(*(platform_sprite));
+  int w = esat::SpriteWidth(*(platform_sprite + 0));
+  int h = esat::SpriteHeight(*(platform_sprite + 0));
 
   float* bg = (float*)malloc(8 * sizeof(float));
 
   for (int i = 0; i < kplatform_numbers; ++i){
-    TPlatform* p = g_platforms + i;
+    TPlatform* p = (g_platforms + i);
 
     *(bg + 0) = p->collision_platform.position.x;
     *(bg + 1) = p->collision_platform.position.y;
@@ -232,48 +227,49 @@ void GeneratePlatform(){
   free(bg);
 }
 
-void GenerateFloor(){
+void GenerateFloor(esat::SpriteHandle* platform_sprite){
+  if (platform_sprite == nullptr) return;
   float* floor = (float*)malloc(8 * sizeof(float));
-  float h = esat::SpriteHeight(*(platform_sprite));
+  float h = esat::SpriteHeight(*(platform_sprite + 0));
 
   *(floor + 0) = 0.0f;
-  *(floor + 1) = (float)(KWindow_Height - (int)h);
-  *(floor + 2) = (float)KWindow_Width;
-  *(floor + 3) = (float)(KWindow_Height - (int)h);
-  *(floor + 4) = (float)KWindow_Width;
-  *(floor + 5) = (float)KWindow_Height;
+  *(floor + 1) = (float)(kScreenHeight - (int)h);
+  *(floor + 2) = (float)kScreenWidth;
+  *(floor + 3) = (float)(kScreenHeight - (int)h);
+  *(floor + 4) = (float)kScreenWidth;
+  *(floor + 5) = (float)kScreenHeight;
   *(floor + 6) = 0.0f;
-  *(floor + 7) = (float)KWindow_Height;
+  *(floor + 7) = (float)kScreenHeight;
 
   esat::DrawSetStrokeColor(0, 0, 0, 0); // hide borders
   esat::DrawSetFillColor(208, 208, 0, 255);
   esat::DrawSolidPath(floor, 4);
 
-  for (int j = 0; j < KWindow_Width/esat::SpriteWidth(*(platform_sprite)); ++j){
-    esat::DrawSprite(*(platform_sprite + 0), j * esat::SpriteWidth(*(platform_sprite)), KWindow_Height - h);
+  for (int j = 0; j < kScreenWidth/esat::SpriteWidth(*(platform_sprite + 0)); ++j){
+    esat::DrawSprite(*(platform_sprite + 0), j * esat::SpriteWidth(*(platform_sprite + 0)), kScreenHeight - h);
   }
 
   free(floor);
 }
 
 // Basic game screen
-void GameScreen(){
+void GameScreen(TPlatform* g_platforms, esat::SpriteHandle* platform_sprite){
   DrawHeader();
-  GeneratePlatform();
-  GenerateFloor();
+  GeneratePlatform(g_platforms, platform_sprite);
+  GenerateFloor(platform_sprite);
 }
 
-void InitialImage(){
+void InitialImage(esat::SpriteHandle* loading_sprite){
   esat::DrawSprite(*(loading_sprite + 0), 0, 0);
 }
 
 // function to select the screen to show
-void ScreenSelector(float dt) {
+void ScreenSelector(float dt, TPlatform* g_platforms, esat::SpriteHandle* platform_sprite, esat::SpriteHandle* loading_sprite) {
   switch (game.current_screen) {
     case IMAGE:
       timer += dt;
       if (timer >= 5.0f) game.current_screen = MAIN_MENU;
-      InitialImage();
+      InitialImage(loading_sprite);
       break;
     case MAIN_MENU: {
       menu_blink_timer += dt;
@@ -290,7 +286,7 @@ void ScreenSelector(float dt) {
       break;
     }
     case GAME_SCREEN:
-      GameScreen();
+      GameScreen(g_platforms, platform_sprite);
       break;
     default:
       break;
