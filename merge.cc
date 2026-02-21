@@ -18,7 +18,6 @@ double delta_time;
 
 #include "jugador.cc"
 #include "nave.cc"
-#include "interface.cc"
 
 // FPS
 unsigned char fps = 25;
@@ -70,7 +69,7 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     InstanciarSpritesPlayer(*spritesPersonaje);
     InstanciarSpritesItems(*spritesItems);
     //!RECURRE A VARIABLES GLOBALES DE INTERFACE.CC
-    InitPlatformSprites(*platform_sprite, *g_platforms);
+    InitPlatformSprites(platform_sprite, g_platforms);
 
     //INSTANCIAR
     InstanciarBalas(*punteroBalas);

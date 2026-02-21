@@ -623,12 +623,12 @@ void ResetPlayer_OnDead(Jugador *player)
 
   if (!player->muerto)
   {
-    timer_invulnerable += delta_time
+    timer_invulnerable += delta_time;
     player.colisiona = false;
     // no detectar colisiones con enemigos
     if (timer >= timer_invulnerable)
     {
-      player.colisiona = true
+      player.colisiona = true;
       // empezar a detectar colisiones con enemigos
     }
   }
