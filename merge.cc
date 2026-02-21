@@ -18,6 +18,7 @@ double delta_time;
 
 #include "jugador.cc"
 #include "nave.cc"
+#include "interface.cc"
 
 // FPS
 unsigned char fps = 25;
@@ -51,7 +52,7 @@ void InitiateFrame(){
 
 void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Sprites **spritesItems, Jugador *player,
                  esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa, COL::object* gasofa,
-                COL::object* prueba_nave, ItemDrop* itemdrop){
+                COL::object* prueba_nave, ItemDrop* itemdrop, esat::SpriteHandle** platform_sprite, TPlatform** g_platforms){
     esat::WindowInit(kScreenWidth, kScreenHeight);
 	esat::WindowSetMouseVisibility(true);
 	srand((unsigned)time(nullptr));
@@ -69,7 +70,7 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     InstanciarSpritesPlayer(*spritesPersonaje);
     InstanciarSpritesItems(*spritesItems);
     //!RECURRE A VARIABLES GLOBALES DE INTERFACE.CC
-    //InitPlatformSprites();
+    InitPlatformSprites(*platform_sprite, *g_platforms);
 
     //INSTANCIAR
     InstanciarBalas(*punteroBalas);
@@ -97,13 +98,16 @@ void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, 
     ControlarLimitesPantalla(player, punteroBalas);
 
     // ! Colisiones
-    ColisionJugador(player); // Actualizar colider a player
+    if (player->colisiona)
+        ColisionJugador(player); // Actualizar colider a player
+    if (player->muerto)
+        ResetPlayer_OnDead(player);
+    
     ActualizarColisionesItems(player, gasofa, prueba_nave, *itemdrop);
     //!Meter aqui la nave
     LoopGasofa(*player, gasofa, prueba_nave, contador_gasofa, numero_max_gasofa);
     LoopPickItems(*player, itemdrop, spritesItems);
-    //GameScreen();
-    //ColisionPlayerPlatforma(*player);
+    ColisionPlayerPlatforma(*player);
 
     //!Cambiar también el tope de la altura para que no toque el HUD
     ControlarLimitesPantalla(player, punteroBalas);
@@ -114,9 +118,16 @@ void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, 
 void DrawAll(Sprites* spritesColores, Sprites* spritesPersonaje, Bala* punteroBalas, Jugador player, int frame, 
         esat::SpriteHandle nave1, esat::SpriteHandle nave2, esat::SpriteHandle nave3, esat::SpriteHandle rosa,
         int head_x, int head_y, int body_x, int body_y, int tail_x, int tail_y, COL::object gasofa, Sprites* spritesItems, ItemDrop itemdrop){
+    GameScreen();
     DibujarDisparos(punteroBalas);
-    DibujarColoresJugador(spritesColores, player, frame);
-    DibujarJugador(spritesPersonaje, player, frame);
+    if (!player.muerto) {
+        DibujarColoresJugador(spritesColores, player, frame);
+        DibujarJugador(spritesPersonaje, player, frame);
+    } else if (!player.colisiona){
+        DibujarColoresJugador(spritesColores, player, 0);
+        DibujarJugador(spritesPersonaje, player, frame);
+    }
+
     DibujarGasofa(gasofa, spritesItems);
     DibujarItems(itemdrop, spritesItems);
     DrawShip(nave1, nave2, nave3, rosa, head_x, head_y, body_x, body_y, tail_x, tail_y);
@@ -173,7 +184,20 @@ int esat::main(int argc, char **argv){
     COL::object prueba_nave;
     ItemDrop itemdrop;
 
-    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &nave1, &nave2, &nave3, &rosa, &gasofa, &prueba_nave, &itemdrop);
+    // plataformas
+    const unsigned char kplatform_numbers = 3;
+    esat::SpriteHandle* platform_sprite = nullptr;
+    esat::SpriteHandle* loading_sprite = nullptr;
+    TPlatform* g_platforms = nullptr;
+    TGame game;
+        // TODO: move top
+    float timer = 0;
+    int menu_selection_player = 0;   /* 0 = 1 player, 1 = 2 player */
+    int menu_selection_control = 0;   /* 0 = keyboard, 1 = kempston */
+    float menu_blink_timer = 0.0f;
+    bool menu_highlight_white = true;
+
+    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &nave1, &nave2, &nave3, &rosa, &gasofa, &prueba_nave, &itemdrop, &platform_sprite, &g_platforms);
 
     //Datos Nave
     int pink_x, pink_y;

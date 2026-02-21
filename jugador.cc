@@ -12,7 +12,7 @@
 #include <time.h>
 #include <math.h>
 #include "colisiones.h"
-//#include "interface.cc"
+#include "interface.cc"
 
 //#include "audio.cc"
 #include <esat_extra/soloud/soloud.h>
@@ -44,6 +44,7 @@ struct Jugador
   float tiempo_invulnerable;
   int spriteWidth;
   int spriteHeight;
+  bool colisiona;
 };
 struct Bala
 {
@@ -120,6 +121,7 @@ void InstanciarPlayer(Jugador *player)
   player->pos.x = kScreenWidth / 2;
   player->pos.y = kScreenHeight - player->spriteHeight - terrain_height;
   player->dir = {0, 0};
+  player->colisiona = false;
   player->isMoving = false;
   player->isShooting = false;
   player->volando = false;
@@ -578,7 +580,7 @@ void ColisionJugador(Jugador *player)
   player->config_colision.colision = COL::CreateColision(player->config_colision);
 }
 
-/*void ColisionPlayerPlatforma(Jugador &player)
+void ColisionPlayerPlatforma(Jugador &player)
 {
   for (int i = 0; i < kplatform_numbers; ++i)
   {
@@ -590,7 +592,7 @@ void ColisionJugador(Jugador *player)
           player.config_colision.colision.p2.y <= p->collision_platform.colision.p2.y)
       {
 
-        player.pos.y = p->collision_platform.position.y - (float)spriteheight;
+        player.pos.y = p->collision_platform.position.y - (float)player.spriteHeight;
         player.volando = false;
       }
       else if (player.config_colision.colision.p1.y <= p->collision_platform.colision.p2.y &&
@@ -601,12 +603,13 @@ void ColisionJugador(Jugador *player)
       }
     }
   }
-}*/
-void ResetPlayer_OnDead(Jugador *player, bool colision_player)
+}
+
+void ResetPlayer_OnDead(Jugador *player)
 {
   static float timer = 0.0f;
   static float timer_invulnerable = 0.0f;
-  player->muerto = true;
+  //player->muerto = true;
   timer += delta_time;
   // si esta muerto no dibujar ni detectar inputs
   if (timer >= player->tiempo_aparicion)
@@ -619,10 +622,12 @@ void ResetPlayer_OnDead(Jugador *player, bool colision_player)
 
   if (!player->muerto)
   {
-    timer_invulnerable += delta_time;
+    timer_invulnerable += delta_time
+    player.colisiona = false;
     // no detectar colisiones con enemigos
     if (timer >= timer_invulnerable)
     {
+      player.colisiona = true
       // empezar a detectar colisiones con enemigos
     }
   }
@@ -641,8 +646,6 @@ void ResetPlayer_OnDead(Jugador *player, bool colision_player)
 
   srand((unsigned)time(nullptr));
   last_time = esat::Time();
-
-  //InitPlatformSprites();
 
   // puntero a sprites
   Sprites *spritesColores = AsignarMemoriaSprites(4);

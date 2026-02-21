@@ -1,3 +1,19 @@
+// ESAT Libraries
+#include <esat/window.h>
+#include <esat/draw.h>
+#include <esat/sprite.h>
+#include <esat/input.h>
+#include <esat/time.h>
+
+// Standard libraries
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
+
+#include "colisiones.h"
+
 // TODO(@jhony): Optimize this scripts
 extern const int KWindow_Width;
 extern const int KWindow_Height; 
@@ -56,22 +72,22 @@ void FreeMemory(){
   loading_sprite = nullptr;
 }
 
-void InitPlatforms(){
-  if (g_platforms != nullptr) return;
+void InitPlatforms(TPlatform** g_platforms){
+  if (*g_platforms != nullptr) return;
   int w = esat::SpriteWidth(*(platform_sprite));
   int h = esat::SpriteHeight(*(platform_sprite));
-  g_platforms = (TPlatform*)malloc(kplatform_numbers * sizeof(TPlatform));
+  *g_platforms = (TPlatform*)malloc(kplatform_numbers * sizeof(TPlatform));
   
   // (@jhony) TODO: fix this
-  *(g_platforms + 0) = {nullptr, w, h, 70.0f, 150.0f, 70.0f, 150.0f, 70.0f + w*6, 150.0f + h, 6};
-  *(g_platforms + 1) = {nullptr, w, h, 240.0f, 180.0f, 240.0f, 180.0f, 240.0f + w*4, 180.0f + h, 4};
-  *(g_platforms + 2) = {nullptr, w, h, 390.0f, 100.0f, 390.0f, 100.0f, 390.0f + w*6, 100.0f + h, 6};
+  **(g_platforms + 0) = {nullptr, w, h, 70.0f, 150.0f, 70.0f, 150.0f, 70.0f + w*6, 150.0f + h, 6};
+  **(g_platforms + 1) = {nullptr, w, h, 240.0f, 180.0f, 240.0f, 180.0f, 240.0f + w*4, 180.0f + h, 4};
+  **(g_platforms + 2) = {nullptr, w, h, 390.0f, 100.0f, 390.0f, 100.0f, 390.0f + w*6, 100.0f + h, 6};
 }
 
-void ReserveMemory(){
+void ReserveMemory(esat::SpriteHandle** platform_sprite){
   printf("[DEBUG] sizeof(esat::SpriteHandle) %d\n", sizeof(esat::SpriteHandle));
-  platform_sprite = (esat::SpriteHandle*)malloc(4 * sizeof(esat::SpriteHandle));
-  if (platform_sprite == nullptr){
+  *platform_sprite = (esat::SpriteHandle*)malloc(4 * sizeof(esat::SpriteHandle));
+  if (*platform_sprite == nullptr){
     printf("Error: reserve memory\n");
   }else{
     printf("All ok\n");
@@ -88,19 +104,19 @@ void InitLoadingSprites(){
   *(loading_sprite + 1) = esat::SpriteFromFile("assets/sprites/loader/jetpac_frame2.png");
 }
 
-void InitPlatformSprites(){
-  ReserveMemory();
+void InitPlatformSprites(esat::SpriteHandle** platform_sprite, TPlatform** g_platforms){
+  ReserveMemory(platform_sprite);
 
-  *(platform_sprite + 0) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_1_2x.png"); // First platform_sprite
-  *(platform_sprite + 1) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_2_2x.png"); // Middle platform_sprite
-  *(platform_sprite + 2) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_3_2x.png"); // Last platform_sprite
+  **(platform_sprite + 0) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_1_2x.png"); // First platform_sprite
+  **(platform_sprite + 1) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_2_2x.png"); // Middle platform_sprite
+  **(platform_sprite + 2) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_3_2x.png"); // Last platform_sprite
 
   for (int i = 0; i < 4;  ++i){
-    if ((platform_sprite + i) == nullptr){
+    if (*(platform_sprite + i) == nullptr){
       printf("Error: on sprite %d\n", i);
     }
   }
-  InitPlatforms();
+  InitPlatforms(g_platforms);
 }
 
 void LoadFonts(){
