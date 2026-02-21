@@ -12,12 +12,15 @@
 #include <time.h>
 #include <math.h>
 
+const int kScreenWidth = 512;
+const int kScreenHeight = 384;
+double delta_time;
+
 #include "globalfunctions.h"
 #include "jugador.cc"
 #include "nave.cc"
 
 // FPS
-double delta_time;
 unsigned char fps = 25;
 double current_time;
 double last_time = 0;
@@ -36,7 +39,7 @@ void InitiateFrame(){
 }
 
 void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Jugador *player, esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa){
-    esat::WindowInit(GLO::kScreenWidth, GLO::kScreenHeight);
+    esat::WindowInit(kScreenWidth, kScreenHeight);
 	esat::WindowSetMouseVisibility(true);
 	srand((unsigned)time(nullptr));
 	last_time = esat::Time();
@@ -66,12 +69,12 @@ void GetInput(bool* moverLeft, bool* moverRight, bool* ascender, Bala* punteroBa
 
 void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, bool moverRight, int* frame,
             int* head_y, int* body_y, int* tail_y, int speed, bool rocket_started){
-    Ascender_Gravedad(player, ascender, delta_time);
-    ActualizarDisparos(punteroBalas, *player, delta_time);
-    LoopMoverJugador(moverLeft, moverRight, player, delta_time);
+    Ascender_Gravedad(player, ascender);
+    ActualizarDisparos(punteroBalas, *player);
+    LoopMoverJugador(moverLeft, moverRight, player);
     //!Cambiar también el tope de la altura para que no toque el HUD
     ControlarLimitesPantalla(player, punteroBalas);
-    *frame = ActualizarAnimacionJugador(*player, delta_time);
+    *frame = ActualizarAnimacionJugador(*player);
     MoverNave(head_y, body_y, tail_y, speed, delta_time, rocket_started);
 }
 
@@ -128,7 +131,7 @@ int esat::main(int argc, char **argv){
 
     //Datos Nave
     int pink_x, pink_y;
-    int tail_x = 420, tail_y = GLO::kScreenHeight - esat::SpriteHeight(nave3) - terrain_height;
+    int tail_x = 420, tail_y = kScreenHeight - esat::SpriteHeight(nave3) - terrain_height;
     int body_x = 420, body_y = tail_y - esat::SpriteHeight(nave3);
     int head_x = 420, head_y = body_y - esat::SpriteHeight(nave2);
     int speed = 1;

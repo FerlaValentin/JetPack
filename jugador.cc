@@ -12,7 +12,6 @@
 #include <time.h>
 #include <math.h>
 #include "colisiones.h"
-#include "globalfunctions.h"
 #define spritewidth 34
 #define spriteheight 50
 
@@ -104,8 +103,8 @@ void InstanciarSpritesPlayer(Sprites *punteroSprites)
 void InstanciarPlayer(Jugador *player)
 {
   const int terrain_height = 16;
-  player->pos.x = GLO::kScreenWidth / 2;
-  player->pos.y = GLO::kScreenHeight - spriteheight - terrain_height;
+  player->pos.x = kScreenWidth / 2;
+  player->pos.y = kScreenHeight - spriteheight - terrain_height;
   player->dir = {0, 0};
   player->isMoving = false;
   player->isShooting = false;
@@ -140,8 +139,8 @@ void InstanciarCubo(COL::object *cubo_prueba, Sprites punteroSprites)
   cubo_prueba->width = esat::SpriteWidth(punteroSprites.sprite);
   cubo_prueba->height = esat::SpriteHeight(punteroSprites.sprite);
 
-  cubo_prueba->position.x = GLO::kScreenWidth - spritewidth;
-  cubo_prueba->position.y = GLO::kScreenHeight - spriteheight;
+  cubo_prueba->position.x = kScreenWidth - spritewidth;
+  cubo_prueba->position.y = kScreenHeight - spriteheight;
 }
 
 // ________________________________
@@ -176,7 +175,7 @@ void CrearDisparos(Bala *bala, Jugador player)
   }
 }
 
-void ActualizarDisparos(Bala *bala, Jugador player, double delta_time)
+void ActualizarDisparos(Bala *bala, Jugador player)
 {
   float duracion_bala = 3.0f;
 
@@ -231,7 +230,7 @@ void DibujarDisparos(Bala *bala)
 // DIBUJADO
 // ________________________________
 
-int ActualizarAnimacionJugador(Jugador jugador, double delta_time)
+int ActualizarAnimacionJugador(Jugador jugador)
 {
   static int frame = 0;
   static float timer = 0.0f;
@@ -274,28 +273,28 @@ void ControlarLimitesPantalla(Jugador *player, Bala *bala)
 {
   const int terrain_height = 16;
   //! (funcion carlos)
-  if (player->pos.x > GLO::kScreenWidth)
+  if (player->pos.x > kScreenWidth)
     player->pos.x = -spritewidth;
   if (player->pos.x < -spritewidth)
-    player->pos.x = GLO::kScreenWidth;
-  if (player->pos.y >= GLO::kScreenHeight - terrain_height)
-    player->pos.y = GLO::kScreenHeight - (terrain_height + spriteheight);
+    player->pos.x = kScreenWidth;
+  if (player->pos.y >= kScreenHeight - terrain_height)
+    player->pos.y = kScreenHeight - (terrain_height + spriteheight);
   if (player->pos.y <= 0)
-    player->pos.y = GLO::kScreenHeight - spriteheight;
+    player->pos.y = kScreenHeight - spriteheight;
 
   for (int i = 0; i < 20; i++)
   {
-    if (bala[i].pos.x > GLO::kScreenWidth)
+    if (bala[i].pos.x > kScreenWidth)
       bala[i].pos.x = -50;
     if (bala[i].pos.x < -50) // lo que mida la bala, en este caso 50
-      bala[i].pos.x = GLO::kScreenWidth;
+      bala[i].pos.x = kScreenWidth;
   }
 }
 //_____________________________
 // JUGADOR
 //______________________________
 
-void MoverJugador(Jugador *jugador, bool moverLeft, bool moverRight, double delta_time)
+void MoverJugador(Jugador *jugador, bool moverLeft, bool moverRight)
 {
   if (!jugador->isMoving)
     return;
@@ -311,12 +310,12 @@ void MoverJugador(Jugador *jugador, bool moverLeft, bool moverRight, double delt
   }
 }
 
-void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player, double delta_time)
+void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player)
 {
   if (moverLeft || moverRight)
   {
     player->isMoving = true;
-    MoverJugador(player, moverLeft, moverRight, delta_time);
+    MoverJugador(player, moverLeft, moverRight);
     if (moverLeft)
       player->mirandoDerecha = false;
     else
@@ -326,10 +325,10 @@ void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player, double d
     player->isMoving = false;
 }
 
-void Ascender_Gravedad(Jugador *jugador, bool ascendiendo, double delta_time)
+void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
 {
   const int terrain_height = 16;
-  const float suelo = GLO::kScreenHeight - spriteheight - terrain_height;
+  const float suelo = kScreenHeight - spriteheight - terrain_height;
   if (ascendiendo)
     jugador->pos.y -= jugador->speed * delta_time;
   else
