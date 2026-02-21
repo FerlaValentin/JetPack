@@ -75,7 +75,7 @@ void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, 
     //!Cambiar también el tope de la altura para que no toque el HUD
     ControlarLimitesPantalla(player, punteroBalas);
     *frame = ActualizarAnimacionJugador(*player);
-    MoverNave(head_y, body_y, tail_y, speed, delta_time, rocket_started);
+    MoverNave(head_y, body_y, tail_y, speed, rocket_started);
 }
 
 void DrawAll(Sprites* spritesColores, Sprites* spritesPersonaje, Bala* punteroBalas, Jugador player, int frame, 

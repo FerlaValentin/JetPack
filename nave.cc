@@ -33,7 +33,7 @@ void DrawShip(esat::SpriteHandle nave1, esat::SpriteHandle nave2, esat::SpriteHa
   esat::DrawSprite(nave3, tail_x, tail_y);
 }
 
-void MoverNave(int* head_y, int* body_y, int* tail_y, int speed, double delta_time, bool rocket_started){
+void MoverNave(int* head_y, int* body_y, int* tail_y, int speed, bool rocket_started){
   if(rocket_started && *head_y >= 60){
     *head_y -= speed * delta_time;
     *body_y -= speed * delta_time;
