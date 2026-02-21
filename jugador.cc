@@ -16,13 +16,12 @@
 
 #include "audio.cc"
 #include <esat_extra/soloud/soloud.h>
+//!ESTO SE VA FUERA
 #define spritewidth 34
 #define spriteheight 50
-#define windowX 256 * 2
-#define windowY 192 * 2
 
-const int KWindow_Width = 256 * 2;
-const int KWindow_Height = 192 * 2;
+const int kScreenWidth = 256 * 2;
+const int kScreenHeight = 192 * 2;
 
 // FPS
 double delta_time;
@@ -75,6 +74,7 @@ struct ItemDrop
   float cooldown;
 };
 
+//!LAS FUNCIONES DE MALLOC FUERA
 Sprites *AsignarMemoriaSprites(int cantidad)
 {
   return (Sprites *)malloc(cantidad * sizeof(Sprites));
@@ -127,9 +127,10 @@ void InstanciarSpritesItems(Sprites *punteroSprites)
 }
 
 void InstanciarPlayer(Jugador *player)
-{
-  player->pos.x = windowX / 2;
-  player->pos.y = windowY - spriteheight;
+{    
+  const int terrain_height = 16;
+  player->pos.x = kScreenWidth / 2;
+  player->pos.y = kScreenHeight - spriteheight - terrain_height;
   player->dir = {0, 0};
   player->isMoving = false;
   player->isShooting = false;
@@ -161,11 +162,11 @@ void InstaciarGasofa_Nave(COL::object *gasofa, COL::object *prueba_nave, Sprites
   gasofa->width = esat::SpriteWidth(punteroSprites.sprite);
   gasofa->height = esat::SpriteHeight(punteroSprites.sprite);
 
-  gasofa->position.x = windowX - spritewidth;
-  gasofa->position.y = windowY - spriteheight;
+  gasofa->position.x = kScreenWidth - spritewidth;
+  gasofa->position.y = kScreenHeight - spriteheight;
 
-  prueba_nave->position.x = windowX - 100;
-  prueba_nave->position.y = windowY - 180;
+  prueba_nave->position.x = kScreenWidth - 100;
+  prueba_nave->position.y = kScreenHeight - 180;
   prueba_nave->width = 80;
   prueba_nave->height = 180;
 }
@@ -187,11 +188,13 @@ void CrearDisparos(Bala *bala, Jugador player)
 {
   if (esat::IsSpecialKeyDown(esat::kSpecialKey_Space))
   {
+    bool inactive_bullet_found = false;
     PlayAudio(shoot);
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < 20 && !inactive_bullet_found; i++)
     {
       if (!bala[i].activa)
       {
+        inactive_bullet_found = true;
         bala[i].activa = true;
         bala[i].pos.x = player.pos.x + (spritewidth / 2);
         bala[i].pos.y = player.pos.y + (spriteheight / 2);
@@ -223,7 +226,6 @@ void CrearDisparos(Bala *bala, Jugador player)
           bala[i].r = 0;
           bala[i].g = 255;
           bala[i].b = 0;
-          break;
         }
 
         // animacion bala
@@ -241,7 +243,6 @@ void CrearDisparos(Bala *bala, Jugador player)
           bala[i].dir = {-1, 0};
           bala[i].pos.x = player.pos.x;
         }
-        break;
       }
     }
   }
@@ -255,7 +256,7 @@ void ActualizarDisparos(Bala *bala, Jugador player)
   {
     if (bala[i].activa)
     {
-      bala[i].pos.x += bala[i].dir.x * bala[i].speed;
+      bala[i].pos.x += bala[i].dir.x * bala[i].speed * delta_time;
       //! si sale de pantalla (funcion carlos)
       bala[i].config_bala.position.x = bala[i].pos.x;
       bala[i].config_bala.position.y = bala[i].pos.y;
@@ -294,62 +295,61 @@ void DibujarDisparos(Bala *bala)
 {
   for (int i = 0; i < 20; i++)
   {
-    if (!bala[i].activa)
-      continue;
+    if (bala[i].activa){
+        float punta_x = bala[i].pos.x;
+        float punta_y = bala[i].pos.y;
+        float dir = bala[i].dir.x;
 
-    float punta_x = bala[i].pos.x;
-    float punta_y = bala[i].pos.y;
-    float dir = bala[i].dir.x;
+        float alto = 3.0f;
+        float espacio = 20.0f;
+        float largo_segmento = 18.0f;
 
-    float alto = 3.0f;
-    float espacio = 20.0f;
-    float largo_segmento = 18.0f;
+        float distancia = bala[i].longitud_actual;
 
-    float distancia = bala[i].longitud_actual;
+        if (distancia <= 0.0f)
+        continue;
 
-    if (distancia <= 0.0f)
-      continue;
+        // Dibujar desde la punta hacia atras
+        for (float d = 0; d < distancia; d += espacio)
+        {
+        float inicio = punta_x - dir * d;
 
-    // Dibujar desde la punta hacia atras
-    for (float d = 0; d < distancia; d += espacio)
-    {
-      float inicio = punta_x - dir * d;
+        // gradiente
+        float factor = 1.0f - (d / distancia);
 
-      // gradiente
-      float factor = 1.0f - (d / distancia);
+        if (factor < 0.0f)
+            factor = 0.0f;
 
-      if (factor < 0.0f)
-        factor = 0.0f;
+        // brillo cerca de la punta
+        float brillo = powf(factor, 0.5f);
 
-      // brillo cerca de la punta
-      float brillo = powf(factor, 0.5f);
+        unsigned char r = (unsigned char)(bala[i].r * brillo);
+        unsigned char g = (unsigned char)(bala[i].g * brillo);
+        unsigned char b = (unsigned char)(bala[i].b * brillo);
 
-      unsigned char r = (unsigned char)(bala[i].r * brillo);
-      unsigned char g = (unsigned char)(bala[i].g * brillo);
-      unsigned char b = (unsigned char)(bala[i].b * brillo);
+        esat::DrawSetFillColor(r, g, b);
 
-      esat::DrawSetFillColor(r, g, b);
+        float segmento[8] = {
+            inicio, punta_y,
+            inicio - dir * largo_segmento, punta_y,
+            inicio - dir * largo_segmento, punta_y + alto,
+            inicio, punta_y + alto};
 
-      float segmento[8] = {
-          inicio, punta_y,
-          inicio - dir * largo_segmento, punta_y,
-          inicio - dir * largo_segmento, punta_y + alto,
-          inicio, punta_y + alto};
+        esat::DrawSolidPath(segmento, 4);
+        }
 
-      esat::DrawSolidPath(segmento, 4);
+        // punta
+        esat::DrawSetFillColor(255, 255, 255);
+
+        float punta[8] = {
+            punta_x, punta_y,
+            punta_x - dir * 25.0f, punta_y,
+            punta_x - dir * 25.0f, punta_y + alto,
+            punta_x, punta_y + alto};
+
+        esat::DrawSolidPath(punta, 4);
     }
-
-    // punta
-    esat::DrawSetFillColor(255, 255, 255);
-
-    float punta[8] = {
-        punta_x, punta_y,
-        punta_x - dir * 25.0f, punta_y,
-        punta_x - dir * 25.0f, punta_y + alto,
-        punta_x, punta_y + alto};
-
-    esat::DrawSolidPath(punta, 4);
-  }
+    }
 }
 
 // ________________________________
@@ -415,21 +415,21 @@ void DibujarItems(ItemDrop item, Sprites *punteroSprites)
 void ControlarLimitesPantalla(Jugador *player, Bala *bala)
 {
   //! (funcion carlos)
-  if (player->pos.x > windowX)
+  if (player->pos.x > kScreenWidth)
     player->pos.x = -spritewidth;
   if (player->pos.x < -spritewidth)
-    player->pos.x = windowX;
-  if (player->pos.y >= windowY - spriteheight)
+    player->pos.x = kScreenWidth;
+  if (player->pos.y >= kScreenHeight - spriteheight)
     player->pos.y = 0;
   if (player->pos.y <= 0)
-    player->pos.y = windowY - spriteheight;
+    player->pos.y = kScreenHeight - spriteheight;
 
   for (int i = 0; i < 20; i++)
   {
-    if (bala[i].pos.x > windowX)
+    if (bala[i].pos.x > kScreenWidth)
       bala[i].pos.x = -50;
     if (bala[i].pos.x < -50) // lo que mida la bala, en este caso 50
-      bala[i].pos.x = windowX;
+      bala[i].pos.x = kScreenWidth;
   }
 }
 //_____________________________
@@ -443,12 +443,12 @@ void MoverJugador(Jugador *jugador, bool moverLeft, bool moverRight)
   if (moverLeft)
   {
     jugador->isMoving = true;
-    jugador->pos.x -= jugador->speed;
+    jugador->pos.x -= jugador->speed * delta_time;
   }
   if (moverRight)
   {
     jugador->isMoving = true;
-    jugador->pos.x += jugador->speed;
+    jugador->pos.x += jugador->speed * delta_time;
   }
 }
 
@@ -469,7 +469,7 @@ void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player)
 
 void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
 {
-  float suelo = windowY - spriteheight - 16;
+  float suelo = kScreenHeight - spriteheight - 16;
   if (ascendiendo)
     jugador->pos.y -= jugador->speed;
   else
@@ -491,8 +491,8 @@ void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
 
 void SpawnItem(COL::object &item)
 {
-  float x = rand() % (windowX - item.width);
-  float y = rand() % (windowY - item.height);
+  float x = rand() % (kScreenWidth - item.width);
+  float y = rand() % (kScreenHeight - item.height);
   item.position.x = x;
   item.position.y = y;
 }
@@ -501,9 +501,9 @@ void GravedadItem(COL::object &item)
 {
   float speed = 5.0f;
   item.position.y += speed;
-  if (item.position.y + 32 >= windowY - 16)
+  if (item.position.y + 32 >= kScreenHeight - 16)
   {
-    item.position.y = windowY - 16 - 32;
+    item.position.y = kScreenHeight - 16 - 32;
   }
 }
 
@@ -620,8 +620,8 @@ void ResetPlayer_OnDead(Jugador *player, bool colision_player)
   if (timer >= player->tiempo_aparicion)
   {
     timer = 0.0f;
-    player->pos.x = windowX / 2;
-    player->pos.y = windowY - 16;
+    player->pos.x = kScreenWidth / 2;
+    player->pos.y = kScreenHeight - 16;
     player->muerto = false;
   }
 
@@ -644,7 +644,7 @@ void ResetPlayer_OnDead(Jugador *player, bool colision_player)
 int esat::main(int argc, char **argv)
 {
   AudioInit();
-  esat::WindowInit(windowX, windowY);
+  esat::WindowInit(kScreenWidth, kScreenHeight);
   esat::WindowSetMouseVisibility(true);
 
   srand((unsigned)time(nullptr));

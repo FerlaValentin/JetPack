@@ -17,7 +17,7 @@ const int kScreenHeight = 384;
 double delta_time;
 
 #include "globalfunctions.h"
-#include "jugador_old.cc"
+#include "jugador.cc"
 #include "nave.cc"
 
 // FPS
@@ -38,25 +38,28 @@ void InitiateFrame(){
     esat::DrawClear(0,0,0);
 }
 
-void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Jugador *player, esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa){
+void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Sprites **spritesItems, Jugador *player, esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa){
     esat::WindowInit(kScreenWidth, kScreenHeight);
 	esat::WindowSetMouseVisibility(true);
 	srand((unsigned)time(nullptr));
 	last_time = esat::Time();
 
     //MALLOCS
-    *spritesColores = (Sprites*)GLO::AllocateMemory(4, sizeof(Sprites));
-    *spritesPersonaje = (Sprites*)GLO::AllocateMemory(16, sizeof(Sprites));
-    *punteroBalas = (Bala*)GLO::AllocateMemory(20, sizeof(Bala));
+    *spritesColores = (Sprites*)malloc(4 * sizeof(Sprites));
+    *spritesPersonaje = (Sprites*)malloc(16 * sizeof(Sprites));
+    *punteroBalas = (Bala*)malloc(20 * sizeof(Bala));
+    *spritesItems = (Sprites*)malloc(6 * sizeof(Sprites));
 
     //SPRITES
     LoadShipSprites(nave1, nave2, nave3, rosa);
     InstanciarSpritesColores(*spritesColores);
     InstanciarSpritesPlayer(*spritesPersonaje);
+    InitPlatformSprites();
 
     //INSTANCIAR
     InstanciarBalas(*punteroBalas);
     InstanciarPlayer(player);
+    AudioInit();
 }
 
 void GetInput(bool* moverLeft, bool* moverRight, bool* ascender, Bala* punteroBalas, Jugador player, bool* rocket_started){
@@ -68,10 +71,22 @@ void GetInput(bool* moverLeft, bool* moverRight, bool* ascender, Bala* punteroBa
 }
 
 void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, bool moverRight, int* frame,
-            int* head_y, int* body_y, int* tail_y, int speed, bool rocket_started){
+            int* head_y, int* body_y, int* tail_y, int speed, bool rocket_started, COL::object gasofa, COL::object prueba_nave, ItemDrop itemdrop, int contador_gasofa, int numero_max_gasofa, Sprites *spritesItems) {
+                
     Ascender_Gravedad(player, ascender);
+    CrearDisparos(punteroBalas, *player);
     ActualizarDisparos(punteroBalas, *player);
     LoopMoverJugador(moverLeft, moverRight, player);
+    ControlarLimitesPantalla(player, punteroBalas);
+
+    // ! Colisiones
+    ColisionJugador(player); // Actualizar colider a player
+    ActualizarColisionesItems(player, gasofa, prueba_nave, itemdrop);
+    LoopGasofa(*player, gasofa, prueba_nave, contador_gasofa, numero_max_gasofa);
+    LoopPickItems(*player, &itemdrop, spritesItems);
+    GameScreen();
+    ColisionPlayerPlatforma(*player);
+
     //!Cambiar también el tope de la altura para que no toque el HUD
     ControlarLimitesPantalla(player, punteroBalas);
     *frame = ActualizarAnimacionJugador(*player);
@@ -80,10 +95,13 @@ void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, 
 
 void DrawAll(Sprites* spritesColores, Sprites* spritesPersonaje, Bala* punteroBalas, Jugador player, int frame, 
         esat::SpriteHandle nave1, esat::SpriteHandle nave2, esat::SpriteHandle nave3, esat::SpriteHandle rosa,
-        int head_x, int head_y, int body_x, int body_y, int tail_x, int tail_y){
+        int head_x, int head_y, int body_x, int body_y, int tail_x, int tail_y, COL::object gasofa, Sprites* spritesItems, ItemDrop itemdrop){
+    int frame = ActualizarAnimacionJugador(player);
+    DibujarDisparos(punteroBalas);
     DibujarColoresJugador(spritesColores, player, frame);
     DibujarJugador(spritesPersonaje, player, frame);
-    DibujarDisparos(punteroBalas);
+    DibujarGasofa(gasofa, spritesItems);
+    DibujarItems(itemdrop, spritesItems);
     DrawShip(nave1, nave2, nave3, rosa, head_x, head_y, body_x, body_y, tail_x, tail_y);
 }
 
@@ -119,15 +137,15 @@ void FreeAll(Sprites **spritesColores, Sprites **spritesPersonaje, esat::SpriteH
 }
 
 int esat::main(int argc, char **argv){
-    const int terrain_height = 16;
-    int frame;
+    const int terrain_height = 16, numero_max_gasofa = 3;
+    int frame, contador_gasofa = 0;
     bool moverLeft, moverRight, ascender;
-    Sprites *spritesColores = nullptr, *spritesPersonaje = nullptr;
+    Sprites *spritesColores = nullptr, *spritesPersonaje = nullptr, *spritesItems = nullptr;
     esat::SpriteHandle nave1, nave2, nave3, rosa;
     Bala *punteroBalas = nullptr;
     Jugador player;
 
-    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &player, &nave1, &nave2, &nave3, &rosa);
+    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &nave1, &nave2, &nave3, &rosa);
 
     //Datos Nave
     int pink_x, pink_y;
