@@ -121,7 +121,7 @@ void InstanciarPlayer(Jugador *player)
   player->pos.x = kScreenWidth / 2;
   player->pos.y = kScreenHeight - player->spriteHeight - terrain_height;
   player->dir = {0, 0};
-  player->colisiona = false;
+  player->colisiona = true;
   player->isMoving = false;
   player->isShooting = false;
   player->volando = false;
@@ -609,6 +609,7 @@ void ResetPlayer_OnDead(Jugador *player)
 {
   static float timer = 0.0f;
   static float timer_invulnerable = 0.0f;
+  player->colisiona = false;
   //player->muerto = true;
   timer += delta_time;
   // si esta muerto no dibujar ni detectar inputs

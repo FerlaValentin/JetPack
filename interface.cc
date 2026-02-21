@@ -112,7 +112,7 @@ void InitPlatformSprites(esat::SpriteHandle** platform_sprite, TPlatform** g_pla
   **(platform_sprite + 2) = esat::SpriteFromFile("./SPRITES/TERRENO/terreno_3_2x.png"); // Last platform_sprite
 
   for (int i = 0; i < 4;  ++i){
-    if (*(platform_sprite + i) == nullptr){
+    if (**(platform_sprite + i) == nullptr){
       printf("Error: on sprite %d\n", i);
     }
   }
