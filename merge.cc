@@ -17,7 +17,7 @@ const int kScreenHeight = 384;
 double delta_time;
 
 #include "globalfunctions.h"
-#include "jugador.cc"
+#include "jugador_old.cc"
 #include "nave.cc"
 
 // FPS
