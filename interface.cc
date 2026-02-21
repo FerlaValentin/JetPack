@@ -1,5 +1,4 @@
 // TODO(@jhony): Optimize this scripts
-#include "globalfunctions.h"
 extern const int KWindow_Width;
 extern const int KWindow_Height; 
 

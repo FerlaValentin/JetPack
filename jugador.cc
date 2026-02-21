@@ -12,23 +12,15 @@
 #include <time.h>
 #include <math.h>
 #include "colisiones.h"
-#include "interface.cc"
+//#include "interface.cc"
 
-#include "audio.cc"
+//#include "audio.cc"
 #include <esat_extra/soloud/soloud.h>
 //!ESTO SE VA FUERA
-#define spritewidth 34
-#define spriteheight 50
+// #define spritewidth 34
+// #define spriteheight 50
 
-const int kScreenWidth = 256 * 2;
-const int kScreenHeight = 192 * 2;
-
-// FPS
-double delta_time;
-unsigned char fps = 25;
-double current_time;
-double last_time;
-extern SoLoud::Soloud Soloud;
+//extern SoLoud::Soloud Soloud;
 
 struct Sprites
 {
@@ -50,6 +42,8 @@ struct Jugador
   bool muerto;
   float tiempo_aparicion;
   float tiempo_invulnerable;
+  int spriteWidth;
+  int spriteHeight;
 };
 struct Bala
 {
@@ -75,14 +69,6 @@ struct ItemDrop
 };
 
 //!LAS FUNCIONES DE MALLOC FUERA
-Sprites *AsignarMemoriaSprites(int cantidad)
-{
-  return (Sprites *)malloc(cantidad * sizeof(Sprites));
-}
-Bala *AsignarMemoriaBalas(int cantidad)
-{
-  return (Bala *)malloc(cantidad * sizeof(Bala));
-}
 // ________________________________
 // INSTANCIAR
 // ________________________________
@@ -129,8 +115,10 @@ void InstanciarSpritesItems(Sprites *punteroSprites)
 void InstanciarPlayer(Jugador *player)
 {    
   const int terrain_height = 16;
+  player->spriteWidth = 34;
+  player->spriteHeight = 50;
   player->pos.x = kScreenWidth / 2;
-  player->pos.y = kScreenHeight - spriteheight - terrain_height;
+  player->pos.y = kScreenHeight - player->spriteHeight - terrain_height;
   player->dir = {0, 0};
   player->isMoving = false;
   player->isShooting = false;
@@ -142,8 +130,8 @@ void InstanciarPlayer(Jugador *player)
   player->tiempo_aparicion = 5.0f;
   player->tiempo_invulnerable = 3.0f;
 
-  player->config_colision.width = spritewidth;
-  player->config_colision.height = spriteheight;
+  player->config_colision.width = player->spriteWidth;
+  player->config_colision.height = player->spriteHeight;
 }
 
 void InstanciarBalas(Bala *bala)
@@ -158,6 +146,8 @@ void InstanciarBalas(Bala *bala)
 
 void InstaciarGasofa_Nave(COL::object *gasofa, COL::object *prueba_nave, Sprites punteroSprites)
 {
+  int spritewidth = 34;
+  int spriteheight = 50;
   gasofa->sprite = punteroSprites.sprite;
   gasofa->width = esat::SpriteWidth(punteroSprites.sprite);
   gasofa->height = esat::SpriteHeight(punteroSprites.sprite);
@@ -189,16 +179,16 @@ void CrearDisparos(Bala *bala, Jugador player)
   if (esat::IsSpecialKeyDown(esat::kSpecialKey_Space))
   {
     bool inactive_bullet_found = false;
-    PlayAudio(shoot);
+    //PlayAudio(shoot);
     for (int i = 0; i < 20 && !inactive_bullet_found; i++)
     {
       if (!bala[i].activa)
       {
         inactive_bullet_found = true;
         bala[i].activa = true;
-        bala[i].pos.x = player.pos.x + (spritewidth / 2);
-        bala[i].pos.y = player.pos.y + (spriteheight / 2);
-        bala[i].speed = 16.0f;
+        bala[i].pos.x = player.pos.x + (player.spriteWidth / 2);
+        bala[i].pos.y = player.pos.y + (player.spriteHeight / 2);
+        bala[i].speed = 400.0f;
         bala[i].tiempo_vida = 0.0f;
 
         int tipo = rand() % 4;
@@ -236,7 +226,7 @@ void CrearDisparos(Bala *bala, Jugador player)
         if (player.mirandoDerecha)
         {
           bala[i].dir = {1, 0};
-          bala[i].pos.x = player.pos.x + spritewidth;
+          bala[i].pos.x = player.pos.x + player.spriteWidth;
         }
         else
         {
@@ -416,13 +406,13 @@ void ControlarLimitesPantalla(Jugador *player, Bala *bala)
 {
   //! (funcion carlos)
   if (player->pos.x > kScreenWidth)
-    player->pos.x = -spritewidth;
-  if (player->pos.x < -spritewidth)
+    player->pos.x = -player->spriteWidth;
+  if (player->pos.x < -player->spriteWidth)
     player->pos.x = kScreenWidth;
-  if (player->pos.y >= kScreenHeight - spriteheight)
+  if (player->pos.y >= kScreenHeight - player->spriteHeight)
     player->pos.y = 0;
   if (player->pos.y <= 0)
-    player->pos.y = kScreenHeight - spriteheight;
+    player->pos.y = kScreenHeight - player->spriteHeight;
 
   for (int i = 0; i < 20; i++)
   {
@@ -469,7 +459,7 @@ void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player)
 
 void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
 {
-  float suelo = kScreenHeight - spriteheight - 16;
+  float suelo = kScreenHeight - jugador->spriteHeight - 16;
   if (ascendiendo)
     jugador->pos.y -= jugador->speed;
   else
@@ -517,8 +507,8 @@ void CambiarTipoItem(ItemDrop *item, Sprites *sprites)
 
 void UpdateGasofaPosition(Jugador player, COL::object &gasofa)
 {
-  gasofa.position.x = player.pos.x + spritewidth / 2;
-  gasofa.position.y = player.pos.y + spriteheight / 2;
+  gasofa.position.x = player.pos.x + player.spriteWidth / 2;
+  gasofa.position.y = player.pos.y + player.spriteHeight / 2;
 }
 
 void LoopGasofa(Jugador &player, COL::object &gasofa, COL::object prueba_nave, int &contador_gasofa, int &numero_max_gasofa)
@@ -586,7 +576,7 @@ void ColisionJugador(Jugador *player)
   player->config_colision.colision = COL::CreateColision(player->config_colision);
 }
 
-void ColisionPlayerPlatforma(Jugador &player)
+/*void ColisionPlayerPlatforma(Jugador &player)
 {
   for (int i = 0; i < kplatform_numbers; ++i)
   {
@@ -609,7 +599,7 @@ void ColisionPlayerPlatforma(Jugador &player)
       }
     }
   }
-}
+}*/
 void ResetPlayer_OnDead(Jugador *player, bool colision_player)
 {
   static float timer = 0.0f;
@@ -641,16 +631,16 @@ void ResetPlayer_OnDead(Jugador *player, bool colision_player)
 //   esat::DrawSprite(punteroSprites.sprite, cubo.position.x, cubo.position.y);
 // }  COL::SHOWCOLISION
 
-int esat::main(int argc, char **argv)
+/*int esat::main(int argc, char **argv)
 {
-  AudioInit();
+  //AudioInit();
   esat::WindowInit(kScreenWidth, kScreenHeight);
   esat::WindowSetMouseVisibility(true);
 
   srand((unsigned)time(nullptr));
   last_time = esat::Time();
 
-  InitPlatformSprites();
+  //InitPlatformSprites();
 
   // puntero a sprites
   Sprites *spritesColores = AsignarMemoriaSprites(4);
@@ -703,8 +693,8 @@ int esat::main(int argc, char **argv)
     ActualizarColisionesItems(&player, gasofa, prueba_nave, itemdrop);
     LoopGasofa(player, gasofa, prueba_nave, contador_gasofa, numero_max_gasofa);
     LoopPickItems(player, &itemdrop, spritesItems);
-    GameScreen();
-    ColisionPlayerPlatforma(player);
+    //GameScreen();
+    //ColisionPlayerPlatforma(player);
     // ColisionDisparos();
 
     // Animaciones Dibujado
@@ -728,8 +718,8 @@ int esat::main(int argc, char **argv)
     } while ((current_time - last_time) <= 1000.0 / fps);
     esat::WindowFrame();
   }
-  FreeAudio();
+  //FreeAudio();
   // Destroy window
   esat::WindowDestroy();
   return 0;
-}
+}*/

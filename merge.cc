@@ -16,7 +16,6 @@ const int kScreenWidth = 512;
 const int kScreenHeight = 384;
 double delta_time;
 
-#include "globalfunctions.h"
 #include "jugador.cc"
 #include "nave.cc"
 
@@ -24,6 +23,23 @@ double delta_time;
 unsigned char fps = 25;
 double current_time;
 double last_time = 0;
+
+/*struct PlayerVariables
+{
+    Jugador player;
+    bool ascender;
+    Bala punteroBalas;
+    bool moverLeft;
+    bool moverRight;
+    int frame;
+};
+
+ (Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, bool moverRight, int* frame,
+            int* head_y, int* body_y, int* tail_y, int speed, bool rocket_started, COL::object gasofa, COL::object prueba_nave, ItemDrop itemdrop, int contador_gasofa, int numero_max_gasofa, Sprites *spritesItems)*/
+
+
+
+
 
 void InitiateFrame(){
     // Calculate time elapsed since the last frame
@@ -38,7 +54,9 @@ void InitiateFrame(){
     esat::DrawClear(0,0,0);
 }
 
-void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Sprites **spritesItems, Jugador *player, esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa){
+void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Sprites **spritesItems, Jugador *player,
+                 esat::SpriteHandle* nave1, esat::SpriteHandle* nave2, esat::SpriteHandle* nave3, esat::SpriteHandle* rosa, COL::object* gasofa,
+                COL::object* prueba_nave, ItemDrop* itemdrop){
     esat::WindowInit(kScreenWidth, kScreenHeight);
 	esat::WindowSetMouseVisibility(true);
 	srand((unsigned)time(nullptr));
@@ -54,12 +72,17 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     LoadShipSprites(nave1, nave2, nave3, rosa);
     InstanciarSpritesColores(*spritesColores);
     InstanciarSpritesPlayer(*spritesPersonaje);
-    InitPlatformSprites();
+    InstanciarSpritesItems(*spritesItems);
+    //!RECURRE A VARIABLES GLOBALES DE INTERFACE.CC
+    //InitPlatformSprites();
 
     //INSTANCIAR
     InstanciarBalas(*punteroBalas);
     InstanciarPlayer(player);
-    AudioInit();
+    //!HAY QUE SUSTITUIR PRUEBA_NAVE POR LA NAVE? CREO QUE LA FUNCION INSTANCIA LA NAVE TAMBIEN. IGUAL HAY QUE CAMBIARLO
+    InstaciarGasofa_Nave(gasofa, prueba_nave, *spritesItems[0]);
+    //AudioInit();
+    InstanciarItems(itemdrop, *spritesItems);
 }
 
 void GetInput(bool* moverLeft, bool* moverRight, bool* ascender, Bala* punteroBalas, Jugador player, bool* rocket_started){
@@ -74,7 +97,6 @@ void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, 
             int* head_y, int* body_y, int* tail_y, int speed, bool rocket_started, COL::object gasofa, COL::object prueba_nave, ItemDrop itemdrop, int contador_gasofa, int numero_max_gasofa, Sprites *spritesItems) {
                 
     Ascender_Gravedad(player, ascender);
-    CrearDisparos(punteroBalas, *player);
     ActualizarDisparos(punteroBalas, *player);
     LoopMoverJugador(moverLeft, moverRight, player);
     ControlarLimitesPantalla(player, punteroBalas);
@@ -82,10 +104,11 @@ void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, 
     // ! Colisiones
     ColisionJugador(player); // Actualizar colider a player
     ActualizarColisionesItems(player, gasofa, prueba_nave, itemdrop);
+    //!Meter aqui la nave
     LoopGasofa(*player, gasofa, prueba_nave, contador_gasofa, numero_max_gasofa);
     LoopPickItems(*player, &itemdrop, spritesItems);
-    GameScreen();
-    ColisionPlayerPlatforma(*player);
+    //GameScreen();
+    //ColisionPlayerPlatforma(*player);
 
     //!Cambiar también el tope de la altura para que no toque el HUD
     ControlarLimitesPantalla(player, punteroBalas);
@@ -96,7 +119,6 @@ void Update(Jugador* player, bool ascender, Bala* punteroBalas, bool moverLeft, 
 void DrawAll(Sprites* spritesColores, Sprites* spritesPersonaje, Bala* punteroBalas, Jugador player, int frame, 
         esat::SpriteHandle nave1, esat::SpriteHandle nave2, esat::SpriteHandle nave3, esat::SpriteHandle rosa,
         int head_x, int head_y, int body_x, int body_y, int tail_x, int tail_y, COL::object gasofa, Sprites* spritesItems, ItemDrop itemdrop){
-    int frame = ActualizarAnimacionJugador(player);
     DibujarDisparos(punteroBalas);
     DibujarColoresJugador(spritesColores, player, frame);
     DibujarJugador(spritesPersonaje, player, frame);
@@ -144,8 +166,11 @@ int esat::main(int argc, char **argv){
     esat::SpriteHandle nave1, nave2, nave3, rosa;
     Bala *punteroBalas = nullptr;
     Jugador player;
+    COL::object gasofa;
+    COL::object prueba_nave;
+    ItemDrop itemdrop;
 
-    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &nave1, &nave2, &nave3, &rosa);
+    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &nave1, &nave2, &nave3, &rosa, &gasofa, &prueba_nave, &itemdrop);
 
     //Datos Nave
     int pink_x, pink_y;
@@ -160,9 +185,9 @@ int esat::main(int argc, char **argv){
         InitiateFrame();
 
         GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, player, &rocket_started);
-        Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame, &head_y, &body_y, &tail_y, speed, rocket_started);
+        Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame, &head_y, &body_y, &tail_y, speed, rocket_started, gasofa, prueba_nave, itemdrop, contador_gasofa, numero_max_gasofa, spritesItems);
         DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, nave1, nave2, nave3, rosa, head_x, head_y,
-                body_x, body_y, tail_x, tail_y);
+                body_x, body_y, tail_x, tail_y, gasofa, spritesItems, itemdrop);
         FinishFrame();
     }
 

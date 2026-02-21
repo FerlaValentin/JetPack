@@ -1,3 +1,5 @@
+#pragma once
+
 // ESAT Libraries
 #include <esat/window.h>
 #include <esat/draw.h>
