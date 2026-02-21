@@ -461,9 +461,9 @@ void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
 {
   float suelo = kScreenHeight - jugador->spriteHeight - 16;
   if (ascendiendo)
-    jugador->pos.y -= jugador->speed;
+    jugador->pos.y -= jugador->speed * delta_time;
   else
-    jugador->pos.y += jugador->speed;
+    jugador->pos.y += jugador->speed * delta_time;
 
   if (jugador->pos.y >= suelo)
   {
