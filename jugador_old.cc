@@ -11,7 +11,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "colisiones.h"
+#include "colisiones_old.h"
 #define spritewidth 34
 #define spriteheight 50
 
