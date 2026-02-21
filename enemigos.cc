@@ -47,7 +47,9 @@ namespace ENE{
         COL::vec2 speed;
         EnemyType type;
         ColorType Color;
+        int count;
         bool active;
+        COL::colision col;
     };
 
     struct EnemyManager{
@@ -81,9 +83,9 @@ namespace ENE{
 
         char* paths[] = {
         "SPRITES/ENEMIGOS/enemigo1_1_2x.png", "SPRITES/ENEMIGOS/enemigo2_1_2x.png",
-        "SPRITES/ENEMIGOS/enemigo3_1_2x.png", "SPRITES/ENEMIGOS/enemigo4_2x.png",
-        "SPRITES/ENEMIGOS/enemigo5_2x.png",   "SPRITES/ENEMIGOS/enemigo6_2x.png",
-        "SPRITES/ENEMIGOS/enemigo7_2x.png",   "SPRITES/ENEMIGOS/enemigo8_2x.png"
+        "SPRITES/ENEMIGOS/enemigo3_1_2x.png", "SPRITES/ENEMIGOS/enemigo7_2x.png",
+        "SPRITES/ENEMIGOS/enemigo4_2x.png",   "SPRITES/ENEMIGOS/enemigo5_2x.png",
+        "SPRITES/ENEMIGOS/enemigo6_2x.png",   "SPRITES/ENEMIGOS/enemigo8_2x.png"
         };
 
         for(int i=0;i<KTypeCount;i++){
@@ -115,35 +117,60 @@ namespace ENE{
     }
 
     void SpeedEnemies(Enemy *e){
-        float Value = (float)(rand() % 1 + 1);
+
+        float speedX = ((float)rand() / (float)RAND_MAX) + 0.5f;
+        float speedY = ((float)rand() / (float)RAND_MAX) + 0.5f;
+
+        if(rand() % 2 == 0) speedX *= -1;
+        if(rand() % 2 == 0) speedY *= -1;
+
         switch(e->type){
             case KMeteorites:
                 if(rand()%2 == 1){
-                    e->speed={Value,0.3}; 
+                    e->speed={speedX,0.3}; 
                 }else{
-                    e->speed={Value,0};   
+                    e->speed={speedX,0};   
                 }
                 break;
 
             case KFurballs:
+                e->speed={speedX,speedY};
                 break;
 
             case KBubbles:
+                e->speed={speedX,speedY};
                 break;
 
             case KDarts:
+                if(rand()%2 == 1){
+                    e->speed={speedX,0.3}; 
+                }else{
+                    e->speed={speedX,0};   
+                }
                 break;
 
             case KJets:
+                if(speedX < 0){
+                    e->speed={0,speedY};
+                }else{
+                    e->speed={0,speedY};
+                }
                 break;
 
             case KUfo:
+                e->speed={speedX,speedY};
                 break;
 
             case KFlower:
+                e->speed={speedX,speedY};
                 break;
 
             case KAlien:
+                if(speedY < 0){
+                    e->speed={speedX,speedY};
+                }else{
+                    e->speed={speedX,-speedY};
+                }
                 break;
         }
     }
@@ -163,13 +190,62 @@ namespace ENE{
     }
     
     void EnemiesAI(Enemy *e, COL::colision ecol){
-        if (COL::WindowsColision(ecol,COL::right,100)){e->position.x=-32;}
-        if (COL::WindowsColision(ecol,COL::left,100) && !e->type == KMeteorites){e->position.x=799;}
-        if (COL::WindowsColision(ecol,COL::down,0) && e->type == KMeteorites){
-            e->active=false;
-            ExplodeAt(e->position.x,e->position.y, e->Color);
-            SpawnEnemy(enemies,KMeteorites,-32,rand()%360);
-        }       
+        if(e->type == KMeteorites || e->type == KDarts){
+            if (COL::WindowsColision(ecol,COL::down,0)){
+                e->active=false;
+                ExplodeAt(e->position.x,e->position.y, e->Color);
+                if(e->type == KMeteorites){
+                    SpawnEnemy(enemies,KMeteorites,-32,rand()%360);
+                }else{
+                    SpawnEnemy(enemies,KDarts,-32,rand()%360);
+                }
+
+            }     
+            if (COL::WindowsColision(ecol,COL::right,100)){e->position.x=-32;}
+        }
+        else if(e->type == KFurballs || e->type == KBubbles || e->type == KFlower){
+            if (COL::WindowsColision(ecol,COL::right,100)){e->position.x=-32;}
+            if (COL::WindowsColision(ecol,COL::left,100)){e->position.x=(256*2)+32;}
+            if (COL::WindowsColision(ecol,COL::top,0) || COL::WindowsColision(ecol,COL::down,0)){e->speed.y *= -1;}
+        }
+        else if(e->type == KAlien){
+            if (COL::WindowsColision(ecol,COL::right,100)){e->position.x=-32;}
+            if (COL::WindowsColision(ecol,COL::left,100)){e->position.x=(256*2)+32;}
+            if (e->position.y < rand()%(192*2)-80 && e->speed.y < 0 || COL::WindowsColision(ecol,COL::down,0)){e->speed.y *= -1;}
+        }
+        else if(e->type == KUfo) {
+            if (e->speed.y < 0) {
+                if (COL::WindowsColision(ecol, COL::top, 0)) {
+                    e->speed.y = 0.5f;
+                }
+            } 
+            if (e->speed.y > 0) {
+
+                e->speed.x = sinf(esat::Time() * 0.005f) * 1.5f; 
+                
+                if (COL::WindowsColision(ecol, COL::down, 0)) {
+                    e->speed.y = -1.0f;
+                }
+            }
+            if (COL::WindowsColision(ecol,COL::right,100)){e->position.x=-32;}
+            if (COL::WindowsColision(ecol,COL::left,100)){e->position.x=(256*2)+32;}
+        }
+        else if(e->type == KJets) {
+            e->count++;
+            if(e->count < 300) {
+                e->speed.x=0;
+                e->speed.y = sinf(esat::Time() * 0.005f) * 1.0f; 
+            } 
+            else {
+                e->speed.x = 1.0f;
+            }
+            if (COL::WindowsColision(ecol, COL::down, 0) || COL::WindowsColision(ecol, COL::top, 0) || COL::WindowsColision(ecol,COL::right,0)) {
+                e->active = false;
+                ExplodeAt(e->position.x, e->position.y, e->Color);
+                SpawnEnemy(enemies, KJets, 0, rand() % 360);
+                e->count = 0;
+            }
+        }
     }
 
     void BGcolor(COL::colision col, ColorType type){
@@ -193,10 +269,10 @@ namespace ENE{
                 break;
         }
 
-        *(P+0)=col.p1.x; *(P+1)=col.p1.y+3;
-        *(P+2)=col.p2.x; *(P+3)=col.p1.y+3;
-        *(P+4)=col.p2.x; *(P+5)=col.p2.y-3;
-        *(P+6)=col.p1.x; *(P+7)=col.p2.y-3;
+        *(P+0)=col.p1.x+1; *(P+1)=col.p1.y+1;
+        *(P+2)=col.p2.x-1; *(P+3)=col.p1.y+1;
+        *(P+4)=col.p2.x-1; *(P+5)=col.p2.y-1;
+        *(P+6)=col.p1.x+1; *(P+7)=col.p2.y-1;
         *(P+8)=*(P+0); *(P+9)=*(P+1);
 
         esat::DrawSolidPath(P,5, false);
@@ -219,12 +295,12 @@ namespace ENE{
                 tempobj.width = myTemplate->width;
                 tempobj.height = myTemplate->height;
 
-                COL::colision enemycol = COL::CreateColision(tempobj);
+                e->col = COL::CreateColision(tempobj);
 
-                BGcolor(enemycol, e->Color);
+                BGcolor(e->col, e->Color);
                 esat::DrawSprite(myTemplate->sprite, (mgr->pool+i)->position.x, (mgr->pool+i)->position.y);
 
-                EnemiesAI(e,enemycol);
+                EnemiesAI(e,e->col);
             }
         }
     }
@@ -297,63 +373,68 @@ namespace ENE{
     }
 }
 
-int level = 1;
-bool toogle = false; 
 
 
-int esat::main(int argc, char **argv)
-{
+// int level = 1;
+// bool toogle = false; 
 
-    esat::WindowInit(256*2,192*2);
-    WindowSetMouseVisibility(true);
 
-    //////////////////////////////
-    srand(time(NULL));
-    ENE::InitManager(ENE::enemies,10);
-    ENE::InitVFXSystem();
-    /////////////////////////////
+// int esat::main(int argc, char **argv)
+// {
 
-    while (esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape))
-    {
-        esat::DrawBegin();
-        esat::DrawClear(0, 0, 0);
+//     esat::WindowInit(256*2,192*2);
+//     WindowSetMouseVisibility(true);
 
-        ///////////////////////////////
+//     //////////////////////////////
+//     srand(time(NULL));
+//     ENE::InitManager(ENE::enemies,10);
+//     ENE::InitVFXSystem();
+//     /////////////////////////////
 
-        if(level == 1 && !toogle){
-            ENE::ResetEnemies(ENE::enemies);
-            for(int i=0;i<3;i++){
-                ENE::SpawnEnemy(ENE::enemies,ENE::KMeteorites,-32,rand()%360);
-            }
-            toogle = true;
-        }
-        if(level == 2 && toogle){
-            ENE::ResetEnemies(ENE::enemies);
-            for(int i=0;i<3;i++){
-                ENE::SpawnEnemy(ENE::enemies,ENE::KMeteorites,-32,rand()%360);
-            }
-            toogle = false;
-        }
+//     while (esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape))
+//     {
+//         esat::DrawBegin();
+//         esat::DrawClear(0, 0, 0);
 
-        if(esat::MouseButtonDown(0)){
-            level++;
-        }
+//         ///////////////////////////////
 
-        ENE::UpdateAndDraw(ENE::enemies);
-        ENE::DrawActiveVFX();
+//         if(level == 1 && !toogle){
+//             ENE::ResetEnemies(ENE::enemies);
+//             for(int i=0;i<3;i++){
+//                 ENE::SpawnEnemy(ENE::enemies,ENE::KJets,0,rand()%350);
+//             }
+//             for(int i=0;i<3;i++){
+//                 ENE::SpawnEnemy(ENE::enemies,ENE::KFlower,-32,rand()%350);
+//             }
+//             toogle = true;
+//         }
+//         if(level == 2 && toogle){
+//             ENE::ResetEnemies(ENE::enemies);
+//             for(int i=0;i<3;i++){
+//                 ENE::SpawnEnemy(ENE::enemies,ENE::KBubbles,-32,rand()%360);
+//             }
+//             toogle = false;
+//         }
 
-        ////////////////////////////////
+//         if(esat::MouseButtonDown(0)){
+//             level++;
+//         }
 
-        esat::DrawEnd();
-        esat::WindowFrame();
-    }
+//         ENE::UpdateAndDraw(ENE::enemies);
+//         ENE::DrawActiveVFX();
 
-    esat::WindowDestroy();
+//         ////////////////////////////////
 
-    /////////////////////////
-    ENE::FreeManager(ENE::enemies);
-    ENE::FreeVFX();
-    /////////////////////////
+//         esat::DrawEnd();
+//         esat::WindowFrame();
+//     }
 
-    return 0;
-}
+//     esat::WindowDestroy();
+
+//     /////////////////////////
+//     ENE::FreeManager(ENE::enemies);
+//     ENE::FreeVFX();
+//     /////////////////////////
+
+//     return 0;
+// }
