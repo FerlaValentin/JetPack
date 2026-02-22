@@ -173,13 +173,13 @@ void RellenarNave(Nave *nave, Sprite *punteroSprites)
   {
     // the white sprite is twice as tall so we need to draw it first to prevent it of overlapping with the pink
 
-    if(i <= 3){
-      esat::DrawSprite(punteroSprites[12].sprite, nave->pos.x, (nave->pos.y - (i * 32) + 32));
+    if(i < 3){
+      esat::DrawSprite(punteroSprites[12].sprite, nave->pos.x, (nave->pos.y - (i * 32)));
     }
     //pink
-    if (i <= nave->fuelAmount)
+    if (i < nave->fuelAmount)
     {
-      esat::DrawSprite(punteroSprites[13].sprite, nave->pos.x, (nave->pos.y - (i * 16) + 32));
+      esat::DrawSprite(punteroSprites[13].sprite, nave->pos.x, (nave->pos.y - (i * 16) + 16));
     }
   }
 }
