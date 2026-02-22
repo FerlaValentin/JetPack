@@ -54,7 +54,7 @@ void InitiateFrame()
 
 void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Sprites **spritesItems, Jugador *player,
                  esat::SpriteHandle *nave1, esat::SpriteHandle *nave2, esat::SpriteHandle *nave3, esat::SpriteHandle *rosa, COL::object *gasofa,
-                 COL::object *prueba_nave, ItemDrop *itemdrop, esat::SpriteHandle **platform_sprite, TPlatform **g_platforms, esat::SpriteHandle *loading_sprite)
+                 COL::object *prueba_nave, ItemDrop *itemdrop, esat::SpriteHandle **platform_sprite, TPlatform **g_platforms, esat::SpriteHandle **loading_sprite)
 {
     esat::WindowInit(kScreenWidth, kScreenHeight);
     esat::WindowSetMouseVisibility(true);
@@ -90,8 +90,7 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     // Interface
     printf("[DEBUG] Interface\n\n");
     InitLivesSprite();
-    ReserveMemory(&loading_sprite);
-    InitLoadingSprites(&loading_sprite);
+    InitLoadingSprites(loading_sprite);
     printf("[DEBUG] Interface end\n\n");
 }
 
@@ -237,7 +236,8 @@ int esat::main(int argc, char **argv)
     float menu_blink_timer = 0.0f;
     bool menu_highlight_white = true;
 
-    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &nave1, &nave2, &nave3, &rosa, &gasofa, &prueba_nave, &itemdrop, &platform_sprite, &g_platforms, loading_sprite);
+    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &nave1, &nave2, &nave3, &rosa, &gasofa, &prueba_nave, &itemdrop, &platform_sprite, &g_platforms, &loading_sprite);
+    InitGameVariables();
 
     // Datos Nave
     int pink_x, pink_y;
@@ -251,11 +251,16 @@ int esat::main(int argc, char **argv)
     while (esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape))
     {
         InitiateFrame();
-
-        GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, player, &rocket_started);
-        Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame, &head_y, &body_y, &tail_y, speed, rocket_started, gasofa, prueba_nave, &itemdrop, contador_gasofa, numero_max_gasofa, spritesItems, g_platforms);
-        DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, nave1, nave2, nave3, rosa, head_x, head_y,
-                body_x, body_y, tail_x, tail_y, gasofa, spritesItems, itemdrop, g_platforms, platform_sprite);
+        
+        if (game_data.current_screen == TScreen::GAME_SCREEN) {
+          GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, player, &rocket_started);
+          Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame, &head_y, &body_y, &tail_y, speed, rocket_started, gasofa, prueba_nave, &itemdrop, contador_gasofa, numero_max_gasofa, spritesItems, g_platforms);
+          DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, nave1, nave2, nave3, rosa, head_x, head_y,
+                  body_x, body_y, tail_x, tail_y, gasofa, spritesItems, itemdrop, g_platforms, platform_sprite);
+        } else {
+          ScreenSelector(delta_time, g_platforms, platform_sprite, loading_sprite);
+        }
+        
         FinishFrame();
     }
 
