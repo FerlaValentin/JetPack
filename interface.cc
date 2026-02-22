@@ -14,7 +14,6 @@
 
 #include "colisiones.h"
 
-// TODO(@jhony): Optimize this scripts
 extern const int kScreenWidth;
 extern const int kScreenHeight; 
 
@@ -30,7 +29,6 @@ struct TPlatform {
   int size;
 };
 
-// (@jhony) check this
 struct TGame {
   TScreen current_screen;
   unsigned char current_lives;
@@ -38,32 +36,6 @@ struct TGame {
   int score_p1; // actual hi-score for player1
   int score_p2; // actual hi-score for player2
 };
-
-// (@jhony) check this
-struct TPlayerGame {
-  unsigned char player_id;
-  unsigned char lives;
-  int score;
-};
-
-// test
-
-
-// esat::SpriteHandle* platform_sprite = nullptr;
-// esat::SpriteHandle* loading_sprite = nullptr;
-// TPlatform* g_platforms = nullptr;
-
-/*TGame game_data;
-
-// TODO: move top
-float timer = 0;
-
-int menu_selection_player = 0;    0 = 1 player, 1 = 2 player 
-int menu_selection_control = 0;    0 = keyboard, 1 = kempston 
-float menu_blink_timer = 0.0f;
-bool menu_highlight_white = true;
-
-esat::SpriteHandle sprite_lives;*/
 
 void InitLivesSprite(esat::SpriteHandle* sprite_lives){
   printf("[DEBUG] call InitLivesSprite\n");
@@ -166,7 +138,6 @@ void DrawHeader(TGame game_data, esat::SpriteHandle sprite_lives, int lives = 0)
   esat::DrawText(210, 32, hi_score + 1); // Hi-Score placeholder
   esat::DrawText(413, 32, score_2up + 1); // score 2up placeholder
 
-  // TODO @jhony: fix this
   if (lives > 0){
     esat::DrawSetFillColor(255, 255, 255, 255);
     esat::DrawText(115, 16, lives_text);
