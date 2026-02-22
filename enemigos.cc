@@ -276,7 +276,6 @@ namespace ENE{
 
     void BGcolor(COL::colision col, ColorType type){
         float *P = (float*)malloc(10*sizeof(float));
-
         switch(type){
             case red:
             esat::DrawSetFillColor(255,0,0,255);
@@ -294,13 +293,11 @@ namespace ENE{
             esat::DrawSetFillColor(52,198,233,255);
                 break;
         }
-
         *(P+0)=col.p1.x+1; *(P+1)=col.p1.y+1;
         *(P+2)=col.p2.x-1; *(P+3)=col.p1.y+1;
         *(P+4)=col.p2.x-1; *(P+5)=col.p2.y-1;
         *(P+6)=col.p1.x+1; *(P+7)=col.p2.y-1;
         *(P+8)=*(P+0); *(P+9)=*(P+1);
-
         esat::DrawSolidPath(P,5, false);
         free(P);
     }
@@ -308,7 +305,6 @@ namespace ENE{
     void UpdateAndDraw(EnemyManager *mgr){
         for(int i=0;i<mgr->pool_size;i++){
             Enemy *e = &(*(mgr->pool+i));
-
             if(e->active){
 
                 e->position.y += e->speed.y;
@@ -353,22 +349,20 @@ namespace ENE{
         }
     }
 
-void FreeManager(EnemyManager *mgr) {
+    void FreeManager(EnemyManager *mgr) {
     if (mgr == nullptr) return;
-
-    for (int i = 0; i < KTypeCount; i++) {
-        EnemyTemplate *t = (mgr->templates + i);
-        if (t->sprite != nullptr) {
-            for(int j=0; j < t->num_frames; j++){
-                esat::SpriteRelease(*(t->sprite + j));
+        for (int i = 0; i < KTypeCount; i++) {
+            EnemyTemplate *t = (mgr->templates + i);
+            if (t->sprite != nullptr) {
+                for(int j=0; j < t->num_frames; j++){
+                    esat::SpriteRelease(*(t->sprite + j));
+                }
+                free(t->sprite); 
             }
-            free(t->sprite); 
         }
+        if (mgr->pool != nullptr) free(mgr->pool);
+        free(mgr);
     }
-
-    if (mgr->pool != nullptr) free(mgr->pool);
-    free(mgr);
-}
 
     void FreeVFX(){
         for(int i=0;i<3;i++){
@@ -376,12 +370,10 @@ void FreeManager(EnemyManager *mgr) {
                 esat::SpriteRelease(g_fx_sprites+i);
             }
         }
-
         if (g_fx_sprites != nullptr) {
             free(g_fx_sprites);
             g_fx_sprites = nullptr;
         }
-
         if (g_fx_pool != nullptr) {
             free(g_fx_pool);
             g_fx_pool = nullptr;
@@ -405,9 +397,8 @@ void FreeManager(EnemyManager *mgr) {
 
 
 
-int level = 1;
-bool toogle = false; 
-
+// int level = 1;
+// bool toogle = false; 
 
 // int esat::main(int argc, char **argv)
 // {
