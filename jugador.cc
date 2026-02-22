@@ -607,6 +607,18 @@ void ColisionPlayerPlatforma(Jugador &player)
 
         player.pos.y = p->collision_platform.position.y + p->collision_platform.height;
       }
+      else if (player.config_colision.colision.p2.x <= p->collision_platform.colision.p2.x &&
+               player.config_colision.colision.p2.x >= p->collision_platform.colision.p1.x)
+      {
+
+        player.pos.x = p->collision_platform.colision.p1.x - player.config_colision.width;
+      }
+      else if (player.config_colision.colision.p1.x >= p->collision_platform.colision.p1.x &&
+              player.config_colision.colision.p1.x <= p->collision_platform.colision.p2.x)
+      {
+
+        player.pos.x = p->collision_platform.colision.p2.x;
+      }
     }
   }
 }
