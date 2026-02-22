@@ -54,7 +54,7 @@ void InitiateFrame()
 
 void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Sprites **spritesItems, Jugador *player,
                  esat::SpriteHandle *nave1, esat::SpriteHandle *nave2, esat::SpriteHandle *nave3, esat::SpriteHandle *rosa, COL::object *gasofa,
-                 COL::object *prueba_nave, ItemDrop *itemdrop, esat::SpriteHandle **platform_sprite, TPlatform **g_platforms)
+                 COL::object *prueba_nave, ItemDrop *itemdrop, esat::SpriteHandle **platform_sprite, TPlatform **g_platforms, esat::SpriteHandle *loading_sprite)
 {
     esat::WindowInit(kScreenWidth, kScreenHeight);
     esat::WindowSetMouseVisibility(true);
@@ -72,6 +72,10 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     InstanciarSpritesColores(*spritesColores);
     InstanciarSpritesPlayer(*spritesPersonaje);
     InstanciarSpritesItems(*spritesItems);
+
+    // Fuente
+    LoadFonts();
+
     //! RECURRE A VARIABLES GLOBALES DE INTERFACE.CC
     InitPlatformSprites(platform_sprite, g_platforms);
 
@@ -82,6 +86,13 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     InstaciarGasofa_Nave(gasofa, prueba_nave, (*spritesItems)[5]);
     // AudioInit();
     InstanciarItems(itemdrop, *spritesItems);
+
+    // Interface
+    printf("[DEBUG] Interface\n\n");
+    InitLivesSprite();
+    ReserveMemory(&loading_sprite);
+    InitLoadingSprites(&loading_sprite);
+    printf("[DEBUG] Interface end\n\n");
 }
 
 void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBalas, Jugador player, bool *rocket_started)
@@ -94,6 +105,15 @@ void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBa
     CrearDisparos(punteroBalas, player);
 }
 
+void TestValues(Jugador *player){
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_0)) (*player).puntos += 1;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_1)) (*player).vidas += 1;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_2)) (*player).player_id += 1;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_3)) (*player).puntos -= 1;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_4)) (*player).vidas -= 1;
+  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_5)) (*player).player_id -= 1;
+}
+
 void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, bool moverRight, int *frame,
             int *head_y, int *body_y, int *tail_y, int speed, bool rocket_started, COL::object &gasofa, COL::object &prueba_nave, ItemDrop *itemdrop, int &contador_gasofa, int numero_max_gasofa, Sprites *spritesItems, TPlatform* g_platforms)
 {
@@ -102,6 +122,10 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
     ActualizarDisparos(punteroBalas, *player);
     LoopMoverJugador(moverLeft, moverRight, player);
     ControlarLimitesPantalla(player, punteroBalas);
+    
+    // Pasar vidas y puntos a la interfaz
+    UpdateInterface(&player->puntos, &player->vidas, &player->player_id);
+    TestValues(player);
 
     // ! Colisiones
     if (player->colisiona)
@@ -126,7 +150,7 @@ void DrawAll(Sprites *spritesColores, Sprites *spritesPersonaje, Bala *punteroBa
              int head_x, int head_y, int body_x, int body_y, int tail_x, int tail_y, COL::object gasofa, Sprites *spritesItems, ItemDrop itemdrop,
              TPlatform* g_platforms, esat::SpriteHandle* platform_sprite)
 {
-    GameScreen(g_platforms, platform_sprite);
+    GameScreen(g_platforms, platform_sprite, player.vidas);
     DibujarDisparos(punteroBalas);
     if (!player.muerto)
     {
@@ -203,6 +227,7 @@ int esat::main(int argc, char **argv)
     const unsigned char kplatform_numbers = 3;
     esat::SpriteHandle *platform_sprite = nullptr;
     esat::SpriteHandle *loading_sprite = nullptr;
+    esat::SpriteHandle sprite_lives;
     TPlatform *g_platforms = nullptr;
     TGame game;
     // TODO: move top
@@ -212,7 +237,7 @@ int esat::main(int argc, char **argv)
     float menu_blink_timer = 0.0f;
     bool menu_highlight_white = true;
 
-    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &nave1, &nave2, &nave3, &rosa, &gasofa, &prueba_nave, &itemdrop, &platform_sprite, &g_platforms);
+    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &nave1, &nave2, &nave3, &rosa, &gasofa, &prueba_nave, &itemdrop, &platform_sprite, &g_platforms, loading_sprite);
 
     // Datos Nave
     int pink_x, pink_y;

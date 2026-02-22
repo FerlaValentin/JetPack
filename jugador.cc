@@ -39,6 +39,8 @@ struct Jugador
   bool tiene_gasofa;
   COL::object config_colision;
   int vidas;
+  int puntos;
+  int player_id;
   bool muerto;
   float tiempo_aparicion;
   float tiempo_invulnerable;
@@ -134,6 +136,10 @@ void InstanciarPlayer(Jugador *player)
 
   player->config_colision.width = player->spriteWidth;
   player->config_colision.height = player->spriteHeight;
+
+  player->puntos = 0;
+  player->vidas = 3;
+  player->player_id = 1;
 }
 
 void InstanciarBalas(Bala *bala)
@@ -559,7 +565,7 @@ void LoopPickItems(Jugador player, ItemDrop *item, Sprites *sprites)
   if (COL::CheckColision(player.config_colision.colision, item->item_config.colision))
   {
     item->recogido = true;
-    printf("Colision objetos !!!!!!!!!!!!!! \n");
+    printf("Colision objetos Item !!!!!!!!!!!!!! \n");
   }
   if (item->recogido)
   {
