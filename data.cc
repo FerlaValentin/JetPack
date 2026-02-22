@@ -14,7 +14,7 @@ void SavePlayerDataToFile(Jugador *player1, Jugador *player2 = nullptr){
 
 void LoadPlayerDataFromFile(Jugador *player, int player_id = 1){
   FILE *fichero;
-  Jugador tmp = *player;
+  Jugador tmp;
   if ((fichero = fopen("save.dat", "rb")) != nullptr){
     while (fread(&tmp, sizeof(Jugador), 1, fichero) != 0){
       if (tmp.player_id == player_id){
@@ -25,7 +25,7 @@ void LoadPlayerDataFromFile(Jugador *player, int player_id = 1){
   } else {
     printf("[ERROR] Error loading player data\n");
   }
-  printf("[DEBUG] Player data loaded for player %d\n", player_id);
+  printf("[DEBUG] Player data loaded for player %d\n", player->player_id);
 }
 
 void DeletePlayerDataFiles(){
