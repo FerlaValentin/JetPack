@@ -41,6 +41,7 @@ struct Jugador
   int vidas;
   int puntos;
   int player_id;
+  bool isActive;
   bool muerto;
   float tiempo_aparicion;
   float tiempo_invulnerable;
@@ -139,14 +140,16 @@ void InstanciarPlayer(Jugador *player)
   player->config_colision.width = player->spriteWidth;
   player->config_colision.height = player->spriteHeight;
 
+  // This data change for each player, so we need to set it for each player when we instantiate it
   player->puntos = 0;
   player->vidas = 3;
   player->player_id = 1;
+  player->isActive = true;
 }
 
-void LoadPlayerData(Jugador *player){
-  printf("[DEBUG] Loading player data\n");
-  LoadPlayerDataFromFile(player);
+void LoadPlayerData(Jugador *player, int player_id = 1){
+  printf("[DEBUG] Loading player data for player %d\n", player_id);
+  LoadPlayerDataFromFile(player, player_id);
   printf("[DEBUG] Player data loaded\n");
 }
 

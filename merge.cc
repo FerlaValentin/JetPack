@@ -100,7 +100,19 @@ void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBa
       if (esat::IsKeyPressed('2')) *menu_selection_player = 1;
       if (esat::IsKeyPressed('3')) *menu_selection_control = 0;
       if (esat::IsKeyPressed('4')) *menu_selection_control = 1;
-      if (esat::IsKeyPressed('5')) (*game).current_screen = GAME_SCREEN;
+      if (esat::IsKeyPressed('5')) {
+        if (*menu_selection_player == 1) {
+          // Save player 2 data
+          Jugador player2;
+          InstanciarPlayer(&player2);
+          player2.player_id = 2;
+          player2.isActive = false;
+          SavePlayerDataToFile(&player, &player2);
+        }else{
+          SavePlayerDataToFile(&player);
+        }
+        game->current_screen = TScreen::GAME_SCREEN;
+      }
     }
     if (!player.muerto)
     {
@@ -113,6 +125,14 @@ void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBa
     }
 }
 
+void SwitchPlayer(Jugador *player){
+  Jugador tmp;
+  tmp = *player;
+  printf("[DEBUG] Switching player to %d\n", player->player_id == 1 ? 2 : 1);
+  LoadPlayerDataFromFile(player, player->player_id == 1 ? 2 : 1);
+  SavePlayerDataToFile(&tmp, player);
+}
+
 void TestValues(Jugador *player){
   if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_0)) (*player).puntos += 1;
   if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_1)) (*player).vidas += 1;
@@ -120,8 +140,7 @@ void TestValues(Jugador *player){
   if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_3)) (*player).puntos -= 1;
   if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_4)) (*player).vidas -= 1;
 
-  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_5)) SavePlayerData(player);
-  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_6)) LoadPlayerData(player);
+  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_8)) SwitchPlayer(player);
 }
 
 void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, bool moverRight, int *frame,
@@ -139,7 +158,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
     
         // Pasar vidas y puntos a la interfaz
         UpdateInterface(&player->puntos, &player->vidas, &player->player_id, game);
-        TestValues(player);
+        TestValues(player); // @jhony: remove this
 
         if (esat::IsKeyDown('Y') || esat::IsKeyDown('y'))
             player->muerto = true;
