@@ -89,8 +89,8 @@ void ReserveMemory(esat::SpriteHandle** platform_sprite){
   }
 }
 
-void InitGameVariables(){
-  game_data = {IMAGE,0,0,0,0};
+void InitGameVariables(TGame *game){
+  *game = {IMAGE,0,0,0,0};
 }
 
 void InitLoadingSprites(esat::SpriteHandle** loading_sprite){
@@ -316,12 +316,12 @@ void InitialImage(esat::SpriteHandle* loading_sprite){
 void ScreenSelector(float dt, TPlatform* g_platforms, esat::SpriteHandle* platform_sprite, esat::SpriteHandle* loading_sprite) {
   switch (game_data.current_screen) {
     case IMAGE:
-      timer += dt;
-      if (timer >= 5.0f) game_data.current_screen = MAIN_MENU;
+      timer += delta_time;
+      if (timer >= 5.0f) game.current_screen = MAIN_MENU;
       InitialImage(loading_sprite);
       break;
     case MAIN_MENU: {
-      menu_blink_timer += dt;
+      menu_blink_timer += delta_time;
       if (menu_blink_timer >= 0.5f) {
         menu_blink_timer = 0.0f;
         menu_highlight_white = !menu_highlight_white;
