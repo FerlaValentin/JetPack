@@ -14,13 +14,11 @@
 #include "colisiones.h"
 #include "interface.cc"
 
-// #include "audio.cc"
+#include "audio.cc"
 #include <esat_extra/soloud/soloud.h>
 //! ESTO SE VA FUERA
 // #define spritewidth 34
 // #define spriteheight 50
-
-// extern SoLoud::Soloud Soloud;
 
 struct Sprites
 {
@@ -188,7 +186,7 @@ void CrearDisparos(Bala *bala, Jugador player)
   if (esat::IsSpecialKeyDown(esat::kSpecialKey_Space))
   {
     bool inactive_bullet_found = false;
-    // PlayAudio(shoot);
+    PlayAudio(shoot);
     for (int i = 0; i < 20 && !inactive_bullet_found; i++)
     {
       if (!bala[i].activa)
