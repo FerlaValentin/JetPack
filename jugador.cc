@@ -71,6 +71,8 @@ struct ItemDrop
   float cooldown;
 };
 
+#include "data.cc"
+
 //! LAS FUNCIONES DE MALLOC FUERA
 // ________________________________
 // INSTANCIAR
@@ -140,6 +142,18 @@ void InstanciarPlayer(Jugador *player)
   player->puntos = 0;
   player->vidas = 3;
   player->player_id = 1;
+}
+
+void LoadPlayerData(Jugador *player){
+  printf("[DEBUG] Loading player data\n");
+  LoadPlayerDataFromFile(player);
+  printf("[DEBUG] Player data loaded\n");
+}
+
+void SavePlayerData(Jugador *player){
+  printf("[DEBUG] Saving player data\n");
+  SavePlayerDataToFile(player);
+  printf("[DEBUG] Player data saved\n");
 }
 
 void InstanciarBalas(Bala *bala)
