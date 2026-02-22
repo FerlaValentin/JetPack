@@ -590,6 +590,7 @@ void ColisionJugador(Jugador *player)
 
 void ColisionPlayerPlatforma(Jugador &player, TPlatform* g_platforms)
 {
+  const unsigned char kplatform_numbers = 3;
   for (int i = 0; i < kplatform_numbers; ++i)
   {
     TPlatform *p = g_platforms + i;

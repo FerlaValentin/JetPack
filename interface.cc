@@ -47,31 +47,32 @@ struct TPlayerGame {
 };
 
 // test
-const unsigned char kplatform_numbers = 3;
+
 
 // esat::SpriteHandle* platform_sprite = nullptr;
 // esat::SpriteHandle* loading_sprite = nullptr;
 // TPlatform* g_platforms = nullptr;
 
-TGame game_data;
+/*TGame game_data;
 
 // TODO: move top
 float timer = 0;
 
-int menu_selection_player = 0;   /* 0 = 1 player, 1 = 2 player */
-int menu_selection_control = 0;   /* 0 = keyboard, 1 = kempston */
+int menu_selection_player = 0;    0 = 1 player, 1 = 2 player 
+int menu_selection_control = 0;    0 = keyboard, 1 = kempston 
 float menu_blink_timer = 0.0f;
 bool menu_highlight_white = true;
 
-esat::SpriteHandle sprite_lives;
+esat::SpriteHandle sprite_lives;*/
 
-void InitLivesSprite(){
+void InitLivesSprite(esat::SpriteHandle* sprite_lives){
   printf("[DEBUG] call InitLivesSprite\n");
-  sprite_lives = esat::SpriteFromFile("SPRITES/JUGADOR/vidas_2x.png");
+  *sprite_lives = esat::SpriteFromFile("SPRITES/JUGADOR/vidas_2x.png");
   printf("[DEBUG] end InitLivesSprite\n");
 }
 
 void InitPlatforms(TPlatform** g_platforms, esat::SpriteHandle* platform_sprite){
+  const unsigned char kplatform_numbers = 3;
   printf("[DEBUG] call InitPlatforms\n");
   if (*g_platforms != nullptr) return;
   int w = esat::SpriteWidth(*(platform_sprite + 0));
@@ -126,22 +127,22 @@ void LoadFonts(){
   esat::DrawSetTextFont("assets/fonts/zx_spectrum-7.ttf");
 }
 
-void UpdateInterface(int *score, int *lives, int *player_id){
-  game_data.current_lives = *lives;
+void UpdateInterface(int *score, int *lives, int *player_id, TGame* game_data){
+  (*game_data).current_lives = *lives;
   if (*player_id == 1){
-    game_data.score_p1 = *score;
+    (*game_data).score_p1 = *score;
   }else{
-    game_data.score_p2 = *score;
+    (*game_data).score_p2 = *score;
   }
-  if (game_data.score_p1 > game_data.hi_socore){
-    game_data.hi_socore = game_data.score_p1;
+  if ((*game_data).score_p1 > (*game_data).hi_socore){
+    (*game_data).hi_socore = (*game_data).score_p1;
   }
-  if (game_data.score_p2 > game_data.hi_socore){
-    game_data.hi_socore = game_data.score_p2;
+  if ((*game_data).score_p2 > (*game_data).hi_socore){
+    (*game_data).hi_socore = (*game_data).score_p2;
   }
 }
 
-void DrawHeader(int lives = 0){
+void DrawHeader(TGame game_data, esat::SpriteHandle sprite_lives, int lives = 0){
   char* score_1up = (char*)malloc(7 * sizeof(char));
   char* hi_score = (char*)malloc(7 * sizeof(char));
   char* score_2up = (char*)malloc(7 * sizeof(char));
@@ -200,8 +201,8 @@ void DrawHighlightRect(float x, float y, float w, float h, bool white) {
   free(pts);
 }
 
-void MainMenu(int selected_player, int selected_control, bool highlight_white) {
-  DrawHeader();
+void MainMenu(int selected_player, int selected_control, bool highlight_white, TGame game_data, esat::SpriteHandle sprite_lives) {
+  DrawHeader(game_data, sprite_lives);
 
   esat::DrawSetTextSize(20);
   esat::DrawSetFillColor(255, 255, 255);
@@ -243,6 +244,7 @@ void MainMenu(int selected_player, int selected_control, bool highlight_white) {
 }
 
 void GeneratePlatform(TPlatform* g_platforms, esat::SpriteHandle* platform_sprite){ 
+  const unsigned char kplatform_numbers = 3;
   if (g_platforms == nullptr) return;
   int w = esat::SpriteWidth(*(platform_sprite + 0));
   int h = esat::SpriteHeight(*(platform_sprite + 0));
@@ -307,8 +309,8 @@ void GenerateFloor(esat::SpriteHandle* platform_sprite){
 }
 
 // Basic game screen
-void GameScreen(TPlatform* g_platforms, esat::SpriteHandle* platform_sprite, int lives = 0){
-  DrawHeader(lives);
+void GameScreen(TPlatform* g_platforms, esat::SpriteHandle* platform_sprite, TGame game_data, esat::SpriteHandle sprite_lives, int lives = 0){
+  DrawHeader(game_data, sprite_lives, lives);
   GeneratePlatform(g_platforms, platform_sprite);
   GenerateFloor(platform_sprite);
 }
@@ -320,17 +322,17 @@ void InitialImage(esat::SpriteHandle* loading_sprite){
 }
 
 // function to select the screen to show
-void ScreenSelector(TGame* game) {
+void ScreenSelector(TGame* game, float* timer, float* menu_blink_timer, bool* menu_highlight_white) {
   switch ((*game).current_screen) {
     case IMAGE:
-      timer += delta_time;
-      if (timer >= 5.0f) (*game).current_screen = MAIN_MENU;
+      *timer += delta_time;
+      if (*timer >= 5.0f) (*game).current_screen = MAIN_MENU;
       break;
     case MAIN_MENU: {
-      menu_blink_timer += delta_time;
-      if (menu_blink_timer >= 0.5f) {
-        menu_blink_timer = 0.0f;
-        menu_highlight_white = !menu_highlight_white;
+      *menu_blink_timer += delta_time;
+      if (*menu_blink_timer >= 0.5f) {
+        *menu_blink_timer = 0.0f;
+        *menu_highlight_white = !(*menu_highlight_white);
       }
     }
   }
