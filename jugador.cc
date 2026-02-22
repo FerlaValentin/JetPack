@@ -419,10 +419,10 @@ void ControlarLimitesPantalla(Jugador *player, Bala *bala)
     player->pos.x = -player->spriteWidth;
   if (player->pos.x < -player->spriteWidth)
     player->pos.x = kScreenWidth;
-  if (player->pos.y >= kScreenHeight - player->spriteHeight)
-    player->pos.y = 0;
+  if (player->pos.y >= kScreenHeight - player->spriteHeight - 16)
+    player->pos.y = kScreenHeight - player->spriteHeight - 16;
   if (player->pos.y <= 0)
-    player->pos.y = kScreenHeight - player->spriteHeight;
+    player->pos.y = 0;
 
   for (int i = 0; i < 20; i++)
   {
@@ -612,30 +612,33 @@ void ColisionPlayerPlatforma(Jugador &player, TPlatform* g_platforms)
     }
   }
 }
-
+//if(muerto == true || colisiona == false)
 void ResetPlayer_OnDead(Jugador *player)
 {
   static float timer = 0.0f;
   static float timer_invulnerable = 0.0f;
-  player->colisiona = false;
   // player->muerto = true;
-  timer += delta_time;
+  
   // si esta muerto no dibujar ni detectar inputs
-  if (timer >= player->tiempo_aparicion)
+  if (timer <= player->tiempo_aparicion)
   {
-    timer = 0.0f;
-    player->pos.x = kScreenWidth / 2;
-    player->pos.y = kScreenHeight - 16;
-    player->muerto = false;
-  }
+    if(!timer){
+      player->pos.x = kScreenWidth / 2;
+      player->pos.y = kScreenHeight - player->spriteHeight - 16;
+    }
 
-  if (!player->muerto)
+    timer += delta_time;
+  }
+  else
   {
-    timer_invulnerable += delta_time;
     player->colisiona = false;
+    player->muerto = false;
+    timer_invulnerable += delta_time; // 0 1 2 3 4 5
     // no detectar colisiones con enemigos
-    if (timer >= timer_invulnerable)
+    if (timer_invulnerable >= player->tiempo_invulnerable)
     {
+      timer = 0.0f;
+      timer_invulnerable = 0.0f;
       player->colisiona = true;
       // empezar a detectar colisiones con enemigos
     }
