@@ -39,6 +39,13 @@ struct TGame {
   int score_p2; // actual hi-score for player2
 };
 
+// (@jhony) check this
+struct TPlayerGame {
+  unsigned char player_id;
+  unsigned char lives;
+  int score;
+};
+
 // test
 const unsigned char kplatform_numbers = 3;
 
@@ -89,8 +96,8 @@ void ReserveMemory(esat::SpriteHandle** platform_sprite){
   }
 }
 
-void InitGameVariables(TGame *game){
-  *game = {IMAGE,0,0,0,0};
+void InitGameVariables(TGame *game_data){
+  *game_data = {IMAGE,0,0,0,0};
 }
 
 void InitLoadingSprites(esat::SpriteHandle** loading_sprite){
@@ -313,12 +320,11 @@ void InitialImage(esat::SpriteHandle* loading_sprite){
 }
 
 // function to select the screen to show
-void ScreenSelector(float dt, TPlatform* g_platforms, esat::SpriteHandle* platform_sprite, esat::SpriteHandle* loading_sprite) {
-  switch (game_data.current_screen) {
+void ScreenSelector(TGame* game) {
+  switch ((*game).current_screen) {
     case IMAGE:
       timer += delta_time;
-      if (timer >= 5.0f) game.current_screen = MAIN_MENU;
-      InitialImage(loading_sprite);
+      if (timer >= 5.0f) (*game).current_screen = MAIN_MENU;
       break;
     case MAIN_MENU: {
       menu_blink_timer += delta_time;
@@ -326,19 +332,7 @@ void ScreenSelector(float dt, TPlatform* g_platforms, esat::SpriteHandle* platfo
         menu_blink_timer = 0.0f;
         menu_highlight_white = !menu_highlight_white;
       }
-      if (esat::IsKeyPressed('1')) menu_selection_player = 0;
-      if (esat::IsKeyPressed('2')) menu_selection_player = 1;
-      if (esat::IsKeyPressed('3')) menu_selection_control = 0;
-      if (esat::IsKeyPressed('4')) menu_selection_control = 1;
-      if (esat::IsKeyPressed('5')) game_data.current_screen = GAME_SCREEN;
-      MainMenu(menu_selection_player, menu_selection_control, menu_highlight_white);
-      break;
     }
-    case GAME_SCREEN:
-      GameScreen(g_platforms, platform_sprite);
-      break;
-    default:
-      break;
   }
 }
 
@@ -350,6 +344,4 @@ void TestMousePosition(){
   
 }
 
-void Testers(){
 
-}

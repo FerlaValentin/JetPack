@@ -18,7 +18,6 @@ double delta_time;
 
 #include "jugador.cc"
 #include "nave.cc"
-// #include "interface.cc"
 
 // FPS
 unsigned char fps = 25;
@@ -79,7 +78,6 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
 
     //! RECURRE A VARIABLES GLOBALES DE INTERFACE.CC
     InitPlatformSprites(platform_sprite, g_platforms);
-    InitLoadingSprites(loading_sprite);
     InitLoadingSprites(loading_sprite);
 
     // INSTANCIAR
@@ -273,8 +271,7 @@ int esat::main(int argc, char **argv)
     bool menu_highlight_white = true;
 
     InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &nave1, &nave2, &nave3, &rosa, &gasofa, &prueba_nave, &itemdrop, &platform_sprite, &g_platforms, &loading_sprite, &game);
-    InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &nave1, &nave2, &nave3, &rosa, &gasofa, &prueba_nave, &itemdrop, &platform_sprite, &g_platforms, &loading_sprite, &game);
-
+    
     // Datos Nave
     int pink_x, pink_y;
     int tail_x = 420, tail_y = kScreenHeight - esat::SpriteHeight(nave3) - terrain_height;
