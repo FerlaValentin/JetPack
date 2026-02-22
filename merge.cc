@@ -116,12 +116,17 @@ void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBa
 //Solo para testear luego se borra
 /*void TestValues(Jugador *player){
   if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_0)) (*player).puntos += 1;
-  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_1)) (*player).vidas += 1;
-  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_2)) (*player).player_id += 1;
+  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_1)) (*player).vidas += 1;
+  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_2)) (*player).player_id == 1 ? (*player).player_id = 2 : (*player).player_id = 1;
   if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_3)) (*player).puntos -= 1;
   if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_4)) (*player).vidas -= 1;
   if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_5)) (*player).player_id -= 1;
 }*/
+  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_4)) (*player).vidas -= 1;
+
+  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_5)) SavePlayerData(player);
+  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_6)) LoadPlayerData(player);
+}
 
 void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, bool moverRight, int *frame,
             COL::object &gasofa, COL::object &prueba_nave, ItemDrop *itemdrop, int &contador_gasofa, int numero_max_gasofa, 
