@@ -531,6 +531,7 @@ void LoopGasofa(Jugador &player, COL::object &gasofa, Nave *nave)
     GravedadItem(gasofa);
     if (COL::CheckColision(player.config_colision.colision, gasofa.colision))
     {
+      if(!player.tiene_gasofa){player.puntos += 100;}
       player.tiene_gasofa = true;
       UpdateGasofaPosition(player, gasofa);
     }
@@ -555,7 +556,7 @@ void ActualizarColisionesItems(Jugador *player, COL::object &gasofa, ItemDrop &i
   item.item_config.colision = COL::CreateColision(item.item_config);
 }
 
-void LoopPickItems(Jugador player, ItemDrop *item, Sprites *sprites)
+void LoopPickItems(Jugador &player, ItemDrop *item, Sprites *sprites)
 {
   static float timer = 0.0f;
   if (!item->recogido)
@@ -565,6 +566,7 @@ void LoopPickItems(Jugador player, ItemDrop *item, Sprites *sprites)
 
   if (COL::CheckColision(player.config_colision.colision, item->item_config.colision))
   {
+    if(item->recogido == false){player.puntos += 250;}
     item->recogido = true;
   }
   if (item->recogido)
