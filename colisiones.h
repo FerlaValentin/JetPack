@@ -1,5 +1,3 @@
-#pragma once
-
 // ESAT Libraries
 #include <esat/window.h>
 #include <esat/draw.h>
@@ -14,6 +12,9 @@
 #include <time.h>
 #include <math.h>
 
+#ifndef COLISIONES_H
+#define COLISIONES_H
+
 namespace COL{
 
     struct vec2
@@ -26,7 +27,6 @@ namespace COL{
         vec2 p1, p2;
     };
 
-    //!El sprite de este struct se usa?
     struct object
     {
         esat::SpriteHandle sprite;
@@ -111,3 +111,5 @@ namespace COL{
     }
 
 }
+
+#endif

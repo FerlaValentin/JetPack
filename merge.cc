@@ -18,6 +18,8 @@ double delta_time;
 
 #include "nave.cc"
 #include "jugador.cc"
+#include "colisiones.h"
+#include "enemigos.h"
 
 // FPS
 unsigned char fps = 25;
