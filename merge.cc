@@ -18,8 +18,8 @@ double delta_time;
 
 #include "nave.cc"
 #include "jugador.cc"
-#include "colisiones.h"
 #include "enemigos.h"
+
 
 // FPS
 unsigned char fps = 25;
@@ -43,7 +43,8 @@ void InitiateFrame()
 
 void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Sprites **spritesItems, Jugador *player,
                  COL::object *gasofa, ItemDrop *itemdrop, esat::SpriteHandle **platform_sprite, TPlatform **g_platforms,
-                esat::SpriteHandle **loading_sprite, TGame *game, esat::SpriteHandle* sprite_lives, Sprites** spritesNave, Nave* nave)
+                esat::SpriteHandle **loading_sprite, TGame *game, esat::SpriteHandle* sprite_lives, Sprites** spritesNave, Nave* nave, 
+                ENE::EnemyManager **mgr)
 {
     esat::WindowInit(kScreenWidth, kScreenHeight);
     esat::WindowSetMouseVisibility(true);
@@ -76,6 +77,10 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     InitGameVariables(game);
     InitLivesSprite(sprite_lives);// Fuente
     LoadFonts();
+
+    //enemigos
+    ENE::InitManager(*mgr,10);
+    ENE::InitVFXSystem();
 }
 
 void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBalas, Jugador player,
@@ -132,7 +137,8 @@ void TestValues(Jugador *player){
 
 void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, bool moverRight, int *frame,
             COL::object &gasofa, ItemDrop *itemdrop, Sprites *spritesItems, TPlatform* g_platforms, 
-            TGame* game, float* timer, float* menu_blink_timer, bool* menu_highlight_white, Nave* nave)
+            TGame* game, float* timer, float* menu_blink_timer, bool* menu_highlight_white, Nave* nave,
+            ENE:: EnemyManager **mgr)
 {
     if(game->current_screen != TScreen::GAME_SCREEN)
         ScreenSelector(game, timer, menu_blink_timer, menu_highlight_white);
@@ -163,6 +169,9 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         LoopPickItems(*player, itemdrop, spritesItems);
 
         MoverNave(nave);
+
+        ENE::UpdateAndDraw(*mgr);
+        ENE::InitVFXSystem();
     }
 }
 
@@ -208,7 +217,7 @@ void FinishFrame()
 }
 
 void FreeAll(Sprites **spritesColores, Sprites **spritesPersonaje, Sprites **spritesItem, Bala **punteroBalas,
-             COL::object *gasofa, ItemDrop *itemdrop)
+             COL::object *gasofa, ItemDrop *itemdrop, ENE::EnemyManager **mgr)
 {
     for (int i = 0; i < 4; ++i)
         esat::SpriteRelease((*spritesColores)[i].sprite);
@@ -231,6 +240,8 @@ void FreeAll(Sprites **spritesColores, Sprites **spritesPersonaje, Sprites **spr
     esat::SpriteRelease(gasofa->sprite);
     esat::SpriteRelease(itemdrop->item_config.sprite);
     FreeAudio();
+    ENE::FreeManager(*mgr);
+    ENE::FreeVFX();
 }
 
 int esat::main(int argc, char **argv)
@@ -244,6 +255,9 @@ int esat::main(int argc, char **argv)
     COL::object prueba_nave;
     ItemDrop itemdrop;
     Nave nave;
+
+    //enemigos
+    ENE::EnemyManager *enemies = nullptr;
 
     // plataformas
     esat::SpriteHandle *platform_sprite = nullptr;
@@ -259,7 +273,7 @@ int esat::main(int argc, char **argv)
     bool menu_highlight_white = true;
 
     InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &gasofa, &itemdrop, &platform_sprite, &g_platforms, &loading_sprite, &game,
-                &sprite_lives, &SpritesNaves, &nave);
+                &sprite_lives, &SpritesNaves, &nave, &enemies);
 
     // Main game loop
     while (esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape))
@@ -268,7 +282,7 @@ int esat::main(int argc, char **argv)
 
         GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, player, &game, &menu_selection_player, &menu_selection_control);
         Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame, gasofa, &itemdrop, spritesItems, g_platforms, &game, &timer,
-                &menu_blink_timer, &menu_highlight_white, &nave);
+                &menu_blink_timer, &menu_highlight_white, &nave, &enemies);
         DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, gasofa, spritesItems, itemdrop, g_platforms, platform_sprite, 
                 game, loading_sprite, menu_selection_player, menu_selection_control, menu_highlight_white, sprite_lives, &nave, SpritesNaves);
 
@@ -277,6 +291,6 @@ int esat::main(int argc, char **argv)
 
     // Destroy window
     esat::WindowDestroy();
-    FreeAll(&spritesColores, &spritesPersonaje, &spritesItems, &punteroBalas, &gasofa, &itemdrop);
+    FreeAll(&spritesColores, &spritesPersonaje, &spritesItems, &punteroBalas, &gasofa, &itemdrop, &enemies);
     return 0;
 }
