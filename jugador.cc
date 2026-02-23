@@ -31,6 +31,7 @@ struct Jugador
   int vidas;
   int puntos;
   int player_id;
+  bool isActive;
   bool muerto;
   float tiempo_aparicion;
   float tiempo_invulnerable;
@@ -133,11 +134,12 @@ void InstanciarPlayer(Jugador *player)
   player->puntos = 0;
   player->vidas = 3;
   player->player_id = 1;
+  player->isActive = true;
 }
 
-void LoadPlayerData(Jugador *player){
-  printf("[DEBUG] Loading player data\n");
-  LoadPlayerDataFromFile(player);
+void LoadPlayerData(Jugador *player, int player_id = 1){
+  printf("[DEBUG] Loading player data for player %d\n", player_id);
+  LoadPlayerDataFromFile(player, player_id);
   printf("[DEBUG] Player data loaded\n");
 }
 
@@ -599,7 +601,7 @@ void ColisionPlayerPlatforma(Jugador &player, TPlatform* g_platforms)
           player.config_colision.colision.p2.y <= p->collision_platform.colision.p2.y)
       {
 
-        player.pos.y = p->collision_platform.position.y - (float)spriteheight;
+        player.pos.y = p->collision_platform.position.y - (float)player.spriteHeight;
         player.volando = false;
       }
       else if (player.config_colision.colision.p1.y <= p->collision_platform.colision.p2.y &&
