@@ -599,7 +599,7 @@ void ColisionPlayerPlatforma(Jugador &player, TPlatform* g_platforms)
           player.config_colision.colision.p2.y <= p->collision_platform.colision.p2.y)
       {
 
-        player.pos.y = p->collision_platform.position.y - (float)player.spriteHeight;
+        player.pos.y = p->collision_platform.position.y - (float)spriteheight;
         player.volando = false;
       }
       else if (player.config_colision.colision.p1.y <= p->collision_platform.colision.p2.y &&
@@ -607,6 +607,18 @@ void ColisionPlayerPlatforma(Jugador &player, TPlatform* g_platforms)
       {
 
         player.pos.y = p->collision_platform.position.y + p->collision_platform.height;
+      }
+      else if (player.config_colision.colision.p2.x <= p->collision_platform.colision.p2.x &&
+               player.config_colision.colision.p2.x >= p->collision_platform.colision.p1.x)
+      {
+
+        player.pos.x = p->collision_platform.colision.p1.x - player.config_colision.width;
+      }
+      else if (player.config_colision.colision.p1.x >= p->collision_platform.colision.p1.x &&
+              player.config_colision.colision.p1.x <= p->collision_platform.colision.p2.x)
+      {
+
+        player.pos.x = p->collision_platform.colision.p2.x;
       }
     }
   }
