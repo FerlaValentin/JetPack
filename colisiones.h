@@ -29,7 +29,6 @@ namespace COL{
 
     struct object
     {
-        esat::SpriteHandle sprite;
         int width, height;
         vec2 position;
         colision colision;
