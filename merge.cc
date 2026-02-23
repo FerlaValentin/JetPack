@@ -35,10 +35,9 @@ void LevelManager(ENE::EnemyManager *mgr){
     switch (level){
         case 1:
         if(!toogle){
-            for(int i=0;i<1;i++){ENE::SpawnEnemy(mgr,ENE::KMeteorites,-32,rand()%360);}
+            for(int i=0;i<3;i++){ENE::SpawnEnemy(mgr,ENE::KMeteorites,-32,rand()%360);}
             toogle = true;
         }
-
         break;
     }
 }
@@ -105,7 +104,7 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     LoadFonts();
 
     //INCLUIR LUEGO
-    ENE::InitManager(*mgr,1);
+    ENE::InitManager(*mgr,10);
     ENE::InitVFXSystem();
 
 }
@@ -198,7 +197,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         MoverNave(nave);
 
         //INCLUIR LUEGO
-        ENE::SpawnEnemy(*mgr,ENE::KAlien,10,200);
+        LevelManager(*mgr);
         ENE::UpdateAndDraw(*mgr, player);
         ENE::DrawActiveVFX();
     }

@@ -54,6 +54,7 @@ namespace ENE{
         ColorType Color;
         int count;
         bool active;
+        bool iscolliding;
         COL::colision col;
     };
 
@@ -96,8 +97,8 @@ namespace ENE{
         }
 
 
-        *((mgr->templates+0)->sprite+0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo1_1_2x.png");
-        *((mgr->templates+0)->sprite+1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo1_2_2x.png");
+        *((mgr->templates+0)->sprite+0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo_1_1_2x.png");
+        *((mgr->templates+0)->sprite+1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo_1_2_2x.png");
 
         *((mgr->templates+1)->sprite+0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo2_1_2x.png");
         *((mgr->templates+1)->sprite+1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo2_2_2x.png");
@@ -205,6 +206,7 @@ namespace ENE{
         for(int i=0;i<mgr->pool_size && !found;i++){
             if(!(mgr->pool+i)->active){
                 (mgr->pool+i)->active = true;
+                (mgr->pool+i)->iscolliding = false;
                 (mgr->pool+i)->type = type;
                 (mgr->pool+i)->position = {x,y};
                 SpeedEnemies((mgr->pool+i));
@@ -329,9 +331,12 @@ namespace ENE{
 
                 esat::DrawSprite(*(t->sprite + frame), e->position.x, e->position.y);
 
-                if(COL::CheckColision(e->col,player->config_colision.colision)){
+                bool collision_now = COL::CheckColision(e->col,player->config_colision.colision);
+                if(collision_now && !e->iscolliding){
                     player->vidas --;
                 }
+                e->iscolliding = collision_now;
+
                 printf("%d\n",player->vidas);
                 EnemiesAI(e,e->col, mgr);
             }
