@@ -143,7 +143,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         ControlarLimitesPantalla(player, punteroBalas);
         //! Cambiar también el tope de la altura para que no toque el HUD
         *frame = ActualizarAnimacionJugador(*player);
-        ColisionPlayerPlatforma(*player, g_platforms);
+
         
         // Pasar vidas y puntos a la interfaz
         UpdateInterface(&player->puntos, &player->vidas, &player->player_id, game);
@@ -161,6 +161,8 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         //! Meter aqui la nave
         LoopGasofa(*player, gasofa, nave);
         LoopPickItems(*player, itemdrop, spritesItems);
+
+        ColisionPlayerPlatforma(*player, g_platforms); // No subir porque da error
 
         MoverNave(nave);
     }
