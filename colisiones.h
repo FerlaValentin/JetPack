@@ -12,6 +12,9 @@
 #include <time.h>
 #include <math.h>
 
+#ifndef COLISIONES_H
+#define COLISIONES_H
+
 namespace COL{
 
     struct vec2
@@ -108,3 +111,5 @@ namespace COL{
     }
 
 }
+
+#endif

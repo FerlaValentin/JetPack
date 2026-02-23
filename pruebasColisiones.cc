@@ -14,14 +14,16 @@
 
 // Group Libraries
 #include "colisiones.h"
+#include "enemigos.h"
 
+ENE::EnemyManager *enemies = (ENE::EnemyManager*)malloc(sizeof(ENE::EnemyManager));
 COL::object test, test2;
 COL::vec2 mymouse;
 
 int esat::main(int argc, char **argv)
 {
 
-    esat::WindowInit(800, 800);
+    esat::WindowInit(256*2,192*2);
     WindowSetMouseVisibility(true);
 
     //////////////////////////////
@@ -36,6 +38,12 @@ int esat::main(int argc, char **argv)
     test2.position.y = 300;
     test2.width = esat::SpriteWidth(test2.sprite);
     test2.height = esat::SpriteHeight(test2.sprite);
+
+    srand(time(NULL));
+    ENE::InitManager(enemies,10);
+    ENE::InitVFXSystem();
+    ENE::SpawnEnemy(enemies,ENE::KMeteorites,-32,rand()%250);
+
     /////////////////////////////
 
     while (esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape))
@@ -45,6 +53,9 @@ int esat::main(int argc, char **argv)
         esat::DrawClear(0, 0, 0);
 
         ////////////////////////////////
+        ENE::UpdateAndDraw(enemies);
+        ENE::DrawActiveVFX();
+
         mymouse = {(float)esat::MousePositionX(), (float)esat::MousePositionY()};
         test2.position = mymouse;
 
@@ -62,19 +73,18 @@ int esat::main(int argc, char **argv)
             printf("A");
         }
 
-        if(COL::WindowsColision(test2.colision,COL::top)){
+        if(COL::WindowsColision(test2.colision,COL::top,0)){
             printf("ARRIBA\n");
         }
-        if(COL::WindowsColision(test2.colision,COL::right)){
+        if(COL::WindowsColision(test2.colision,COL::right,0)){
             printf("DERECHA\n");
         }
-        if(COL::WindowsColision(test2.colision,COL::left)){
+        if(COL::WindowsColision(test2.colision,COL::left,0)){
             printf("IZQUIERDA\n");
         }
-        if(COL::WindowsColision(test2.colision,COL::down)){
+        if(COL::WindowsColision(test2.colision,COL::down,0)){
             printf("ABAJO\n");
         }
-
         ////////////////////////////////
 
         esat::DrawEnd();
@@ -84,6 +94,9 @@ int esat::main(int argc, char **argv)
     /////////////////////////
     esat::SpriteRelease(test.sprite);
     esat::SpriteRelease(test2.sprite);
+
+    ENE::FreeManager(enemies);
+    ENE::FreeVFX();
     /////////////////////////
 
     esat::WindowDestroy();
