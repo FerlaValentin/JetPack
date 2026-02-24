@@ -31,22 +31,150 @@ bool toogle = false;
 
 
 //INCLUIR LUEGO
-void LevelManager(ENE::EnemyManager *mgr){
-    switch (level){
-        case 1:
-        if(!toogle){
-            for(int i=0;i<3;i++){ENE::SpawnEnemy(mgr,ENE::KMeteorites,-32,rand()%360);}
-            toogle = true;
-        }
-        break;
+bool LevelCompleted(Nave *nave){
+    if(nave->pos.y + nave->height * 2 <= nave->height){
+        return true;
+    }else{
+        return false;
     }
 }
 
 //INCLUIR LUEGO
-bool LevelCompleted(){
-    return false;
-}
+void LevelManager(ENE::EnemyManager *mgr, Nave *nave){
+    if(LevelCompleted(nave)){
+        level++;
+        toogle ? !toogle : toogle;
+    }
+    switch (level){
+        case 1:
+        if(!toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KMeteorites,-32,rand()%360);}
+            toogle = true;
+        }
+        break;
 
+        case 2:
+        if(toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KFurballs,-32,rand()%360);}
+            toogle = false;
+        }
+        break;
+
+        case 3:
+        if(!toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KBubbles,-32,rand()%360);}
+            toogle = true;
+        }
+        break;
+
+        case 4:
+        if(toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KJets,0,rand()%360);}
+            toogle = false;
+        }
+        break;
+
+        case 5:
+        if(!toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KUfo,-32,rand()%360);}
+            toogle = true;
+        }
+        break;
+
+        case 6:
+        if(toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KFlower,-32,rand()%344);}
+            toogle = false;
+        }
+        break;
+
+        case 7:
+        if(!toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KDarts,-32,rand()%344);}
+            toogle = true;
+        }
+        break;
+
+        case 8:
+        if(toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KAlien,-32,rand()%344);}
+            toogle = false;
+        }
+        break;
+
+        case 9:
+        if(!toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KMeteorites,-32,rand()%344);}
+            toogle = true;
+        }
+        break;
+
+        case 10:
+        if(toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KFurballs,-32,rand()%344);}
+            toogle = false;
+        }
+        break;
+
+        case 11:
+        if(!toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KBubbles,-32,rand()%344);}
+            toogle = true;
+        }
+        break;
+
+        case 12:
+        if(toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KJets,0,rand()%344);}
+            toogle = false;
+        }
+        break;
+
+        case 13:
+        if(!toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KUfo,-32,rand()%344);}
+            toogle = true;
+        }
+        break;
+
+        case 14:
+        if(toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KFlower,-32,rand()%344);}
+            toogle = false;
+        }
+        break;
+
+        case 15:
+        if(!toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KDarts,-32,rand()%344);}
+            toogle = true;
+        }
+        break;
+
+        case 16:
+        if(toogle){
+            ENE::ResetEnemies(mgr);
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KAlien,-32,rand()%344);}
+            toogle = false;
+        }
+        break;
+    }
+}
 
 void InitiateFrame()
 {
@@ -197,7 +325,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         MoverNave(nave);
 
         //INCLUIR LUEGO
-        LevelManager(*mgr);
+        LevelManager(*mgr, nave);
         ENE::UpdateAndDraw(*mgr, player);
         ENE::DrawActiveVFX();
     }
