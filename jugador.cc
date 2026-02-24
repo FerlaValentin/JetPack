@@ -533,10 +533,10 @@ void SpawnItem(COL::object &item)
 
 void GravedadItem(COL::object &item)
 {
-  const int terrain_height = 16, fuel_height = 32;
-  float speed = 5.0f;
   if(item.position.y < kScreenHeight){
-    if(item.position.y + speed >= kScreenHeight - terrain_height)
+    const int terrain_height = 16, fuel_height = 32;
+    float speed = 5.0f;
+    if(item.position.y + speed >= kScreenHeight - terrain_height - fuel_height)
       item.position.y = kScreenHeight - terrain_height - fuel_height;
     else
       item.position.y += speed;
@@ -553,7 +553,7 @@ void CambiarTipoItem(ItemDrop *item, Sprites *sprites)
 
 void UpdateGasofaPosition(Jugador player, ItemDrop &gasofa)
 {
-  gasofa.item_config.position.x = player.pos.x + player.spriteWidth / 2;
+  gasofa.item_config.position.x = player.pos.x;
   gasofa.item_config.position.y = player.pos.y + player.spriteHeight / 2;
 }
 
@@ -561,12 +561,11 @@ void SpawnGasofaConTimer(ItemDrop &gasofa)
 {
   const float final_timer = 0.0f;
   gasofa.cooldown -= delta_time;
-    if (gasofa.cooldown <= final_timer)
-    {
-      gasofa.cooldown = 5.0f;
-      SpawnItem(gasofa.item_config);
-    }
-  //}
+  if (gasofa.cooldown <= final_timer)
+  {
+    gasofa.cooldown = 5.0f;
+    SpawnItem(gasofa.item_config);
+  }
 }
 
 /*Actualiza la posicion de la gasofa
@@ -581,7 +580,7 @@ void MoveGasofa(Jugador &player, ItemDrop &gasofa){
 }
 
 /*Comprueba si el sprite de la gasolina está a la altura de la nave donde se debe sumar a su contador de gasolina
-  param gasofa El objeto de la gasolina
+  param y_fuel La altura actual del sprite de la gasolina
   Devuelve True si ya está a la altura en la que debe sumarse*/
 bool IsGasofaOnAddingPosition(float y_fuel){
   const int sprites_height = 16;
@@ -591,10 +590,15 @@ bool IsGasofaOnAddingPosition(float y_fuel){
        y_fuel <= kScreenHeight - sprites_height * 3 + gravity_velocity;
 }
 
+/*Lógica que comprueba si la gasolina pasa por el punto de la nave donde la absorba, agrega gasolina al contador de gasolina del cohete
+  y mueve el sprite fuera de la pantalla mientras pasa el tiempo de cooldown
+  param gasofa El objeto de la gasolina
+  param nave El objeto de la nave*/
 void AddFuelToRocket(ItemDrop &gasofa, Nave *nave){
   if(IsGasofaOnAddingPosition(gasofa.item_config.position.y)){ 
     nave->fuelAmount++;
     gasofa.item_config.position.y = kScreenHeight;
+    gasofa.recogido = false;
   }
 }
 
@@ -610,16 +614,13 @@ void LoopGasofa(Jugador &player, ItemDrop &gasofa, Nave *nave)
     }
     if (player.tiene_gasofa)
       if (COL::CheckColision(player.config_colision.colision, nave->nave_config.colision)) player.tiene_gasofa = false;
-
     if(gasofa.recogido == true && player.tiene_gasofa == false) AddFuelToRocket(gasofa, nave);
     if(gasofa.item_config.position.y >= kScreenHeight) SpawnGasofaConTimer(gasofa);
   }
 }
 
-//! El player se queda o se va?
-void ActualizarColisionesItems(Jugador *player, ItemDrop &gasofa, ItemDrop &item, Nave *nave)
+void ActualizarColisionesItems(ItemDrop &gasofa, ItemDrop &item, Nave *nave)
 {
-  // player->config_colision.colision = COL::CreateColision(player->config_colision);
   gasofa.item_config.colision = COL::CreateColision(gasofa.item_config);
   nave->nave_config.colision = COL::CreateColision(nave->nave_config);
   item.item_config.colision = COL::CreateColision(item.item_config);
@@ -677,7 +678,6 @@ void ColisionPlayerPlatforma(Jugador &player, TPlatform *g_platforms)
       else if (player.config_colision.colision.p1.y <= p->collision_platform.colision.p2.y &&
                player.config_colision.colision.p1.y >= p->collision_platform.colision.p1.y)
       {
-
         player.pos.y = p->collision_platform.position.y + p->collision_platform.height;
       }
       else if (player.config_colision.colision.p2.x <= p->collision_platform.colision.p2.x &&
