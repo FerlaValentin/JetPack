@@ -153,7 +153,7 @@ namespace ENE{
             case KMeteorites:
                 if(speedX < 0){speedX*=-1;}
                 if(rand()%2 == 1){
-                    e->speed={speedX,0.3}; 
+                    e->speed={speedX,1}; 
                 }else{
                     e->speed={speedX,0};   
                 }
@@ -169,7 +169,7 @@ namespace ENE{
 
             case KDarts:
                 if(rand()%2 == 1){
-                    e->speed={speedX,0.3}; 
+                    e->speed={speedX,1}; 
                 }else{
                     e->speed={speedX,0};   
                 }
@@ -263,12 +263,12 @@ namespace ENE{
         }
         else if(e->type == KJets) {
             e->count++;
-            if(e->count < 300) {
+            if(e->count < 80) {
                 e->speed.x=0;
-                e->speed.y = sinf(esat::Time() * 0.005f) * 1.0f; 
+                e->speed.y = sinf(esat::Time() * 0.005f) * 2.0f; 
             } 
             else {
-                e->speed.x = 1.0f;
+                e->speed.x = 4.0f;
             }
             if (COL::WindowsColision(ecol, COL::down, -16) || COL::WindowsColision(ecol, COL::top, 0) || COL::WindowsColision(ecol,COL::right,0)) {
                 e->active = false;

@@ -49,7 +49,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave){
         case 1:
         if(!toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KMeteorites,-32,rand()%360);}
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KMeteorites,-32,rand()%344);}
             toogle = true;
         }
         break;
@@ -57,7 +57,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave){
         case 2:
         if(toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KFurballs,-32,rand()%360);}
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KFurballs,-32,rand()%344);}
             toogle = false;
         }
         break;
@@ -65,7 +65,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave){
         case 3:
         if(!toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KBubbles,-32,rand()%360);}
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KBubbles,-32,rand()%344);}
             toogle = true;
         }
         break;
@@ -73,7 +73,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave){
         case 4:
         if(toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KJets,0,rand()%360);}
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KJets,0,rand()%344);}
             toogle = false;
         }
         break;
@@ -81,7 +81,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave){
         case 5:
         if(!toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KUfo,-32,rand()%360);}
+            for(int i=0;i<6;i++){ENE::SpawnEnemy(mgr,ENE::KUfo,-32,rand()%344);}
             toogle = true;
         }
         break;
@@ -175,6 +175,32 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave){
         break;
     }
 }
+
+// INCLUIR LUEGO
+void EnemieAIAdvanced(ENE::EnemyManager *mgr, Jugador *Jugador, TPlatform *g_plat){
+    for(int i = 0; i < mgr->pool_size;i++){
+        ENE::Enemy *e = &(*(mgr->pool+i));
+        if(e->active){
+            for(int j = 0;j<3;j++){
+                if(e->type == ENE::KMeteorites || e->type == ENE::KDarts || e->type == ENE::KJets){
+                    if(COL::CheckColision(e->col,(g_plat+j)->collision_platform.colision)){
+                        e->active = false;
+                        ENE::ExplodeAt(e->position.x,e->position.y,e->Color);
+                        if(e->type = ENE::KJets){
+                            ENE::SpawnEnemy(mgr,e->type,0,rand()%344);
+                        }else{
+                            ENE::SpawnEnemy(mgr,e->type,-32,rand()%344);
+                        }
+                    }
+                }
+                else if(e->type == ENE::KFurballs || e->type == ENE::KBubbles || e->type == ENE::KFlower){
+                    if (COL::CheckColision(e->col,(g_plat+j)->collision_platform.colision)){e->speed.y *= -1;}
+                }
+            }
+        }
+    }
+}
+
 
 void InitiateFrame()
 {
@@ -327,6 +353,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         //INCLUIR LUEGO
         LevelManager(*mgr, nave);
         ENE::UpdateAndDraw(*mgr, player);
+        EnemieAIAdvanced(*mgr,player,g_platforms);
         ENE::DrawActiveVFX();
     }
 }

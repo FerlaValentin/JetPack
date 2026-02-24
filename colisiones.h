@@ -101,6 +101,41 @@ namespace COL{
         return false;
     }
 
+    bool SpecificColision(colision colision1,colision colision2, dir dir){
+    
+        switch(dir){
+            case left:
+            if (colision1.p1.x < colision2.p1.x)
+            {return true;}
+            else
+            {return false;}
+            break;
+
+            case down:
+            if (colision1.p2.y > colision2.p2.y)
+            {return true;}
+            else
+            {return false;}
+            break;
+
+            case top:
+            if (colision1.p1.y < colision2.p1.y)
+            {return true;}
+            else
+            {return false;}
+            break;
+
+            case right:
+            if (colision1.p2.x > colision2.p2.x)
+            {return true;}
+            else
+            {return false;}
+            break;
+        }
+
+        return false;
+    }
+
     void ShowColision(colision colision){
         esat::DrawSetStrokeColor(255,255,255,255);
 
