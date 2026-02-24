@@ -533,11 +533,13 @@ void SpawnItem(COL::object &item)
 
 void GravedadItem(COL::object &item)
 {
+  const int terrain_height = 16, fuel_height = 32;
   float speed = 5.0f;
-  item.position.y += speed;
-  if (item.position.y + 32 >= kScreenHeight - 16)
-  {
-    item.position.y = kScreenHeight - 16 - 32;
+  if(item.position.y < kScreenHeight){
+    if(item.position.y + speed >= kScreenHeight - terrain_height)
+      item.position.y = kScreenHeight - terrain_height - fuel_height;
+    else
+      item.position.y += speed;
   }
 }
 
@@ -555,50 +557,62 @@ void UpdateGasofaPosition(Jugador player, ItemDrop &gasofa)
   gasofa.item_config.position.y = player.pos.y + player.spriteHeight / 2;
 }
 
-void SpawnGasofaConTimer(Jugador &player, ItemDrop &gasofa)
+void SpawnGasofaConTimer(ItemDrop &gasofa)
 {
-  static float timer = 0.0f;
-  const float cooldown = 5.0f;
-
-  //if (!player.gasofa_colocada)
-  //  return;
-  //else
-  //{
-  timer += delta_time;
-    if (timer < cooldown)
+  const float final_timer = 0.0f;
+  gasofa.cooldown -= delta_time;
+    if (gasofa.cooldown <= final_timer)
     {
-      timer = 0.0f;
+      gasofa.cooldown = 5.0f;
       SpawnItem(gasofa.item_config);
     }
   //}
+}
+
+/*Actualiza la posicion de la gasofa
+  param player El objeto del jugador
+  param gasofa El objeto de la gasolina
+*/
+void MoveGasofa(Jugador &player, ItemDrop &gasofa){
+  if(player.tiene_gasofa)
+    UpdateGasofaPosition(player, gasofa);
+  else
+    GravedadItem(gasofa.item_config);
+}
+
+/*Comprueba si el sprite de la gasolina está a la altura de la nave donde se debe sumar a su contador de gasolina
+  param gasofa El objeto de la gasolina
+  Devuelve True si ya está a la altura en la que debe sumarse*/
+bool IsGasofaOnAddingPosition(float y_fuel){
+  const int sprites_height = 16;
+  const float gravity_velocity = 5.0f;
+  //Uso gravity_velocity como un offset por seguridad por si la Y nunca vale (kScreenHeight - sprites_height * 3)
+  return y_fuel >= kScreenHeight - sprites_height * 3 &&
+       y_fuel <= kScreenHeight - sprites_height * 3 + gravity_velocity;
+}
+
+void AddFuelToRocket(ItemDrop &gasofa, Nave *nave){
+  if(IsGasofaOnAddingPosition(gasofa.item_config.position.y)){ 
+    nave->fuelAmount++;
+    gasofa.item_config.position.y = kScreenHeight;
+  }
 }
 
 void LoopGasofa(Jugador &player, ItemDrop &gasofa, Nave *nave)
 {
   if (nave->direccion == Direction::STATIC)
   {
-    const int sprites_height = 16;
-    if (player.tiene_gasofa == false)
-      GravedadItem(gasofa.item_config);
+    MoveGasofa(player, gasofa);
     if (COL::CheckColision(player.config_colision.colision, gasofa.item_config.colision) && gasofa.recogido == false)
     {
       gasofa.recogido = true;
       player.tiene_gasofa = true;
-      UpdateGasofaPosition(player, gasofa);
     }
     if (player.tiene_gasofa)
-    {
-      if (COL::CheckColision(player.config_colision.colision, nave->nave_config.colision))
-      {
-        player.tiene_gasofa = false;
-        // sprites_height es tanto la altura del sprite del terreno como la de la gasofa
-        //if (gasofa.item_config.position.y >= kScreenHeight - sprites_height * 2)
-          nave->fuelAmount++;
-        // ! Revisar
-        // fla
-        SpawnGasofaConTimer(player, gasofa);
-      }
-    }
+      if (COL::CheckColision(player.config_colision.colision, nave->nave_config.colision)) player.tiene_gasofa = false;
+
+    if(gasofa.recogido == true && player.tiene_gasofa == false) AddFuelToRocket(gasofa, nave);
+    if(gasofa.item_config.position.y >= kScreenHeight) SpawnGasofaConTimer(gasofa);
   }
 }
 
