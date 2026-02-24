@@ -31,7 +31,6 @@ struct ParteNave
     esat::Vec2 pos;
     COL::object parteNaveConfig;
     bool recogido;
-    bool primera_colocada;
 };
 
 // definicion funciones agregar luego
@@ -94,12 +93,18 @@ void ActualizarColisionParteNave(ParteNave *parteNave)
         parteNave[i].parteNaveConfig.colision = COL::CreateColision(parteNave[i].parteNaveConfig);
     }
 }
-
-// void ColisionColocarPartes(Nave *nave, ParteNave *parte_nave, Jugador *player)
-// {
-
-//     if (COL::CheckColision(nave->nave_config.colision, parte_nave[0].parteNaveConfig.colision))
-// }
+// Colision de parte con nave.
+// Esta funcion necesitarás ajustarla un poco, te recomiendo que sigas por aqui
+void ColisionColocarPartes(Nave *nave, ParteNave *parte_nave, Jugador *player)
+{
+    for (int i = 0; i < 2; i++)
+    {
+        if ((COL::CheckColision(nave->nave_config.colision, parte_nave[i].parteNaveConfig.colision)) && parte_nave[i].recogido)
+        {
+            parte_nave[i].recogido = false;
+        }
+    }
+}
 
 void ActualizarPosParteNave(ParteNave *parteNave, Jugador *player)
 {
@@ -114,17 +119,23 @@ void ActualizarPosParteNave(ParteNave *parteNave, Jugador *player)
     }
 }
 
-void ColisionPartesNaveJugador(ParteNave *parteNave, Jugador *player)
+void ColisionPartesNaveJugador(ParteNave *parteNave, Jugador *player, bool *primera_colocada)
 {
-    for (int i = 0; i < 2; i++)
+    if (COL::CheckColision(player->config_colision.colision, parteNave[0].parteNaveConfig.colision) && !primera_colocada)
     {
-        if (COL::CheckColision(player->config_colision.colision, parteNave[i].parteNaveConfig.colision))
-        {
-            parteNave[i].recogido = true;
-            printf("Colision objeto \n");
-        }
-        ActualizarPosParteNave(parteNave, player);
+        parteNave[0].recogido = true;
+        *primera_colocada = true;
+        printf("Colision objeto 1\n");
     }
+    if (primera_colocada)
+    {
+        if (COL::CheckColision(player->config_colision.colision, parteNave[1].parteNaveConfig.colision))
+        {
+            parteNave[1].recogido = true;
+            printf("Colision objeto 2\n");
+        }
+    }
+    ActualizarPosParteNave(parteNave, player);
 
     // if(COL::CheckColision(player->config_colision.colision, parteNave[1].parteNaveConfig.colision)){
     //     parteNave[1].parteNaveConfig.position.x = player->pos.x + 32;
@@ -133,8 +144,6 @@ void ColisionPartesNaveJugador(ParteNave *parteNave, Jugador *player)
     COL::ShowColision(parteNave[0].parteNaveConfig.colision);
     COL::ShowColision(parteNave[1].parteNaveConfig.colision);
 }
-
-//
 
 void InitiateFrame()
 {
@@ -267,7 +276,7 @@ void TestValues(Jugador *player)
 
 void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, bool moverRight, int *frame,
             COL::object &gasofa, ItemDrop *itemdrop, Sprites *spritesItems, TPlatform *g_platforms,
-            TGame *game, float *timer, float *menu_blink_timer, bool *menu_highlight_white, Nave *nave)
+            TGame *game, float *timer, float *menu_blink_timer, bool *menu_highlight_white, Nave *nave, bool *primera_colocada)
 {
     if (game->current_screen != TScreen::GAME_SCREEN)
         ScreenSelector(game, timer, menu_blink_timer, menu_highlight_white);
@@ -303,7 +312,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         //
         // Actualziar(parteNave);
         ActualizarColisionParteNave(parteNave);
-        ColisionPartesNaveJugador(parteNave, player);
+        ColisionPartesNaveJugador(parteNave, player, primera_colocada);
     }
 }
 
@@ -337,6 +346,12 @@ void DrawAll(Sprites *spritesColores, Sprites *spritesPersonaje, Bala *punteroBa
 
         //
         DibujarPartesNave(parteNave, spritesNave);
+
+        // debug colisiones
+        COL::ShowColision(nave->nave_config.colision);
+        COL::ShowColision(player.config_colision.colision);
+        COL::ShowColision(parteNave[0].parteNaveConfig.colision);
+        COL::ShowColision(parteNave[1].parteNaveConfig.colision);
     }
 }
 
@@ -404,6 +419,7 @@ int esat::main(int argc, char **argv)
     bool menu_highlight_white = true;
 
     // Partes Nave
+    bool primeraColocada = false;
 
     InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &gasofa, &itemdrop, &platform_sprite, &g_platforms, &loading_sprite, &game,
                 &sprite_lives, &SpritesNaves, &nave);
@@ -415,7 +431,7 @@ int esat::main(int argc, char **argv)
         TestMousePosition();
         GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, player, &game, &menu_selection_player, &menu_selection_control);
         Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame, gasofa, &itemdrop, spritesItems, g_platforms, &game, &timer,
-               &menu_blink_timer, &menu_highlight_white, &nave);
+               &menu_blink_timer, &menu_highlight_white, &nave, &primeraColocada);
         DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, gasofa, spritesItems, itemdrop, g_platforms, platform_sprite,
                 game, loading_sprite, menu_selection_player, menu_selection_control, menu_highlight_white, sprite_lives, &nave, SpritesNaves);
 
