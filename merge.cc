@@ -26,86 +26,109 @@ unsigned char fps = 25;
 double current_time;
 double last_time = 0;
 
-
-
-struct ParteNave{
-  esat::Vec2 pos;
-  COL::object parteNaveConfig;
+struct ParteNave
+{
+    esat::Vec2 pos;
+    COL::object parteNaveConfig;
+    bool recogido;
+    bool primera_colocada;
 };
 
-
-//definicion funciones agregar luego
+// definicion funciones agregar luego
 
 ParteNave *parteNave = nullptr;
 
-void ReservaMemoriaNave(ParteNave **parteNave){
-    *parteNave = (ParteNave*) malloc(sizeof(ParteNave)*3);
+void ReservaMemoriaNave(ParteNave **parteNave)
+{
+    *parteNave = (ParteNave *)malloc(sizeof(ParteNave) * 3);
 }
 
-void InstanciarPartesDeLaNave(ParteNave *parteNave){
+void InstanciarPartesDeLaNave(ParteNave *parteNave)
+{
     int measure = 32;
 
     ParteNave cabeza;
     cabeza.parteNaveConfig.position.x = 105;
-    cabeza.parteNaveConfig.position.y = 150-32;
+    cabeza.parteNaveConfig.position.y = 150 - 32;
     cabeza.parteNaveConfig.height = measure;
     cabeza.parteNaveConfig.width = measure;
     cabeza.parteNaveConfig.colision = COL::CreateColision(cabeza.parteNaveConfig);
+    cabeza.recogido = false;
     parteNave[0] = cabeza;
 
     ParteNave cuerpo;
     cuerpo.parteNaveConfig.position.x = 256;
-    cuerpo.parteNaveConfig.position.y = 180-32;
+    cuerpo.parteNaveConfig.position.y = 180 - 32;
     cuerpo.parteNaveConfig.height = measure;
     cuerpo.parteNaveConfig.width = measure;
     cuerpo.parteNaveConfig.colision = COL::CreateColision(cuerpo.parteNaveConfig);
+    cuerpo.recogido = false;
     parteNave[1] = cuerpo;
 
     ParteNave cola;
-    cola.parteNaveConfig.position.x =  325;
-    cola.parteNaveConfig.position.y =  (kScreenHeight-16)-32;
+    cola.parteNaveConfig.position.x = 325;
+    cola.parteNaveConfig.position.y = (kScreenHeight - 16) - 32;
+    cola.recogido = true;
     parteNave[2] = cola;
 }
 
-
-void DibujarPartesNave(ParteNave *parteNave, Sprites *punteroSprites){
+void DibujarPartesNave(ParteNave *parteNave, Sprites *punteroSprites)
+{
     int height = 32;
 
-    for(int i=0; i<3; i++){
+    for (int i = 0; i < 3; i++)
+    {
         esat::DrawSprite(punteroSprites[12].sprite, parteNave[i].parteNaveConfig.position.x, parteNave[i].parteNaveConfig.position.y);
     }
 
-    for(int i=0; i<3; i++){
+    for (int i = 0; i < 3; i++)
+    {
         esat::DrawSprite(punteroSprites[i].sprite, parteNave[i].parteNaveConfig.position.x, parteNave[i].parteNaveConfig.position.y);
     }
 }
 
-void ActualizarColisionParteNave(ParteNave *parteNave){
-    for(int i=0; i<2; i++){
+void ActualizarColisionParteNave(ParteNave *parteNave)
+{
+    for (int i = 0; i < 2; i++)
+    {
         parteNave[i].parteNaveConfig.colision = COL::CreateColision(parteNave[i].parteNaveConfig);
     }
 }
 
-void ActualizarPosParteNave(ParteNave *parteNave, Jugador *player, int parte, bool jugador_lleva_objeto){
-    
-        printf(" jugador_lleva_objeto : %d \n", jugador_lleva_objeto);
-    if (jugador_lleva_objeto){
-        printf("Actualizar posicion \n");
-        parteNave[parte].parteNaveConfig.position.x = player->pos.x + 32;
-        parteNave[parte].parteNaveConfig.position.y = player->pos.y;
+// void ColisionColocarPartes(Nave *nave, ParteNave *parte_nave, Jugador *player)
+// {
+
+//     if (COL::CheckColision(nave->nave_config.colision, parte_nave[0].parteNaveConfig.colision))
+// }
+
+void ActualizarPosParteNave(ParteNave *parteNave, Jugador *player)
+{
+
+    for (int i = 0; i < 2; i++)
+    {
+        if (parteNave[i].recogido)
+        {
+            parteNave[i].parteNaveConfig.position.x = player->pos.x + 32;
+            parteNave[i].parteNaveConfig.position.y = player->pos.y;
+        }
     }
 }
 
-void ColisionNaveJugador(ParteNave *parteNave, Jugador *player, bool jugador_lleva_objeto){
-    if(COL::CheckColision(player->config_colision.colision, parteNave[0].parteNaveConfig.colision)){
-        jugador_lleva_objeto = true;
-        printf("Colision objeto \n");
+void ColisionPartesNaveJugador(ParteNave *parteNave, Jugador *player)
+{
+    for (int i = 0; i < 2; i++)
+    {
+        if (COL::CheckColision(player->config_colision.colision, parteNave[i].parteNaveConfig.colision))
+        {
+            parteNave[i].recogido = true;
+            printf("Colision objeto \n");
+        }
+        ActualizarPosParteNave(parteNave, player);
     }
-    ActualizarPosParteNave(parteNave, player, 0, jugador_lleva_objeto);
 
     // if(COL::CheckColision(player->config_colision.colision, parteNave[1].parteNaveConfig.colision)){
     //     parteNave[1].parteNaveConfig.position.x = player->pos.x + 32;
-    //     parteNave[1].parteNaveConfig.position.y = player->pos.y;   
+    //     parteNave[1].parteNaveConfig.position.y = player->pos.y;
     // }
     COL::ShowColision(parteNave[0].parteNaveConfig.colision);
     COL::ShowColision(parteNave[1].parteNaveConfig.colision);
@@ -128,10 +151,9 @@ void InitiateFrame()
     esat::DrawClear(0, 0, 0);
 }
 
-
 void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Sprites **spritesItems, Jugador *player,
                  COL::object *gasofa, ItemDrop *itemdrop, esat::SpriteHandle **platform_sprite, TPlatform **g_platforms,
-                esat::SpriteHandle **loading_sprite, TGame *game, esat::SpriteHandle* sprite_lives, Sprites** spritesNave, Nave* nave)
+                 esat::SpriteHandle **loading_sprite, TGame *game, esat::SpriteHandle *sprite_lives, Sprites **spritesNave, Nave *nave)
 {
     esat::WindowInit(kScreenWidth, kScreenHeight);
     esat::WindowSetMouseVisibility(true);
@@ -162,23 +184,20 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     InstanciarItems(itemdrop, *spritesItems);
     InstanciarNave(nave);
     InitGameVariables(game);
-    InitLivesSprite(sprite_lives);// Fuente
+    InitLivesSprite(sprite_lives); // Fuente
     LoadFonts();
 
-
-
-
     //
-    
+
     ReservaMemoriaNave(&parteNave);
     InstanciarPartesDeLaNave(parteNave);
-
 }
 
 void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBalas, Jugador player,
-             TGame* game, int* menu_selection_player, int* menu_selection_control)
+              TGame *game, int *menu_selection_player, int *menu_selection_control)
 {
-    if(game->current_screen == TScreen::GAME_SCREEN){
+    if (game->current_screen == TScreen::GAME_SCREEN)
+    {
         if (!player.muerto)
         {
             *moverLeft = (esat::IsKeyPressed('A') || esat::IsKeyPressed('a'));
@@ -187,57 +206,73 @@ void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBa
             CrearDisparos(punteroBalas, player);
         }
     }
-    if(game->current_screen == TScreen::MAIN_MENU){
-      if (esat::IsKeyPressed('1')) *menu_selection_player = 0;
-      if (esat::IsKeyPressed('2')) *menu_selection_player = 1;
-      if (esat::IsKeyPressed('3')) *menu_selection_control = 0;
-      if (esat::IsKeyPressed('4')) *menu_selection_control = 1;
-      if (esat::IsKeyPressed('5')) {
-        if (*menu_selection_player == 1) {
-          // Save player 2 data
-          Jugador player2;
-          InstanciarPlayer(&player2);
-          player2.player_id = 2;
-          player2.isActive = false;
-          SavePlayerDataToFile(&player, &player2);
-        }else{
-          SavePlayerDataToFile(&player);
+    if (game->current_screen == TScreen::MAIN_MENU)
+    {
+        if (esat::IsKeyPressed('1'))
+            *menu_selection_player = 0;
+        if (esat::IsKeyPressed('2'))
+            *menu_selection_player = 1;
+        if (esat::IsKeyPressed('3'))
+            *menu_selection_control = 0;
+        if (esat::IsKeyPressed('4'))
+            *menu_selection_control = 1;
+        if (esat::IsKeyPressed('5'))
+        {
+            if (*menu_selection_player == 1)
+            {
+                // Save player 2 data
+                Jugador player2;
+                InstanciarPlayer(&player2);
+                player2.player_id = 2;
+                player2.isActive = false;
+                SavePlayerDataToFile(&player, &player2);
+            }
+            else
+            {
+                SavePlayerDataToFile(&player);
+            }
+            game->current_screen = TScreen::GAME_SCREEN;
         }
-        game->current_screen = TScreen::GAME_SCREEN;
-      }
 
-
-      //
-
+        //
     }
 }
 
-void SwitchPlayer(Jugador *player){
-  Jugador tmp;
-  tmp = *player;
-  printf("[DEBUG] Switching player to %d\n", player->player_id == 1 ? 2 : 1);
-  LoadPlayerDataFromFile(player, player->player_id == 1 ? 2 : 1);
-  SavePlayerDataToFile(&tmp, player);
+void SwitchPlayer(Jugador *player)
+{
+    Jugador tmp;
+    tmp = *player;
+    printf("[DEBUG] Switching player to %d\n", player->player_id == 1 ? 2 : 1);
+    LoadPlayerDataFromFile(player, player->player_id == 1 ? 2 : 1);
+    SavePlayerDataToFile(&tmp, player);
 }
 
-//Solo para testear luego se borra
-void TestValues(Jugador *player){
-  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_0)) (*player).puntos += 1;
-  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_1)) (*player).vidas += 1;
-  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_2)) (*player).player_id == 1 ? (*player).player_id = 2 : (*player).player_id = 1;
-  if(esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_3)) (*player).puntos -= 1;
-  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_4)) (*player).vidas -= 1;
+// Solo para testear luego se borra
+void TestValues(Jugador *player)
+{
+    if (esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_0))
+        (*player).puntos += 1;
+    if (esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_1))
+        (*player).vidas += 1;
+    if (esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_2))
+        (*player).player_id == 1 ? (*player).player_id = 2 : (*player).player_id = 1;
+    if (esat::IsSpecialKeyPressed(esat::kSpecialKey_Keypad_3))
+        (*player).puntos -= 1;
+    if (esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_4))
+        (*player).vidas -= 1;
 
-  if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_8)) SwitchPlayer(player);
+    if (esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_8))
+        SwitchPlayer(player);
 }
 
 void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, bool moverRight, int *frame,
-            COL::object &gasofa, ItemDrop *itemdrop, Sprites *spritesItems, TPlatform* g_platforms, 
-            TGame* game, float* timer, float* menu_blink_timer, bool* menu_highlight_white, Nave* nave, bool jugador_lleva_objeto)
+            COL::object &gasofa, ItemDrop *itemdrop, Sprites *spritesItems, TPlatform *g_platforms,
+            TGame *game, float *timer, float *menu_blink_timer, bool *menu_highlight_white, Nave *nave)
 {
-    if(game->current_screen != TScreen::GAME_SCREEN)
+    if (game->current_screen != TScreen::GAME_SCREEN)
         ScreenSelector(game, timer, menu_blink_timer, menu_highlight_white);
-    else{
+    else
+    {
         Ascender_Gravedad(player, ascender);
         ActualizarDisparos(punteroBalas, *player);
         LoopMoverJugador(moverLeft, moverRight, player);
@@ -245,18 +280,18 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         //! Cambiar también el tope de la altura para que no toque el HUD
         *frame = ActualizarAnimacionJugador(*player);
         ColisionPlayerPlatforma(*player, g_platforms);
-        
+
         // Pasar vidas y puntos a la interfaz
         UpdateInterface(&player->puntos, &player->vidas, &player->player_id, game);
         TestValues(player); // @jhony: remove this
-        
+
         if (esat::IsKeyDown('Y') || esat::IsKeyDown('y'))
-        player->muerto = true;
+            player->muerto = true;
         // ! Colisiones
         if (player->colisiona && !player->muerto)
-        ColisionJugador(player); // Actualizar colider a player
+            ColisionJugador(player); // Actualizar colider a player
         if (player->muerto || !player->colisiona)
-        ResetPlayer_OnDead(player);
+            ResetPlayer_OnDead(player);
 
         ActualizarColisionesItems(player, gasofa, *itemdrop, nave);
         //! Meter aqui la nave
@@ -265,25 +300,24 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
 
         MoverNave(nave);
 
-
-
         //
         // Actualziar(parteNave);
         ActualizarColisionParteNave(parteNave);
-        ColisionNaveJugador(parteNave, player, &jugador_lleva_objeto);
+        ColisionPartesNaveJugador(parteNave, player);
     }
 }
 
-void DrawAll(Sprites *spritesColores, Sprites *spritesPersonaje, Bala *punteroBalas, Jugador player, int frame, 
-            COL::object gasofa, Sprites *spritesItems, ItemDrop itemdrop, TPlatform* g_platforms, esat::SpriteHandle* platform_sprite,
-            TGame game, esat::SpriteHandle* loading_sprite, int menu_selection_player, int menu_selection_control, int menu_highlight_white, esat::SpriteHandle sprite_vidas,
-            Nave* nave, Sprites* spritesNave)
+void DrawAll(Sprites *spritesColores, Sprites *spritesPersonaje, Bala *punteroBalas, Jugador player, int frame,
+             COL::object gasofa, Sprites *spritesItems, ItemDrop itemdrop, TPlatform *g_platforms, esat::SpriteHandle *platform_sprite,
+             TGame game, esat::SpriteHandle *loading_sprite, int menu_selection_player, int menu_selection_control, int menu_highlight_white, esat::SpriteHandle sprite_vidas,
+             Nave *nave, Sprites *spritesNave)
 {
-    if(game.current_screen == TScreen::IMAGE)
-      InitialImage(loading_sprite);
-    if(game.current_screen == TScreen::MAIN_MENU)
-      MainMenu(menu_selection_player, menu_selection_control, menu_highlight_white, game, sprite_vidas);
-    if(game.current_screen == TScreen::GAME_SCREEN){
+    if (game.current_screen == TScreen::IMAGE)
+        InitialImage(loading_sprite);
+    if (game.current_screen == TScreen::MAIN_MENU)
+        MainMenu(menu_selection_player, menu_selection_control, menu_highlight_white, game, sprite_vidas);
+    if (game.current_screen == TScreen::GAME_SCREEN)
+    {
         GameScreen(g_platforms, platform_sprite, game, sprite_vidas, player.vidas);
         DibujarDisparos(punteroBalas);
         if (!player.muerto && player.colisiona)
@@ -299,9 +333,7 @@ void DrawAll(Sprites *spritesColores, Sprites *spritesPersonaje, Bala *punteroBa
 
         DibujarGasofa(gasofa, spritesItems, *nave);
         DibujarItems(itemdrop, spritesItems);
-        //DibujarNave(nave, spritesNave);
-
-
+        // DibujarNave(nave, spritesNave);
 
         //
         DibujarPartesNave(parteNave, spritesNave);
@@ -340,7 +372,7 @@ void FreeAll(Sprites **spritesColores, Sprites **spritesPersonaje, Sprites **spr
 
     free(*punteroBalas);
     *punteroBalas = nullptr;
-    
+
     esat::SpriteRelease(gasofa->sprite);
     esat::SpriteRelease(itemdrop->item_config.sprite);
     FreeAudio();
@@ -371,8 +403,7 @@ int esat::main(int argc, char **argv)
     float menu_blink_timer = 0.0f;
     bool menu_highlight_white = true;
 
-    //Partes Nave
-    bool player_lleva_objeto = false;
+    // Partes Nave
 
     InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &gasofa, &itemdrop, &platform_sprite, &g_platforms, &loading_sprite, &game,
                 &sprite_lives, &SpritesNaves, &nave);
@@ -384,8 +415,8 @@ int esat::main(int argc, char **argv)
         TestMousePosition();
         GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, player, &game, &menu_selection_player, &menu_selection_control);
         Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame, gasofa, &itemdrop, spritesItems, g_platforms, &game, &timer,
-                &menu_blink_timer, &menu_highlight_white, &nave, &player_lleva_objeto);
-        DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, gasofa, spritesItems, itemdrop, g_platforms, platform_sprite, 
+               &menu_blink_timer, &menu_highlight_white, &nave);
+        DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, gasofa, spritesItems, itemdrop, g_platforms, platform_sprite,
                 game, loading_sprite, menu_selection_player, menu_selection_control, menu_highlight_white, sprite_lives, &nave, SpritesNaves);
 
         FinishFrame();
