@@ -28,7 +28,7 @@ enum Direction
 {
   UP,
   DOWN,
-  STATIC
+  STATIC,
 };
 
 struct Nave
@@ -106,6 +106,14 @@ void MoverNave(Nave *nave)
             break;
     }
     
+}
+
+bool NaveEstaArriba(Nave *nave){
+  if(nave->pos.y < 20){
+    return true;
+  }else{
+    return false;
+  }
 }
 
 void RellenarFuelNave(Nave *nave)
