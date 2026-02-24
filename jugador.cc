@@ -824,3 +824,97 @@ void ResetPlayer_OnDead(Jugador *player)
   esat::WindowDestroy();
   return 0;
 }*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////// COLISION ITEMS PLATAFORMA //////////////////////////
+/*
+
+entonces en el merge tenemos que poner gplatforme en la llamada a funcion
+  LoopGasofa(*player, gasofa, nave, g_platforms);
+  LoopPickItems(*player, itemdrop, spritesItems, g_platforms);
+
+void LoopGasofa(Jugador &player, COL::object &gasofa, Nave *nave, TPlatform* g_platforms)
+{
+  
+  if(nave->direccion == Direction::STATIC){
+    bool colisionWithPlatform = false;
+    int nPlatform;
+    // detecta colision con plataformas y guarda en caso de ser sierto
+    for(int i = 0; i < 3; ++i)
+    {
+      TPlatform *p = g_platforms + i;
+      if(CheckColision(gasofa.colision, p->collision_platform.colision)){
+        nPlatform = i;
+        colisionWithPlatform = true;
+      }
+    }
+
+    if(colisionWithPlatform){
+      gasofa.colision.p2.y = g_platforms[nPlatform].collision_platform.colision.p1.y+1;
+      gasofa.position.y = gasofa.colision.p2.y - gasofa.height;
+    }
+    else{
+      GravedadItem(gasofa);
+    }
+
+    if (COL::CheckColision(player.config_colision.colision, gasofa.colision))
+    {
+      if(!player.tiene_gasofa){player.puntos += 100;}
+      player.tiene_gasofa = true;
+      UpdateGasofaPosition(player, gasofa);
+    }
+    if (player.tiene_gasofa)
+    {
+      if (COL::CheckColision(player.config_colision.colision, nave->nave_config.colision))
+      {
+        player.tiene_gasofa = false;
+        nave->fuelAmount++;
+        SpawnItem(gasofa);
+      }
+    }
+  }
+}
+
+void LoopPickItems(Jugador &player, ItemDrop *item, Sprites *sprites, TPlatform* g_platforms)
+{
+  static float timer = 0.0f;
+  if (!item->recogido)
+  {
+    bool colisionWithPlatform = false;
+    int nPlatform;
+    // detecta colision con plataformas y guarda en caso de ser sierto
+    for(int i = 0; i < 3; ++i)
+    {
+      TPlatform *p = g_platforms + i;
+      if(CheckColision(item->item_config.colision, p->collision_platform.colision)){
+        nPlatform = i;
+        colisionWithPlatform = true;
+      }
+    }
+
+    if(colisionWithPlatform){
+      item->item_config.colision.p2.y = g_platforms[nPlatform].collision_platform.colision.p1.y+1;
+      item->item_config.position.y = item->item_config.colision.p2.y - item->item_config.height;
+    }
+    else{
+      GravedadItem(item->item_config);
+    }
+  }
+    */
