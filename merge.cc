@@ -69,7 +69,6 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     // INSTANCIAR
     InstanciarBalas(*punteroBalas);
     InstanciarPlayer(player);
-    //! HAY QUE SUSTITUIR PRUEBA_NAVE POR LA NAVE? CREO QUE LA FUNCION INSTANCIA LA NAVE TAMBIEN. IGUAL HAY QUE CAMBIARLO
     InstaciarGasofa_Nave(gasofa, (*spritesItems)[5]);
     AudioInit();
     InstanciarItems(itemdrop, *spritesItems);
@@ -157,8 +156,8 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         if (player->colisiona && !player->muerto)
         if (player->muerto || !player->colisiona)
         ResetPlayer_OnDead(player);
-    
-        ActualizarColisionesItems(player, gasofa, *itemdrop, nave);
+
+        ActualizarColisionesItems(gasofa, *itemdrop, nave);
         LoopGasofa(*player, gasofa, nave);
         LoopPickItems(*player, itemdrop, spritesItems);
         
@@ -196,7 +195,6 @@ void DrawAll(Sprites *spritesColores, Sprites *spritesPersonaje, Bala *punteroBa
             DibujarColoresJugador(spritesColores, player, 3);
             DibujarJugador(spritesPersonaje, player, frame);
         }
-
         DibujarGasofa(gasofa, spritesItems, *nave);
         DibujarItems(itemdrop, spritesItems);
         DibujarNave(nave, spritesNave);
