@@ -72,14 +72,20 @@ namespace ENE{
     VisualEffect *g_fx_pool = nullptr;
     esat::SpriteHandle *g_fx_sprites = nullptr;
 
-    void InitVFXSystem(ENE::VisualEffect** g_fx_pool, esat::SpriteHandle** g_fx_sprites){
-        *g_fx_pool = (VisualEffect*)malloc(20*sizeof(VisualEffect));
-        *g_fx_sprites = (esat::SpriteHandle*)malloc(3*sizeof(esat::SpriteHandle));
+    // Solucion temporal para que funcione el InitVFXSystem
+    // Porque se envian punteros si en este script se usan variables globales?
+    // TODO: fix to use g_fx_pool and g_fx_sprites as global variables
+    void InitVFXSystem(ENE::VisualEffect** g_fx_pool_pointer, esat::SpriteHandle** g_fx_sprites_pointer){
+        *g_fx_pool_pointer = (VisualEffect*)malloc(20*sizeof(VisualEffect));
+        *g_fx_sprites_pointer = (esat::SpriteHandle*)malloc(3*sizeof(esat::SpriteHandle));
 
-        *((*g_fx_sprites)+0) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_1_2x.png");
-        *((*g_fx_sprites)+1) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_2_2x.png");
-        *((*g_fx_sprites)+2) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_3_2x.png");
-        for(int i=0;i<20;i++) ((*g_fx_pool)+i)->active = false;
+        *((*g_fx_sprites_pointer)+0) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_1_2x.png");
+        *((*g_fx_sprites_pointer)+1) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_2_2x.png");
+        *((*g_fx_sprites_pointer)+2) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_3_2x.png");
+        for(int i=0;i<20;i++) ((*g_fx_pool_pointer)+i)->active = false;
+
+        g_fx_pool = *g_fx_pool_pointer;
+        g_fx_sprites = *g_fx_sprites_pointer;
     }
 
     void InitManager(EnemyManager *mgr, int pool_capacity){
@@ -127,6 +133,7 @@ namespace ENE{
     }
 
     void ExplodeAt(float x, float y, ColorType color){
+        if (g_fx_pool == nullptr || g_fx_sprites == nullptr) return;
         bool found = false;
         for(int i=0;i<20 && !found;i++){
             if(!(g_fx_pool+i)->active){
