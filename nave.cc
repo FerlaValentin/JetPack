@@ -74,7 +74,7 @@ void InstanciarNave(Nave *nave)
 {
   const int terrain_height = 16;
   nave->vel = 100;
-  nave->pos.x = kScreenWidth - 100;
+  nave->pos.x = kScreenWidth - 180;
   nave->pos.y = kScreenHeight - (nave->height * 3) - terrain_height;
   nave->fuelAmount = 0;
   nave->direccion = Direction::STATIC;
