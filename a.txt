@@ -1,0 +1,38 @@
+merge
+
+// ESAT Libraries
+#include <esat/window.h>
+#include <esat/draw.h>
+#include <esat/sprite.h>
+#include <esat/input.h>
+#include <esat/time.h>
+
+// Standard libraries
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
+
+const int kScreenWidth = 512;
+const int kScreenHeight = 384;
+double delta_time;
+
+#include "audio.cc"
+#include "colisiones.h"
+#include "nave.cc"
+#include "interface.cc"
+#include "jugador.cc"
+#include "enemigos.h"
+
+audio 
+
+
+#include <esat_extra/soloud/soloud.h>
+#include <esat_extra/soloud/soloud_wav.h>
+
+#ifdef DrawText
+#undef DrawText
+#endif
+
+#pragma once

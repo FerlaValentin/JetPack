@@ -11,7 +11,6 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "colisiones.h"
 #include "interface.cc"
 #include "enemigos.h"
 #include "audio.cc"
