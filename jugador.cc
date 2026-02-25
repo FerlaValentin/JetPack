@@ -311,6 +311,7 @@ void ColisionDisparos(Bala *bala, ENE::EnemyManager *punteroEnemy) // disparos e
       {
         if (CheckColision(bala[i].config_bala.colision, punteroEnemy[j].pool->col))
         {
+          PlayAudio(enemyDies);
           bala[i].activa = false;
           // Sprite explosion, animacion, etc
           printf("colision ENEMIGO !! \n");
