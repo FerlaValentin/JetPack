@@ -503,11 +503,12 @@ void SpawnItem(COL::object &item)
 
 void GravedadItem(COL::object &item)
 {
+  const int terrain_height = 16, item_height = 32;
   float speed = 5.0f;
   item.position.y += speed;
-  if (item.position.y + 32 >= kScreenHeight - 16)
+  if (item.position.y + 32 >= kScreenHeight - terrain_height)
   {
-    item.position.y = kScreenHeight - 16 - 32;
+    item.position.y = kScreenHeight - terrain_height - item_height*2;
   }
 }
 

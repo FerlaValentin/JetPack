@@ -37,6 +37,8 @@ struct ParteNave
 
 ParteNave *parteNave = nullptr;
 
+bool primeraColocada = false;
+
 void ReservaMemoriaNave(ParteNave **parteNave)
 {
     *parteNave = (ParteNave *)malloc(sizeof(ParteNave) * 3);
@@ -70,7 +72,6 @@ void InstanciarPartesDeLaNave(ParteNave *parteNave)
     cola.parteNaveConfig.position.y = (kScreenHeight - 16) - 32;
     cola.parteNaveConfig.height = kScreenHeight;
     cola.parteNaveConfig.width = measure;
-    cola.parteNaveConfig.colision = COL::CreateColision(cola.parteNaveConfig);
     cola.recogido = true;
     parteNave[2] = cola;
 }
@@ -102,10 +103,14 @@ void ActualizarColisionParteNave(ParteNave *parteNave)
 
 void ActualizarColocarNave(Nave *nave, ParteNave *parteNave){
     for(int i=0; i<2; i++){
-        if(parteNave[i].recogido){
-            parteNave[i].parteNaveConfig.position.y = nave->pos.y + ((i)*32);
+        if(!parteNave[i].recogido){
             parteNave[i].parteNaveConfig.position.x = nave->pos.x;
+            parteNave[i].parteNaveConfig.position.y = nave->pos.y + ((i)*32);
+            // while(parteNave[i].parteNaveConfig.position.y != nave->pos.y + ((i)*32)){
+            //     parteNave[i].parteNaveConfig.position.y  += 1;
+            // }
         }
+
     }
 }
 
@@ -113,9 +118,10 @@ void ColisionColocarPartes(Nave *nave, ParteNave *parte_nave, Jugador *player)
 {
     for (int i = 0; i < 2; i++)
     {
-        if ((COL::CheckColision(nave->nave_config.colision, parte_nave[i].parteNaveConfig.colision)) && parte_nave[i].recogido)
+        if ((COL::CheckColision(nave->nave_config.colision, parte_nave[i].parteNaveConfig.colision)) /*&& parte_nave[i].recogido*/)
         {
-            ActualizarColocarNave(nave, parteNave);
+            GravedadItem(parteNave[i].parteNaveConfig);
+            //ActualizarColocarNave(nave, parteNave);
         }
     }
 
@@ -133,34 +139,6 @@ void ActualizarPosParteNave(ParteNave *parteNave, Jugador *player)
         }
     }
 }
-
-// void ColisionPartesNaveJugador(ParteNave *parteNave, Jugador *player, bool *primera_colocada)
-// {
-//     if (COL::CheckColision(player->config_colision.colision, parteNave[0].parteNaveConfig.colision) && !primera_colocada)
-//     {
-//         parteNave[0].recogido = true;
-//         *primera_colocada = true;
-//         printf("Colision objeto 1\n");
-//     }
-//     printf("%d\n", primera_colocada);
-//     if (primera_colocada)
-//     {
-//         if (COL::CheckColision(player->config_colision.colision, parteNave[1].parteNaveConfig.colision))
-//         {
-//             parteNave[1].recogido = true;
-//             printf("Colision objeto 2\n");
-//         }
-//     }
-//     ActualizarPosParteNave(parteNave, player);
-
-//     // if(COL::CheckColision(player->config_colision.colision, parteNave[1].parteNaveConfig.colision)){
-//     //     parteNave[1].parteNaveConfig.position.x = player->pos.x + 32;
-//     //     parteNave[1].parteNaveConfig.position.y = player->pos.y;
-//     // }
-//     COL::ShowColision(parteNave[0].parteNaveConfig.colision);
-//     COL::ShowColision(parteNave[1].parteNaveConfig.colision);
-// }
-
 
 void ColisionPartesNaveJugador(ParteNave *parteNave, Jugador *player, bool &primera_colocada)
 {
@@ -350,11 +328,15 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         MoverNave(nave);
 
         //
-        // Actualziar(parteNave);
+        //
         ActualizarColisionParteNave(parteNave);
+
         ColisionPartesNaveJugador(parteNave, player, *primera_colocada);
+        printf("parte nave pos x [%f], pos y[%f]", parteNave->parteNaveConfig.position.x, parteNave->parteNaveConfig.position.y);
 
         ColisionColocarPartes(nave, parteNave, player);
+        printf("parte nave pos x [%f], pos y[%f]", parteNave->parteNaveConfig.position.x, parteNave->parteNaveConfig.position.y);
+
     }
 }
 
@@ -461,7 +443,6 @@ int esat::main(int argc, char **argv)
     bool menu_highlight_white = true;
 
     // Partes Nave
-    bool primeraColocada = false;
 
     InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &gasofa, &itemdrop, &platform_sprite, &g_platforms, &loading_sprite, &game,
                 &sprite_lives, &SpritesNaves, &nave);
