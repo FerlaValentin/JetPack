@@ -59,7 +59,7 @@ namespace ENE{
     struct EnemyManager{
         Enemy* pool=nullptr;
         int pool_size;
-        EnemyTemplate templates[KTypeCount];
+        EnemyTemplate* templates = nullptr;
     };
 
     struct VisualEffect{
@@ -72,17 +72,18 @@ namespace ENE{
     VisualEffect *g_fx_pool = nullptr;
     esat::SpriteHandle *g_fx_sprites = nullptr;
 
-    void InitVFXSystem(){
-        g_fx_pool = (VisualEffect*)malloc(20*sizeof(VisualEffect));
-        g_fx_sprites = (esat::SpriteHandle*)malloc(3*sizeof(esat::SpriteHandle));
+    void InitVFXSystem(ENE::VisualEffect** g_fx_pool, esat::SpriteHandle** g_fx_sprites){
+        *g_fx_pool = (VisualEffect*)malloc(20*sizeof(VisualEffect));
+        *g_fx_sprites = (esat::SpriteHandle*)malloc(3*sizeof(esat::SpriteHandle));
 
-        *(g_fx_sprites+0) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_1_2x.png");
-        *(g_fx_sprites+1) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_2_2x.png");
-        *(g_fx_sprites+2) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_3_2x.png");
-        for(int i=0;i<20;i++) (g_fx_pool+i)->active = false;
+        *((*g_fx_sprites)+0) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_1_2x.png");
+        *((*g_fx_sprites)+1) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_2_2x.png");
+        *((*g_fx_sprites)+2) = esat::SpriteFromFile("SPRITES/NAVE/nube_polvo_3_2x.png");
+        for(int i=0;i<20;i++) ((*g_fx_pool)+i)->active = false;
     }
 
     void InitManager(EnemyManager *mgr, int pool_capacity){
+        mgr->templates = (ENE::EnemyTemplate*)malloc(ENE::EnemyType::KTypeCount * sizeof(ENE::EnemyTemplate));
 
         for(int i=0; i<KTypeCount; i++){
             if(i == 0 || i == 1 || i == 2){
@@ -304,39 +305,50 @@ namespace ENE{
         free(P);
     }
 
-    void UpdateAndDraw(EnemyManager *mgr){
+    void UpdateEnemies(EnemyManager *mgr){
         for(int i=0;i<mgr->pool_size;i++){
-            Enemy *e = &(*(mgr->pool+i));
+            Enemy *e = (mgr->pool+i);
             if(e->active){
 
                 e->position.y += e->speed.y;
                 e->position.x += e->speed.x;
 
-                ENE::EnemyTemplate *myTemplate = &mgr->templates[e->type];
+                ENE::EnemyTemplate myTemplate = mgr->templates[e->type];
 
                 COL::object tempobj;
                 tempobj.position = e->position;
-                tempobj.width = myTemplate->width;
-                tempobj.height = myTemplate->height;
+                tempobj.width = myTemplate.width;
+                tempobj.height = myTemplate.height;
 
                 e->col = COL::CreateColision(tempobj);
 
-                BGcolor(e->col, e->Color);
+                //BGcolor(e.position, e.Color);
 
-                ENE::EnemyTemplate *t = &mgr->templates[e->type];
-                int frame = (int)(esat::Time() / 200) % t->num_frames;
+                //ENE::EnemyTemplate *t = &mgr->templates[e->type];
+                //int frame = (int)(esat::Time() / 200) % myTemplate.num_frames;
 
-                esat::DrawSprite(*(t->sprite + frame), e->position.x, e->position.y);
+                //esat::DrawSprite(*(myTemplate.sprite + frame), e.position.x, e.position.y);
 
                 EnemiesAI(e,e->col, mgr);
             }
         }
     }
 
-    void DrawActiveVFX(){
+    void DrawEnemies(EnemyManager mgr){
+        for(int i=0;i<mgr.pool_size;i++){
+            Enemy e = *(mgr.pool+i);
+            if(e.active){
+                BGcolor(e.col, e.Color);
+                ENE::EnemyTemplate myTemplate = mgr.templates[e.type];
+                int frame = (int)(esat::Time() / 200) % myTemplate.num_frames;
+                esat::DrawSprite(*(myTemplate.sprite + frame), e.position.x, e.position.y);
+            }
+        }
+    }
+
+    void DrawActiveVFX(ENE::VisualEffect* g_fx_pool, esat::SpriteHandle* g_fx_sprites){
         for(int i=0;i<20;i++){
             VisualEffect *fx = (g_fx_pool + i);
-
             if(fx->active){
                 int frame = (int)((esat::Time() - fx->startTime)/100);
 

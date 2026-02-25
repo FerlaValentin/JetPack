@@ -186,6 +186,7 @@ void InstanciarItems(ItemDrop *item, Sprites *punteroSprites)
   item->cooldown = 5.0f;
   item->recogido = false;
   item->item_config.position.y = kScreenHeight / 2;
+  item->item_config.position.x = 0;
   item->item_config.sprite = punteroSprites[item->tipo].sprite;
   item->item_config.width = esat::SpriteWidth(punteroSprites[0].sprite);
   item->item_config.height = esat::SpriteHeight(punteroSprites[0].sprite);
@@ -522,11 +523,12 @@ void Ascender_Gravedad(Jugador *jugador, bool ascendiendo)
 //              ITEMS
 // _______________________________________
 
-void SpawnItem(COL::object &item)
+void SpawnItem(COL::object &item, Nave nave)
 {
   //! Cambiar por la altura del HUD
   const int hud_height = 50;
-  float x = rand() % (kScreenWidth - item.width);
+  //Que solo spawnee en el espacio que hay a la derecha o a la izquierda de la nave, pero no encima
+  float x = rand() % 2 ? rand() % (int)(kScreenWidth - item.width - (nave.pos.x + nave.nave_config.width)) + (nave.pos.x + nave.nave_config.width) : rand() % (int)(nave.pos.x - item.width);
   item.position.x = x;
   item.position.y = hud_height;
 }
@@ -534,10 +536,10 @@ void SpawnItem(COL::object &item)
 void GravedadItem(COL::object &item)
 {
   if(item.position.y < kScreenHeight){
-    const int terrain_height = 16, fuel_height = 32;
+    const int terrain_height = 16, item_height = 32;
     float speed = 5.0f;
-    if(item.position.y + speed >= kScreenHeight - terrain_height - fuel_height)
-      item.position.y = kScreenHeight - terrain_height - fuel_height;
+    if(item.position.y + speed >= kScreenHeight - terrain_height - item_height)
+      item.position.y = kScreenHeight - terrain_height - item_height;
     else
       item.position.y += speed;
   }
@@ -557,14 +559,14 @@ void UpdateGasofaPosition(Jugador player, ItemDrop &gasofa)
   gasofa.item_config.position.y = player.pos.y + player.spriteHeight / 2;
 }
 
-void SpawnGasofaConTimer(ItemDrop &gasofa)
+void SpawnGasofaConTimer(ItemDrop &gasofa, Nave nave)
 {
   const float final_timer = 0.0f;
   gasofa.cooldown -= delta_time;
   if (gasofa.cooldown <= final_timer)
   {
     gasofa.cooldown = 5.0f;
-    SpawnItem(gasofa.item_config);
+    SpawnItem(gasofa.item_config, nave);
   }
 }
 
@@ -572,11 +574,24 @@ void SpawnGasofaConTimer(ItemDrop &gasofa)
   param player El objeto del jugador
   param gasofa El objeto de la gasolina
 */
-void MoveGasofa(Jugador &player, ItemDrop &gasofa){
+void MoveGasofa(Jugador &player, ItemDrop &gasofa, TPlatform* g_platforms){
   if(player.tiene_gasofa)
     UpdateGasofaPosition(player, gasofa);
-  else
-    GravedadItem(gasofa.item_config);
+  else{
+    bool colisionWithPlatform = false;
+    int nPlatform;for(int i = 0; i < 3; ++i)
+    {
+      TPlatform *p = g_platforms + i;
+      if(CheckColision(gasofa.item_config.colision, p->collision_platform.colision)){
+        nPlatform = i;
+        colisionWithPlatform = true;
+      }
+    }
+    if(colisionWithPlatform)
+      gasofa.item_config.colision.p2.y = g_platforms[nPlatform].collision_platform.colision.p1.y + gasofa.item_config.height + 1;
+    else
+      GravedadItem(gasofa.item_config);
+  }
 }
 
 /*Comprueba si el sprite de la gasolina está a la altura de la nave donde se debe sumar a su contador de gasolina
@@ -602,11 +617,11 @@ void AddFuelToRocket(ItemDrop &gasofa, Nave *nave){
   }
 }
 
-void LoopGasofa(Jugador &player, ItemDrop &gasofa, Nave *nave)
+void LoopGasofa(Jugador &player, ItemDrop &gasofa, Nave *nave, TPlatform* g_platforms)
 {
   if (nave->direccion == Direction::STATIC)
   {
-    MoveGasofa(player, gasofa);
+    MoveGasofa(player, gasofa, g_platforms);
     if (COL::CheckColision(player.config_colision.colision, gasofa.item_config.colision) && gasofa.recogido == false)
     {
       gasofa.recogido = true;
@@ -615,7 +630,7 @@ void LoopGasofa(Jugador &player, ItemDrop &gasofa, Nave *nave)
     if (player.tiene_gasofa)
       if (COL::CheckColision(player.config_colision.colision, nave->nave_config.colision)) player.tiene_gasofa = false;
     if(gasofa.recogido == true && player.tiene_gasofa == false) AddFuelToRocket(gasofa, nave);
-    if(gasofa.item_config.position.y >= kScreenHeight) SpawnGasofaConTimer(gasofa);
+    if(gasofa.item_config.position.y >= kScreenHeight) SpawnGasofaConTimer(gasofa, *nave);
   }
 }
 
@@ -626,12 +641,28 @@ void ActualizarColisionesItems(ItemDrop &gasofa, ItemDrop &item, Nave *nave)
   item.item_config.colision = COL::CreateColision(item.item_config);
 }
 
-void LoopPickItems(Jugador player, ItemDrop *item, Sprites *sprites)
+void LoopPickItems(Jugador player, ItemDrop *item, Sprites *sprites, Nave nave, TPlatform* g_platforms)
 {
   static float timer = 0.0f;
   if (!item->recogido)
   {
-    GravedadItem(item->item_config);
+    bool colisionWithPlatform = false;
+    int nPlatform;
+    // detecta colision con plataformas y guarda en caso de ser Cierto
+    for(int i = 0; i < 3; ++i)
+    {
+      TPlatform *p = g_platforms + i;
+      if(CheckColision(item->item_config.colision, p->collision_platform.colision)){
+        nPlatform = i;
+        colisionWithPlatform = true;
+      }
+    }
+    if(colisionWithPlatform){
+      item->item_config.colision.p2.y = g_platforms[nPlatform].collision_platform.colision.p1.y+1;
+      item->item_config.position.y = item->item_config.colision.p2.y - item->item_config.height;
+    }
+    else
+      GravedadItem(item->item_config);
   }
 
   if (COL::CheckColision(player.config_colision.colision, item->item_config.colision))
@@ -646,7 +677,7 @@ void LoopPickItems(Jugador player, ItemDrop *item, Sprites *sprites)
       timer = 0.0f;
       item->recogido = false;
       CambiarTipoItem(item, sprites);
-      SpawnItem(item->item_config);
+      SpawnItem(item->item_config, nave);
     }
   }
 }

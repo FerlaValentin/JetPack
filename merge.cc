@@ -18,7 +18,7 @@ double delta_time;
 
 #include "nave.cc"
 #include "jugador.cc"
-//#include "enemigos.h"
+#include "enemigos.h"
 
 
 // FPS
@@ -44,7 +44,7 @@ void InitiateFrame()
 void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **punteroBalas, Sprites **spritesItems, Jugador *player,
                 ItemDrop *gasofa, ItemDrop *itemdrop, esat::SpriteHandle **platform_sprite, TPlatform **g_platforms,
                 esat::SpriteHandle **loading_sprite, TGame *game, esat::SpriteHandle* sprite_lives, Sprites** spritesNave, Nave* nave, 
-                ENE::EnemyManager **mgr)
+                ENE::EnemyManager *mgr, ENE::VisualEffect** g_fx_pool, esat::SpriteHandle** g_fx_sprites)
 {
     esat::WindowInit(kScreenWidth, kScreenHeight);
     esat::WindowSetMouseVisibility(true);
@@ -78,8 +78,8 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     LoadFonts();
 
     //enemigos
-    /*ENE::InitManager(*mgr,10);*/
-    ENE::InitVFXSystem();
+    ENE::InitManager(mgr,10);
+    ENE::InitVFXSystem(g_fx_pool, g_fx_sprites);
 }
 
 void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBalas, Jugador player,
@@ -136,7 +136,7 @@ void TestValues(Jugador *player){
 void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, bool moverRight, int *frame,
             ItemDrop &gasofa, ItemDrop *itemdrop, Sprites *spritesItems, TPlatform* g_platforms, 
             TGame* game, float* timer, float* menu_blink_timer, bool* menu_highlight_white, Nave* nave,
-            ENE:: EnemyManager **mgr)
+            ENE:: EnemyManager *mgr, int level)
 {
     if(game->current_screen != TScreen::GAME_SCREEN)
         ScreenSelector(game, timer, menu_blink_timer, menu_highlight_white);
@@ -158,8 +158,9 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         ResetPlayer_OnDead(player);
 
         ActualizarColisionesItems(gasofa, *itemdrop, nave);
-        LoopGasofa(*player, gasofa, nave);
-        LoopPickItems(*player, itemdrop, spritesItems);
+        LoopGasofa(*player, gasofa, nave, g_platforms);
+        LoopPickItems(*player, itemdrop, spritesItems, *nave, g_platforms);
+
         
         LoopMoverJugador(moverLeft, moverRight, player);
         bool isOnPlatform = !player->volando;
@@ -169,8 +170,15 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         AnimationDust(player, isOnPlatform);
 
         MoverNave(nave);
-
-        //ENE::UpdateAndDraw(*mgr);
+        if(level == 1){
+            for(int i=0;i<3;i++){
+                ENE::SpawnEnemy(mgr,ENE::KMeteorites,0,rand()%350);
+            }
+            for(int i=0;i<3;i++){
+                ENE::SpawnEnemy(mgr,ENE::KFurballs,-32,rand()%350);
+            }
+        }
+        ENE::UpdateEnemies(mgr);
         //ENE::InitVFXSystem();
     }
 }
@@ -178,7 +186,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
 void DrawAll(Sprites *spritesColores, Sprites *spritesPersonaje, Bala *punteroBalas, Jugador player, int frame, 
             ItemDrop gasofa, Sprites *spritesItems, ItemDrop itemdrop, TPlatform* g_platforms, esat::SpriteHandle* platform_sprite,
             TGame game, esat::SpriteHandle* loading_sprite, int menu_selection_player, int menu_selection_control, int menu_highlight_white, esat::SpriteHandle sprite_vidas,
-            Nave* nave, Sprites* spritesNave)
+            Nave* nave, Sprites* spritesNave, ENE::EnemyManager mgr, ENE::VisualEffect* g_fx_pool, esat::SpriteHandle* g_fx_sprites)
 {
     if(game.current_screen == TScreen::IMAGE)
       InitialImage(loading_sprite);
@@ -200,7 +208,8 @@ void DrawAll(Sprites *spritesColores, Sprites *spritesPersonaje, Bala *punteroBa
         DibujarGasofa(gasofa, spritesItems, *nave);
         DibujarItems(itemdrop, spritesItems);
         DibujarNave(nave, spritesNave);
-        ENE::DrawActiveVFX();
+        ENE::DrawEnemies(mgr);
+        ENE::DrawActiveVFX(g_fx_pool, g_fx_sprites);
     }
 }
 
@@ -217,7 +226,7 @@ void FinishFrame()
 }
 
 void FreeAll(Sprites **spritesColores, Sprites **spritesPersonaje, Sprites **spritesItem, Bala **punteroBalas,
-             ItemDrop *gasofa, ItemDrop *itemdrop, ENE::EnemyManager **mgr)
+             ItemDrop *gasofa, ItemDrop *itemdrop, ENE::EnemyManager *mgr)
 {
     for (int i = 0; i < 4; ++i)
         esat::SpriteRelease((*spritesColores)[i].sprite);
@@ -240,8 +249,10 @@ void FreeAll(Sprites **spritesColores, Sprites **spritesPersonaje, Sprites **spr
     esat::SpriteRelease(gasofa->item_config.sprite);
     esat::SpriteRelease(itemdrop->item_config.sprite);
     FreeAudio();
-    //ENE::FreeManager(*mgr);
+    
+    // Free enemigos
     ENE::FreeVFX();
+    ENE::FreeManager(mgr);
 }
 
 int esat::main(int argc, char **argv)
@@ -257,7 +268,11 @@ int esat::main(int argc, char **argv)
     Nave nave;
 
     //enemigos
-    ENE::EnemyManager *enemies = nullptr;
+    ENE::EnemyManager enemies;
+    ENE::VisualEffect *g_fx_pool = nullptr;
+    esat::SpriteHandle *g_fx_sprites = nullptr;
+    int level = 1;
+    bool toggle = false;
 
     // plataformas
     esat::SpriteHandle *platform_sprite = nullptr;
@@ -273,7 +288,7 @@ int esat::main(int argc, char **argv)
     bool menu_highlight_white = true;
 
     InitiateAll(&spritesColores, &spritesPersonaje, &punteroBalas, &spritesItems, &player, &gasofa, &itemdrop, &platform_sprite, &g_platforms, &loading_sprite, &game,
-                &sprite_lives, &SpritesNaves, &nave, &enemies);
+                &sprite_lives, &SpritesNaves, &nave, &enemies, &g_fx_pool, &g_fx_sprites);
 
     // Main game loop
     while (esat::WindowIsOpened() && !esat::IsSpecialKeyDown(esat::kSpecialKey_Escape))
@@ -282,9 +297,9 @@ int esat::main(int argc, char **argv)
 
         GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, player, &game, &menu_selection_player, &menu_selection_control);
         Update(&player, ascender, punteroBalas, moverLeft, moverRight, &frame, gasofa, &itemdrop, spritesItems, g_platforms, &game, &timer,
-                &menu_blink_timer, &menu_highlight_white, &nave, &enemies);
+                &menu_blink_timer, &menu_highlight_white, &nave, &enemies, level);
         DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, gasofa, spritesItems, itemdrop, g_platforms, platform_sprite, 
-                game, loading_sprite, menu_selection_player, menu_selection_control, menu_highlight_white, sprite_lives, &nave, SpritesNaves);
+                game, loading_sprite, menu_selection_player, menu_selection_control, menu_highlight_white, sprite_lives, &nave, SpritesNaves, enemies, g_fx_pool, g_fx_sprites);
 
         FinishFrame();
     }
