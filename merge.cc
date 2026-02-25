@@ -26,7 +26,6 @@ double current_time;
 double last_time = 0;
 
 //INCLUIR LUEGO
-int level=1;
 bool toogle = false;
 
 
@@ -40,13 +39,13 @@ bool LevelCompleted(Nave *nave){
 }
 
 //INCLUIR LUEGO
-void LevelManager(ENE::EnemyManager *mgr, Nave *nave){
+void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
     if(LevelCompleted(nave)){
-        level++;
+        player.level++;
         toogle ? !toogle : toogle;
         
     }
-    switch (level){
+    switch (player.level){
         case 1:
         if(!toogle){
             ENE::ResetEnemies(mgr);
@@ -185,11 +184,13 @@ void EnemieAIAdvanced(ENE::EnemyManager *mgr, Jugador *Jugador, TPlatform *g_pla
             for(int j = 0;j<3;j++){
                 if(e->type == ENE::KMeteorites || e->type == ENE::KDarts || e->type == ENE::KJets){
                     if(COL::CheckColision(e->col,(g_plat+j)->collision_platform.colision)){
-                        e->active = false;
-                        ENE::ExplodeAt(e->position.x,e->position.y,e->Color);
                         if(e->type = ENE::KJets){
+                            e->active = false;
+                            ENE::ExplodeAt(e->position.x,e->position.y,e->Color);
                             ENE::SpawnEnemy(mgr,e->type,0,rand()%344);
                         }else{
+                            e->active = false;
+                            ENE::ExplodeAt(e->position.x,e->position.y,e->Color);
                             ENE::SpawnEnemy(mgr,e->type,-32,rand()%344);
                         }
                     }
@@ -352,7 +353,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         MoverNave(nave);
 
         //INCLUIR LUEGO
-        LevelManager(*mgr, nave);
+        LevelManager(*mgr, nave, player);
         ENE::UpdateAndDraw(*mgr, player);
         EnemieAIAdvanced(*mgr,player,g_platforms);
         ENE::DrawActiveVFX();
