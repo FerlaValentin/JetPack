@@ -628,7 +628,10 @@ void LoopGasofa(Jugador &player, ItemDrop &gasofa, Nave *nave, TPlatform* g_plat
       player.tiene_gasofa = true;
     }
     if (player.tiene_gasofa)
-      if (COL::CheckColision(player.config_colision.colision, nave->nave_config.colision)) player.tiene_gasofa = false;
+      if (COL::CheckColision(player.config_colision.colision, nave->nave_config.colision)){
+        player.tiene_gasofa = false;
+        gasofa.item_config.position.x = nave->nave_config.colision.p1.x;
+      }
     if(gasofa.recogido == true && player.tiene_gasofa == false) AddFuelToRocket(gasofa, nave);
     if(gasofa.item_config.position.y >= kScreenHeight) SpawnGasofaConTimer(gasofa, *nave);
   }
