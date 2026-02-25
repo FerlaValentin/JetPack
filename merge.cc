@@ -44,6 +44,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave){
     if(LevelCompleted(nave)){
         level++;
         toogle ? !toogle : toogle;
+        
     }
     switch (level){
         case 1:
