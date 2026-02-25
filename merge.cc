@@ -65,8 +65,12 @@ void InstanciarPartesDeLaNave(ParteNave *parteNave)
     parteNave[1] = cuerpo;
 
     ParteNave cola;
-    cola.parteNaveConfig.position.x = 325;
+    //cola.parteNaveConfig.position.x = 325;
+    cola.parteNaveConfig.position.x = kScreenWidth - 170;
     cola.parteNaveConfig.position.y = (kScreenHeight - 16) - 32;
+    cola.parteNaveConfig.height = kScreenHeight;
+    cola.parteNaveConfig.width = measure;
+    cola.parteNaveConfig.colision = COL::CreateColision(cola.parteNaveConfig);
     cola.recogido = true;
     parteNave[2] = cola;
 }
@@ -95,15 +99,26 @@ void ActualizarColisionParteNave(ParteNave *parteNave)
 }
 // Colision de parte con nave.
 // Esta funcion necesitarás ajustarla un poco, te recomiendo que sigas por aqui
+
+void ActualizarColocarNave(Nave *nave, ParteNave *parteNave){
+    for(int i=0; i<2; i++){
+        if(parteNave[i].recogido){
+            parteNave[i].parteNaveConfig.position.y = nave->pos.y + ((i)*32);
+            parteNave[i].parteNaveConfig.position.x = nave->pos.x;
+        }
+    }
+}
+
 void ColisionColocarPartes(Nave *nave, ParteNave *parte_nave, Jugador *player)
 {
     for (int i = 0; i < 2; i++)
     {
         if ((COL::CheckColision(nave->nave_config.colision, parte_nave[i].parteNaveConfig.colision)) && parte_nave[i].recogido)
         {
-            parte_nave[i].recogido = false;
+            ActualizarColocarNave(nave, parteNave);
         }
     }
+
 }
 
 void ActualizarPosParteNave(ParteNave *parteNave, Jugador *player)
@@ -127,6 +142,7 @@ void ColisionPartesNaveJugador(ParteNave *parteNave, Jugador *player, bool *prim
         *primera_colocada = true;
         printf("Colision objeto 1\n");
     }
+    printf("%d\n", *primera_colocada);
     if (primera_colocada)
     {
         if (COL::CheckColision(player->config_colision.colision, parteNave[1].parteNaveConfig.colision))
@@ -313,6 +329,8 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         // Actualziar(parteNave);
         ActualizarColisionParteNave(parteNave);
         ColisionPartesNaveJugador(parteNave, player, primera_colocada);
+
+        ColisionColocarPartes(nave, parteNave, player);
     }
 }
 
