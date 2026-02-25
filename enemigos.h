@@ -247,7 +247,7 @@ namespace ENE{
         else if(e->type == KUfo) {
             if (e->speed.y < 0) {
                 if (COL::WindowsColision(ecol, COL::top, 0)) {
-                    e->speed.y = 0.5f;
+                    e->speed.y = -2.0f;
                 }
             } 
             if (e->speed.y > 0) {
@@ -255,7 +255,7 @@ namespace ENE{
                 e->speed.x = sinf(esat::Time() * 0.005f) * 1.5f; 
                 
                 if (COL::WindowsColision(ecol, COL::down, -16)) {
-                    e->speed.y = -1.0f;
+                    e->speed.y = -2.0f;
                 }
             }
             if (COL::WindowsColision(ecol,COL::right,100)){e->position.x=-32;}
