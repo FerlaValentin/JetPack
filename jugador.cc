@@ -313,7 +313,8 @@ void ColisionDisparos(Bala *bala, ENE::EnemyManager *punteroEnemy) // disparos e
         if (CheckColision(bala[i].config_bala.colision, punteroEnemy[j].pool->col))
         {
           bala[i].activa = false;
-          // Sprite explosion, animacion, etc
+          punteroEnemy[j].pool.active = false;
+          ENE::ExplodeAt(punteroEnemy[j].pool.position.x, punteroEnemy[j].pool.position.y, punteroEnemy[j].pool.color);
           printf("colision ENEMIGO !! \n");
         }
       }
