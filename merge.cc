@@ -16,9 +16,9 @@ const int kScreenWidth = 512;
 const int kScreenHeight = 384;
 double delta_time;
 
+#include "enemigos.h"
 #include "nave.cc"
 #include "jugador.cc"
-#include "enemigos.h"
 
 
 // FPS
@@ -169,7 +169,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         ColisionPlayerPlatforma(*player, g_platforms); // No subir porque da error
         AnimationDust(player, isOnPlatform);
 
-        MoverNave(nave);
+        MoverNave(nave, *mgr);
         if(level == 1){
             for(int i=0;i<3;i++){
                 ENE::SpawnEnemy(mgr,ENE::KMeteorites,0,rand()%350);
@@ -178,7 +178,14 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
                 ENE::SpawnEnemy(mgr,ENE::KFurballs,-32,rand()%350);
             }
         }
-        ENE::UpdateEnemies(mgr);
+        if(nave->direccion == DOWN){
+            for(int i = 0; i < 10; i++){
+              mgr->pool[i].active = false;
+            }
+        }
+        else{
+            ENE::UpdateEnemies(mgr);
+        }
     }
 }
 

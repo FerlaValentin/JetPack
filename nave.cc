@@ -84,12 +84,12 @@ void InstanciarNave(Nave *nave)
   nave->nave_config.height = kScreenHeight - terrain_height;
 }
 
-void MoverNave(Nave *nave)
+void MoverNave(Nave *nave, ENE::EnemyManager &mgr)
 {
     const int terrain_height = 16;
     if(nave->fuelAmount == 6) nave->direccion = Direction::UP;
     switch (nave->direccion){
-        case Direction::UP:
+      case Direction::UP:
             nave->pos.y -= nave->vel * delta_time;
             if(nave->pos.y + nave->height * 2 <= nave->height){
                 nave->direccion = Direction::DOWN; 
