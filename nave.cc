@@ -74,7 +74,7 @@ void InstanciarNave(Nave *nave)
 {
   const int terrain_height = 16;
   nave->vel = 100;
-  nave->pos.x = kScreenWidth - 100;
+  nave->pos.x = kScreenWidth - 180;
   nave->pos.y = kScreenHeight - (nave->height * 3) - terrain_height;
   nave->fuelAmount = 0;
   nave->direccion = Direction::STATIC;
@@ -84,12 +84,15 @@ void InstanciarNave(Nave *nave)
   nave->nave_config.height = kScreenHeight - terrain_height;
 }
 
-void MoverNave(Nave *nave)
+void MoverNave(Nave *nave, COL::object P, bool* visible)
 {
     const int terrain_height = 16;
-    if(nave->fuelAmount == 6) nave->direccion = Direction::UP;
+    if(nave->fuelAmount == 6 && CheckColision(P.colision, nave->nave_config.colision) && P.colision.p1.y > (kScreenHeight - (32*4))){
+      nave->direccion = Direction::UP;
+      *visible = true;
+    } 
     switch (nave->direccion){
-        case Direction::UP:
+      case Direction::UP:
             nave->pos.y -= nave->vel * delta_time;
             if(nave->pos.y + nave->height * 2 <= nave->height){
                 nave->direccion = Direction::DOWN; 
@@ -102,6 +105,7 @@ void MoverNave(Nave *nave)
             if(nave->pos.y + nave->height * 3 >= kScreenHeight - terrain_height){
                 nave->pos.y = kScreenHeight - terrain_height - nave->height * 3;
                 nave->direccion = Direction::STATIC;
+                *visible = false;
             }
             break;
     }
