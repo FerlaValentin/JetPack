@@ -597,6 +597,8 @@ void ColisionPlayerPlatforma(Jugador &player, TPlatform* g_platforms)
   {
     TPlatform *p = g_platforms + i;
 
+    float offset = 5.0f;
+
     if (CheckColision(player.config_colision.colision, p->collision_platform.colision))
     {
       if (player.config_colision.colision.p2.y >= p->collision_platform.colision.p1.y &&
@@ -627,6 +629,7 @@ void ColisionPlayerPlatforma(Jugador &player, TPlatform* g_platforms)
     }
   }
 }
+
 //if(muerto == true || colisiona == false)
 void ResetPlayer_OnDead(Jugador *player)
 {
