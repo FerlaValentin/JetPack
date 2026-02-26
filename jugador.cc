@@ -141,20 +141,6 @@ void InstanciarPlayer(Jugador *player)
   player->isActive = true;
 }
 
-void LoadPlayerData(Jugador *player, int player_id = 1)
-{
-  printf("[DEBUG] Loading player data for player %d\n", player_id);
-  LoadPlayerDataFromFile(player, player_id);
-  printf("[DEBUG] Player data loaded\n");
-}
-
-void SavePlayerData(Jugador *player)
-{
-  printf("[DEBUG] Saving player data\n");
-  SavePlayerDataToFile(player);
-  printf("[DEBUG] Player data saved\n");
-}
-
 void InstanciarBalas(Bala *bala)
 {
   for (int i = 0; i < 20; i++)
@@ -747,15 +733,17 @@ void ResetPlayer_OnDead(Jugador *player)
 {
   static float timer = 0.0f;
   static float timer_invulnerable = 0.0f;
-  // player->muerto = true;
 
-  // si esta muerto no dibujar ni detectar inputs
+  if (player->muerto && timer > player->tiempo_aparicion)
+    timer = 0.0f;
+
   if (timer <= player->tiempo_aparicion)
   {
     if (!timer)
     {
       player->pos.x = kScreenWidth / 2;
       player->pos.y = kScreenHeight - player->spriteHeight - 16;
+      player->muerto = false;
     }
 
     timer += delta_time;
@@ -763,7 +751,6 @@ void ResetPlayer_OnDead(Jugador *player)
   else
   {
     player->colisiona = false;
-    player->muerto = false;
     timer_invulnerable += delta_time; // 0 1 2 3 4 5
     // no detectar colisiones con enemigos
     if (timer_invulnerable >= player->tiempo_invulnerable)
@@ -772,6 +759,35 @@ void ResetPlayer_OnDead(Jugador *player)
       timer_invulnerable = 0.0f;
       player->colisiona = true;
       // empezar a detectar colisiones con enemigos
+    }
+  }
+}
+
+void SwitchPlayer(Jugador *player){
+  Jugador tmp;
+  tmp = *player;
+  LoadPlayerDataFromFile(player, player->player_id == 1 ? 2 : 1);
+  SavePlayerDataToFile(&tmp, player);
+}
+
+void ColisionPlayerEnemigos(Jugador *player, ENE::EnemyManager *mgr, TGame *game){
+  if (player->colisiona){
+    for(int i = 0; i < mgr->pool_size; i++){
+      ENE::Enemy *e = (mgr->pool + i);
+      if (e->active){
+        if (COL::CheckColision(player->config_colision.colision, e->col) && !player->muerto){
+          player->vidas--;
+          player->muerto = true;
+          player->colisiona = false;
+          e->active = false;
+
+          SwitchPlayer(player);
+          if(player->vidas <= 0){
+            DeletePlayerDataFiles();
+            game->current_screen = TScreen::MAIN_MENU;
+          }
+        }
+      }
     }
   }
 }

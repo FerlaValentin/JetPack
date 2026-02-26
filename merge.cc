@@ -101,26 +101,21 @@ void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBa
       if (esat::IsKeyPressed('3')) *menu_selection_control = 0;
       if (esat::IsKeyPressed('4')) *menu_selection_control = 1;
       if (esat::IsKeyPressed('5')) {
-        /*if (*menu_selection_player == 1) {
+        if (*menu_selection_player == 1) {
           // Save player 2 data
           Jugador player2;
           InstanciarPlayer(&player2);
           player2.player_id = 2;
+          player2.isActive = false;
+          player2.muerto = true;
+          player2.colisiona = false;
           SavePlayerDataToFile(&player, &player2);
         }else{
           SavePlayerDataToFile(&player);
-        }*/
+        }
         game->current_screen = TScreen::GAME_SCREEN;
       }
     }
-}
-
-void SwitchPlayer(Jugador *player){
-  Jugador tmp;
-  tmp = *player;
-  printf("[DEBUG] Switching player to %d\n", player->player_id == 1 ? 2 : 1);
-  LoadPlayerDataFromFile(player, player->player_id == 1 ? 2 : 1);
-  SavePlayerDataToFile(&tmp, player);
 }
 
 //Solo para testear luego se borra
@@ -132,6 +127,8 @@ void TestValues(Jugador *player){
   if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_4)) (*player).vidas -= 1;
 
   if(esat::IsSpecialKeyDown(esat::kSpecialKey_Keypad_8)) SwitchPlayer(player);
+
+  player->puntos++;
 }
 
 void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, bool moverRight, int *frame,
@@ -149,14 +146,13 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         
         // Pasar vidas y puntos a la interfaz
         UpdateInterface(&player->puntos, &player->vidas, &player->player_id, game);
-        //TestValues(player); // @jhony: remove this
+        TestValues(player); // @jhony: remove this
         
         if (esat::IsKeyDown('Y') || esat::IsKeyDown('y'))
         player->muerto = true;
         // ! Colisiones
-        if (player->colisiona && !player->muerto)
         if (player->muerto || !player->colisiona)
-        ResetPlayer_OnDead(player);
+          ResetPlayer_OnDead(player);
 
         ActualizarColisionesItems(gasofa, *itemdrop, nave);
         LoopGasofa(*player, gasofa, nave, g_platforms);
@@ -168,6 +164,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         Ascender_Gravedad(player, ascender);
         ColisionJugador(player); // Actualizar colider a player
         ColisionPlayerPlatforma(*player, g_platforms); // No subir porque da error
+        ColisionPlayerEnemigos(player, mgr, game);
         AnimationDust(player, isOnPlatform);
         ColisionDisparos(punteroBalas, mgr);
         
