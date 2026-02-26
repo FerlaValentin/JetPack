@@ -12,7 +12,6 @@
 #include <time.h>
 #include <math.h>
 #include "interface.cc"
-#include "enemigos.h"
 #include "audio.cc"
 #include <esat_extra/soloud/soloud.h>
 
@@ -307,9 +306,9 @@ void ColisionDisparos(Bala *bala, ENE::EnemyManager *punteroEnemy) // disparos e
   {
     for (int j = 0; j < punteroEnemy->pool_size; j++)
     {
-      if (bala[i].activa && punteroEnemy[j].pool->active)
+      if (bala[i].activa && (*punteroEnemy).pool[j].active)
       {
-        if (CheckColision(bala[i].config_bala.colision, punteroEnemy[j].pool->col))
+        if (CheckColision(bala[i].config_bala.colision, (*punteroEnemy).pool[j].col))
         {
           PlayAudio(enemyDies);
           bala[i].activa = false;
@@ -317,6 +316,22 @@ void ColisionDisparos(Bala *bala, ENE::EnemyManager *punteroEnemy) // disparos e
           printf("colision ENEMIGO !! \n");
         }
       }
+    }
+  }
+}
+
+void EnemiesCollision(ENE::EnemyManager* mgr, Jugador *player, int frame){
+  for(int i = 0; i < mgr->pool_size; ++i){
+    ENE::Enemy *e = mgr->pool+i;
+    if(e->active){
+      bool collision_now = COL::CheckColision(e->col,player->config_colision.colision);
+      if(collision_now && !e->iscolliding){
+        player->vidas --;
+        ENE::ExplodeAt(e->position.x, e->position.y, e->Color);
+        ENE::ExplodeAt(player->pos.x, player->pos.y, static_cast<ENE::ColorType>(frame));
+        player->muerto = true;
+      }
+      e->iscolliding = collision_now;
     }
   }
 }
@@ -844,6 +859,7 @@ void ResetPlayer_OnDead(Jugador *player)
     //GameScreen();
     //ColisionPlayerPlatforma(player);
     // ColisionDisparos();
+    EnemiesCollision();
 
     // Animaciones Dibujado
     int frame = ActualizarAnimacionJugador(player);

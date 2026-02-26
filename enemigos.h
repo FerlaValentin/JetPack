@@ -33,10 +33,11 @@ namespace ENE{
     };
 
     enum ColorType{
+        yellow,
         red,
+        blue,
         green,
         pink,
-        blue,
     };
 
     struct EnemyTemplate{
