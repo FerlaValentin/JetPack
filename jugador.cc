@@ -286,19 +286,22 @@ void ActualizarDisparos(Bala *bala, Jugador player)
 //   }
 // }
 
-void ColisionDisparos(Bala *bala, ENE::EnemyManager *punteroEnemy) // disparos enemigos
+void ColisionDisparos(Bala *bala, ENE::EnemyManager *punteroEnemy)
 {
   for (int i = 0; i < 20; i++)
   {
     for (int j = 0; j < punteroEnemy->pool_size; j++)
     {
-      if (bala[i].activa && (*punteroEnemy).pool[j].active)
+      ENE::Enemy* enemy = &punteroEnemy->pool[j];
+
+      if (bala[i].activa && enemy->active)
       {
-        if (CheckColision(bala[i].config_bala.colision, (*punteroEnemy).pool[j].col))
+        if (CheckColision(bala[i].config_bala.colision, enemy->col))
         {
-          PlayAudio(enemyDies);
           bala[i].activa = false;
-          // Sprite explosion, animacion, etc
+          enemy->active = false;
+
+          ENE::ExplodeAt(enemy->position.x, enemy->position.y, enemy->Color);
           printf("colision ENEMIGO !! \n");
         }
       }
