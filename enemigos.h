@@ -160,14 +160,13 @@ namespace ENE{
                 break;
 
             case KFurballs:
-                e->speed={speedX,speedY};
                 break;
 
             case KBubbles:
-                e->speed={speedX,speedY};
                 break;
 
             case KDarts:
+                if(speedX < 0){speedX*=-1;}
                 if(rand()%2 == 1){
                     e->speed={speedX,1}; 
                 }else{
@@ -176,27 +175,15 @@ namespace ENE{
                 break;
 
             case KJets:
-                if(speedX < 0){
-                    e->speed={0,speedY};
-                }else{
-                    e->speed={0,speedY};
-                }
                 break;
 
             case KUfo:
-                e->speed={speedX,speedY};
                 break;
 
             case KFlower:
-                e->speed={speedX,speedY};
                 break;
 
             case KAlien:
-                if(speedY < 0){
-                    e->speed={speedX,speedY};
-                }else{
-                    e->speed={speedX,-speedY};
-                }
                 break;
         }
     }
@@ -217,66 +204,71 @@ namespace ENE{
         }
     }
     
-    void EnemiesAI(Enemy *e, COL::colision ecol, EnemyManager *mgr){
+    void EnemiesAI(Enemy *e, EnemyManager *mgr){
         if(e->type == KMeteorites || e->type == KDarts){
-            if(e->type == KMeteorites){
-
-            }
-            if (COL::WindowsColision(ecol,COL::down,-16)){
+            if (COL::WindowsColision(e->col,COL::down,-16)){
                 e->active=false;
                 ExplodeAt(e->position.x,e->position.y, e->Color);
-                if(e->type == KMeteorites){
-                    SpawnEnemy(mgr,KMeteorites,-32,rand()%360);
-                }else{
-                    SpawnEnemy(mgr,KDarts,-32,rand()%360);
-                }
-
+                SpawnEnemy(mgr,e->type,-32,rand()%320);
             }     
-            if (COL::WindowsColision(ecol,COL::right,100)){e->position.x=-32;}
+            if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
         }
-        else if(e->type == KFurballs || e->type == KBubbles || e->type == KFlower){
-            if (COL::WindowsColision(ecol,COL::right,100)){e->position.x=-32;}
-            if (COL::WindowsColision(ecol,COL::left,100)){e->position.x=(256*2)+32;}
-            if (COL::WindowsColision(ecol,COL::top,0) || COL::WindowsColision(ecol,COL::down,-16)){e->speed.y *= -1;}
-        }
-        else if(e->type == KAlien){
-            if (COL::WindowsColision(ecol,COL::right,100)){e->position.x=-32;}
-            if (COL::WindowsColision(ecol,COL::left,100)){e->position.x=(256*2)+32;}
-            if (e->position.y < rand()%(192*2)-80 && e->speed.y < 0 || COL::WindowsColision(ecol,COL::down,-16)){e->speed.y *= -1;}
-        }
-        else if(e->type == KUfo) {
-            if (e->speed.y < 0) {
-                if (COL::WindowsColision(ecol, COL::top, 0)) {
-                    e->speed.y = -2.0f;
-                }
-            } 
-            if (e->speed.y > 0) {
+        // else if(e->type == KBubbles){
+        //     if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
+        //     if( rand()%500 == 1){
+        //         e->speed.y *= -1;
+        //     }
+        //     if (COL::WindowsColision(e->col,COL::top,0) || COL::WindowsColision(e->col,COL::down,-16)){e->speed.y *= -1;}
+        // }
+        // else if(e->type == KFurballs || e->type == KBubbles || e->type == KFlower){
+        //     if(e->type == KBubbles){
+        //         int n = rand()%500;
+        //         if(n == 1){
+        //           e->speed.y *= -1;  
+        //         }
+        //     }
+        //     if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
+        //     if (COL::WindowsColision(e->col,COL::left,100)){e->position.x=(256*2)+32;}
+        //     if (COL::WindowsColision(e->col,COL::top,0) || COL::WindowsColision(e->col,COL::down,-16)){e->speed.y *= -1;}
+        // }
+        // else if(e->type == KAlien){
+        //     if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
+        //     if (COL::WindowsColision(e->col,COL::left,100)){e->position.x=(256*2)+32;}
+        //     if (e->position.y < rand()%(192*2)-rand()%(192*2) && e->speed.y < 0 || COL::WindowsColision(e->col,COL::down,-16)){e->speed.y *= -1;}
+        // }
+        // else if(e->type == KUfo){
+        //     if (e->speed.y < 0) {
+        //         if (COL::WindowsColision(e->col, COL::top, 0)) {
+        //             e->speed.y *= -1;
+        //         }
+        //     } 
+        //     if (e->speed.y > 0) {
 
-                e->speed.x = sinf(esat::Time() * 0.005f) * 1.5f; 
+        //         e->speed.x = sinf(esat::Time() * 0.005f) * 5.0f; 
                 
-                if (COL::WindowsColision(ecol, COL::down, -16)) {
-                    e->speed.y = -2.0f;
-                }
-            }
-            if (COL::WindowsColision(ecol,COL::right,100)){e->position.x=-32;}
-            if (COL::WindowsColision(ecol,COL::left,100)){e->position.x=(256*2)+32;}
-        }
-        else if(e->type == KJets) {
-            e->count++;
-            if(e->count < 80) {
-                e->speed.x=0;
-                e->speed.y = sinf(esat::Time() * 0.005f) * 2.0f; 
-            } 
-            else {
-                e->speed.x = 4.0f;
-            }
-            if (COL::WindowsColision(ecol, COL::down, -16) || COL::WindowsColision(ecol, COL::top, 0) || COL::WindowsColision(ecol,COL::right,0)) {
-                e->active = false;
-                ExplodeAt(e->position.x, e->position.y, e->Color);
-                SpawnEnemy(mgr, KJets, 0, rand() % 360);
-                e->count = 0;
-            }
-        }
+        //         if (COL::WindowsColision(e->col, COL::down, -16)) {
+        //             e->speed.y *= -1;
+        //         }
+        //     }
+        //     if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
+        //     if (COL::WindowsColision(e->col,COL::left,100)){e->position.x=(256*2)+32;}
+        // }
+        // else if(e->type == KJets) {
+        //     e->count++;
+        //     if(e->count < 80) {
+        //         e->speed.x=0;
+        //         e->speed.y = sinf(esat::Time() * 0.005f) * 2.0f; 
+        //     } 
+        //     else {
+        //         e->speed.x = 4.0f;
+        //     }
+        //     if (COL::WindowsColision(e->col, COL::down, -16) || COL::WindowsColision(e->col, COL::top, 0) || COL::WindowsColision(e->col,COL::right,0)) {
+        //         e->active = false;
+        //         ExplodeAt(e->position.x, e->position.y, e->Color);
+        //         SpawnEnemy(mgr, KJets, 0, rand() % 320);
+        //         e->count = 0;
+        //     }
+        // }
     }
 
     void BGcolor(COL::colision col, ColorType type){
@@ -337,8 +329,7 @@ namespace ENE{
                 }
                 e->iscolliding = collision_now;
 
-                printf("%d\n",player->vidas);
-                EnemiesAI(e,e->col, mgr);
+                EnemiesAI(e, mgr);
             }
         }
     }
