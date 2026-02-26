@@ -17,10 +17,9 @@ const int kScreenHeight = 384;
 double delta_time;
 
 #include "colisiones.h"
-#include "enemigos.h"
 #include "nave.cc"
+#include "enemigos.h"
 #include "jugador.cc"
-
 
 // FPS
 unsigned char fps = 25;
@@ -134,7 +133,7 @@ void TestValues(Jugador *player){
 void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, bool moverRight, int *frame,
             ItemDrop &gasofa, ItemDrop *itemdrop, Sprites *spritesItems, TPlatform* g_platforms, 
             TGame* game, float* timer, float* menu_blink_timer, bool* menu_highlight_white, Nave* nave,
-            ENE:: EnemyManager *mgr, int level)
+            ENE::EnemyManager *mgr, int level)
 {
     if(game->current_screen != TScreen::GAME_SCREEN)
         ScreenSelector(game, timer, menu_blink_timer, menu_highlight_white);
@@ -148,8 +147,6 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         UpdateInterface(&player->puntos, &player->vidas, &player->player_id, game);
         TestValues(player); // @jhony: remove this
         
-        if (esat::IsKeyDown('Y') || esat::IsKeyDown('y'))
-        player->muerto = true;
         // ! Colisiones
         if (player->muerto || !player->colisiona)
           ResetPlayer_OnDead(player);
@@ -184,6 +181,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         }
         else{
             ENE::UpdateEnemies(mgr);
+            EnemiesCollision(mgr, player, *frame);
         }
     }
 }
