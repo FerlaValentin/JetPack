@@ -306,16 +306,30 @@ void ColisionDisparos(Bala *bala, ENE::EnemyManager *punteroEnemy) // disparos e
   }
 }
 
-void EnemiesCollision(ENE::EnemyManager* mgr, Jugador *player, int frame){
+void SwitchPlayer(Jugador *player){
+  Jugador tmp;
+  tmp = *player;
+  LoadPlayerDataFromFile(player, player->player_id == 1 ? 2 : 1);
+  SavePlayerDataToFile(&tmp, player);
+}
+
+void EnemiesCollision(ENE::EnemyManager* mgr, Jugador *player, int frame, TGame *game){
   for(int i = 0; i < mgr->pool_size; ++i){
     ENE::Enemy *e = mgr->pool+i;
     if(e->active){
       bool collision_now = COL::CheckColision(e->col,player->config_colision.colision);
       if(collision_now && !e->iscolliding){
-        player->vidas --;
+        player->vidas--;
         ENE::ExplodeAt(e->position.x, e->position.y, e->Color);
         ENE::ExplodeAt(player->pos.x, player->pos.y, static_cast<ENE::ColorType>(frame));
         player->muerto = true;
+        player->colisiona = false;
+
+        SwitchPlayer(player);
+        if(player->vidas <= 0){
+          DeletePlayerDataFiles();
+          game->current_screen = TScreen::MAIN_MENU;
+        }
       }
       e->iscolliding = collision_now;
     }
@@ -774,35 +788,6 @@ void ResetPlayer_OnDead(Jugador *player)
       timer_invulnerable = 0.0f;
       player->colisiona = true;
       // empezar a detectar colisiones con enemigos
-    }
-  }
-}
-
-void SwitchPlayer(Jugador *player){
-  Jugador tmp;
-  tmp = *player;
-  LoadPlayerDataFromFile(player, player->player_id == 1 ? 2 : 1);
-  SavePlayerDataToFile(&tmp, player);
-}
-
-void ColisionPlayerEnemigos(Jugador *player, ENE::EnemyManager *mgr, TGame *game){
-  if (player->colisiona){
-    for(int i = 0; i < mgr->pool_size; i++){
-      ENE::Enemy *e = (mgr->pool + i);
-      if (e->active){
-        if (COL::CheckColision(player->config_colision.colision, e->col) && !player->muerto){
-          player->vidas--;
-          player->muerto = true;
-          player->colisiona = false;
-          e->active = false;
-
-          SwitchPlayer(player);
-          if(player->vidas <= 0){
-            DeletePlayerDataFiles();
-            game->current_screen = TScreen::MAIN_MENU;
-          }
-        }
-      }
     }
   }
 }

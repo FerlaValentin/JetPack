@@ -161,7 +161,6 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         Ascender_Gravedad(player, ascender);
         ColisionJugador(player); // Actualizar colider a player
         ColisionPlayerPlatforma(*player, g_platforms); // No subir porque da error
-        ColisionPlayerEnemigos(player, mgr, game);
         AnimationDust(player, isOnPlatform);
         ColisionDisparos(punteroBalas, mgr);
         
@@ -181,7 +180,7 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         }
         else{
             ENE::UpdateEnemies(mgr);
-            EnemiesCollision(mgr, player, *frame);
+            EnemiesCollision(mgr, player, *frame, game);
         }
     }
 }
