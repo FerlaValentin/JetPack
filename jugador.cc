@@ -299,7 +299,7 @@ void EnemiesCollision(ENE::EnemyManager* mgr, Jugador *player, int frame, TGame 
       if(e->active){
         bool collision_now = COL::CheckColision(e->col,player->config_colision.colision);
         if(collision_now && !e->iscolliding){
-          // player->vidas--;
+          player->vidas--;
           ENE::ExplodeAt(e->position.x, e->position.y, e->Color, g_fx_pool_pointer, g_fx_sprites_pointer);
           ENE::ExplodeAt(player->pos.x, player->pos.y, static_cast<ENE::ColorType>(frame), g_fx_pool_pointer, g_fx_sprites_pointer);
           player->muerto = true;
