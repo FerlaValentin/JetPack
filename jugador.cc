@@ -257,7 +257,7 @@ void ActualizarDisparos(Bala *bala, Jugador player)
   }
 }
 
-void ColisionDisparos(Bala *bala, ENE::EnemyManager *punteroEnemy)
+void ColisionDisparos(Bala *bala, ENE::EnemyManager *punteroEnemy, ENE::VisualEffect* g_fx_pool_pointer, esat::SpriteHandle* g_fx_sprites_pointer)
 {
   for (int i = 0; i < 20; i++)
   {
@@ -271,7 +271,7 @@ void ColisionDisparos(Bala *bala, ENE::EnemyManager *punteroEnemy)
         {
           bala[i].activa = false;
           enemy->active = false;
-          ENE::ExplodeAt(enemy->position.x, enemy->position.y, enemy->Color);
+          ENE::ExplodeAt(enemy->position.x, enemy->position.y, enemy->Color, g_fx_pool_pointer, g_fx_sprites_pointer);
           if (enemy->type == ENE::KJets) {
             ENE::SpawnEnemy(punteroEnemy, enemy->type, 0, rand() % 320);
           } else {
@@ -291,7 +291,7 @@ void SwitchPlayer(Jugador *player){
   SavePlayerDataToFile(&tmp, player);
 }
 
-void EnemiesCollision(ENE::EnemyManager* mgr, Jugador *player, int frame, TGame *game){
+void EnemiesCollision(ENE::EnemyManager* mgr, Jugador *player, int frame, TGame *game, ENE::VisualEffect* g_fx_pool_pointer, esat::SpriteHandle* g_fx_sprites_pointer){
   if (!player->muerto && player->colisiona)
   {
     for(int i = 0; i < mgr->pool_size; ++i){
@@ -300,8 +300,8 @@ void EnemiesCollision(ENE::EnemyManager* mgr, Jugador *player, int frame, TGame 
         bool collision_now = COL::CheckColision(e->col,player->config_colision.colision);
         if(collision_now && !e->iscolliding){
           // player->vidas--;
-          ENE::ExplodeAt(e->position.x, e->position.y, e->Color);
-          ENE::ExplodeAt(player->pos.x, player->pos.y, static_cast<ENE::ColorType>(frame));
+          ENE::ExplodeAt(e->position.x, e->position.y, e->Color, g_fx_pool_pointer, g_fx_sprites_pointer);
+          ENE::ExplodeAt(player->pos.x, player->pos.y, static_cast<ENE::ColorType>(frame), g_fx_pool_pointer, g_fx_sprites_pointer);
           player->muerto = true;
           player->colisiona = false;
   
@@ -693,14 +693,14 @@ void ColisionJugador(Jugador *player)
   player->config_colision.colision = COL::CreateColision(player->config_colision);
 }
 
-void AnimationDust(Jugador *player, bool isOnPlatform)
+void AnimationDust(Jugador *player, bool isOnPlatform, ENE::VisualEffect* g_fx_pool_pointer, esat::SpriteHandle* g_fx_sprites_pointer)
 {
   if (isOnPlatform && player->volando) {
     float explode_x = player->pos.x + (player->spriteWidth * 0.5f) - 24.0f;
     float explode_y = player->pos.y + player->spriteHeight - 32.0f;
     ENE::ColorType color = (ENE::ColorType)(rand() % 4);
     
-    ENE::ExplodeAt(explode_x, explode_y, color);
+    ENE::ExplodeAt(explode_x, explode_y, color, g_fx_pool_pointer, g_fx_sprites_pointer);
   }
 }
 
