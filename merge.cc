@@ -28,6 +28,7 @@ double last_time = 0;
 //INCLUIR LUEGO
 int level = 1;
 bool toogle = false;
+const int numenemies = 6;
 
 
 //INCLUIR LUEGO
@@ -50,7 +51,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 1:
         if(!toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KBubbles,0,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KMeteorites,-32,rand()%320);}
             toogle = true;
         }
         break;
@@ -58,7 +59,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 2:
         if(toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KFurballs,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KFurballs,-32,rand()%320);}
             toogle = false;
         }
         break;
@@ -66,7 +67,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 3:
         if(!toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KBubbles,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KBubbles,-32,rand()%320);}
             toogle = true;
         }
         break;
@@ -74,7 +75,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 4:
         if(toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KJets,0,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KJets,0,rand()%320);}
             toogle = false;
         }
         break;
@@ -82,7 +83,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 5:
         if(!toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KUfo,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KUfo,-32,rand()%320);}
             toogle = true;
         }
         break;
@@ -90,7 +91,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 6:
         if(toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KFlower,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KFlower,-32,rand()%320);}
             toogle = false;
         }
         break;
@@ -98,7 +99,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 7:
         if(!toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KDarts,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KDarts,-32,rand()%320);}
             toogle = true;
         }
         break;
@@ -106,7 +107,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 8:
         if(toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KAlien,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KAlien,-32,rand()%320);}
             toogle = false;
         }
         break;
@@ -114,7 +115,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 9:
         if(!toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KMeteorites,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KMeteorites,-32,rand()%320);}
             toogle = true;
         }
         break;
@@ -122,7 +123,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 10:
         if(toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KFurballs,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KFurballs,-32,rand()%320);}
             toogle = false;
         }
         break;
@@ -130,7 +131,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 11:
         if(!toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KBubbles,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KBubbles,-32,rand()%320);}
             toogle = true;
         }
         break;
@@ -138,7 +139,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 12:
         if(toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KJets,0,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KJets,0,rand()%320);}
             toogle = false;
         }
         break;
@@ -146,7 +147,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 13:
         if(!toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KUfo,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KUfo,-32,rand()%320);}
             toogle = true;
         }
         break;
@@ -154,7 +155,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 14:
         if(toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KFlower,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KFlower,-32,rand()%320);}
             toogle = false;
         }
         break;
@@ -162,7 +163,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 15:
         if(!toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KDarts,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KDarts,-32,rand()%320);}
             toogle = true;
         }
         break;
@@ -170,7 +171,7 @@ void LevelManager(ENE::EnemyManager *mgr, Nave *nave, Jugador *player){
         case 16:
         if(toogle){
             ENE::ResetEnemies(mgr);
-            for(int i=0;i<10;i++){ENE::SpawnEnemy(mgr,ENE::KAlien,-32,rand()%320);}
+            for(int i=0;i<numenemies;i++){ENE::SpawnEnemy(mgr,ENE::KAlien,-32,rand()%320);}
             toogle = false;
         }
         break;
@@ -190,7 +191,87 @@ void EnemieAIAdvanced(ENE::EnemyManager *mgr, Jugador *Jugador, TPlatform *g_pla
                             ENE::SpawnEnemy(mgr,e->type,-32,rand()%320);
                     }
                 }
-                COL::ShowColision((g_plat+j)->collision_platform.colision);
+                else if(e-> type == ENE::KFlower || e-> type == ENE::KFurballs || e-> type == ENE::KBubbles){
+                    if(COL::CheckColision(e->col, (g_plat+j)->collision_platform.colision)){
+                        if(COL::SpecificColision(e->col, (g_plat+j)->collision_platform.colision, COL::top)){
+                            if(e->speed.y > 0) {e->speed.y *= -1;}
+                        } 
+                        else if(COL::SpecificColision(e->col, (g_plat+j)->collision_platform.colision, COL::down)){
+                            if(e->speed.y < 0) {e->speed.y *= -1;}
+                        }
+
+                        if(COL::SpecificColision(e->col, (g_plat+j)->collision_platform.colision, COL::left)){
+                            if(e->speed.x > 0) {e->speed.x *= -1;}
+                        } 
+                        else if(COL::SpecificColision(e->col, (g_plat+j)->collision_platform.colision, COL::right)){
+                            if(e->speed.x < 0) {e->speed.x *= -1;}
+                        }
+                    }
+                }
+                else if(e->type == ENE::KUfo || e->type == ENE::KAlien){
+
+                    bool impactado = false;
+
+                    if(COL::CheckColision(e->col, (g_plat+j)->collision_platform.colision)){
+                        impactado = true;
+                        
+                        if(COL::SpecificColision(e->col, (g_plat+j)->collision_platform.colision, COL::top) && e->speed.y > 0) {
+                            e->speed.y *= -1.5f;
+                        } 
+                        else if(COL::SpecificColision(e->col, (g_plat+j)->collision_platform.colision, COL::down) && e->speed.y < 0) {
+                            e->speed.y *= -1.5f;
+                        }
+                
+                        if(COL::SpecificColision(e->col, (g_plat+j)->collision_platform.colision, COL::left) && e->speed.x > 0) {
+                            e->speed.x *= -1.5f;
+                        } 
+                        else if(COL::SpecificColision(e->col, (g_plat+j)->collision_platform.colision, COL::right) && e->speed.x < 0) {
+                            e->speed.x *= -1.5f;
+                        }
+
+                        e->count = 15; 
+                    }
+
+                    if (e->count > 0){
+                        e->count--;
+                    } 
+                    else{
+
+                        COL::vec2 vecdirector = {
+                            Jugador->pos.x - e->position.x,
+                            Jugador->pos.y - e->position.y,
+                        };
+
+                        float distance = sqrtf((vecdirector.x * vecdirector.x) + (vecdirector.y * vecdirector.y));
+                        float speedLimit = ((float)rand() / (float)RAND_MAX) + 2.0f;
+
+                        if(distance > 5.0f) {
+                            e->speed.x = (vecdirector.x / distance) * speedLimit;
+                            e->speed.y = (vecdirector.y / distance) * speedLimit;
+                        } else {
+                            e->speed.x = 0;
+                            e->speed.y = 0;
+                        }
+                    }
+                }
+                else if(e->type == ENE::KJets){
+                    COL::vec2 vecdirector = {
+                        0,
+                        Jugador->pos.y - e->position.y,
+                    };
+
+                    float distance = sqrtf((vecdirector.x * vecdirector.x) + (vecdirector.y * vecdirector.y));
+                    float speedLimit = ((float)rand() / (float)RAND_MAX) + 0.5f;
+                    if(e->count > 80){
+                        e->speed.y = (vecdirector.y / distance) * speedLimit;
+                    }
+
+                    if(COL::CheckColision(e->col,(g_plat+j)->collision_platform.colision)){
+                        e->active = false;
+                        ENE::ExplodeAt(e->position.x,e->position.y,e->Color);
+                        ENE::SpawnEnemy(mgr,e->type,-0,rand()%320);
+                    }
+                }
             }
         }
     }
@@ -350,7 +431,6 @@ void Update(Jugador *player, bool ascender, Bala *punteroBalas, bool moverLeft, 
         ENE::UpdateAndDraw(*mgr, player);
         EnemieAIAdvanced(*mgr,player,g_platforms);
         ENE::DrawActiveVFX();
-        HowManyEnemies(*mgr);
     }
 }
 

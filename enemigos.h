@@ -38,6 +38,7 @@ namespace ENE{
         green,
         pink,
         blue,
+        white,
     };
 
     struct EnemyTemplate{
@@ -160,9 +161,11 @@ namespace ENE{
                 break;
 
             case KFurballs:
+                e->speed={speedX,speedY};
                 break;
 
             case KBubbles:
+                e->speed={speedX,speedY};
                 break;
 
             case KDarts:
@@ -175,15 +178,19 @@ namespace ENE{
                 break;
 
             case KJets:
+                e->speed={0,speedY};
                 break;
 
             case KUfo:
+                e->speed={speedX,speedY};
                 break;
 
             case KFlower:
+                e->speed={speedX,speedY};
                 break;
 
             case KAlien:
+                e->speed={speedX,speedY};
                 break;
         }
     }
@@ -213,62 +220,40 @@ namespace ENE{
             }     
             if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
         }
-        // else if(e->type == KBubbles){
-        //     if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
-        //     if( rand()%500 == 1){
-        //         e->speed.y *= -1;
-        //     }
-        //     if (COL::WindowsColision(e->col,COL::top,0) || COL::WindowsColision(e->col,COL::down,-16)){e->speed.y *= -1;}
-        // }
-        // else if(e->type == KFurballs || e->type == KBubbles || e->type == KFlower){
-        //     if(e->type == KBubbles){
-        //         int n = rand()%500;
-        //         if(n == 1){
-        //           e->speed.y *= -1;  
-        //         }
-        //     }
-        //     if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
-        //     if (COL::WindowsColision(e->col,COL::left,100)){e->position.x=(256*2)+32;}
-        //     if (COL::WindowsColision(e->col,COL::top,0) || COL::WindowsColision(e->col,COL::down,-16)){e->speed.y *= -1;}
-        // }
-        // else if(e->type == KAlien){
-        //     if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
-        //     if (COL::WindowsColision(e->col,COL::left,100)){e->position.x=(256*2)+32;}
-        //     if (e->position.y < rand()%(192*2)-rand()%(192*2) && e->speed.y < 0 || COL::WindowsColision(e->col,COL::down,-16)){e->speed.y *= -1;}
-        // }
-        // else if(e->type == KUfo){
-        //     if (e->speed.y < 0) {
-        //         if (COL::WindowsColision(e->col, COL::top, 0)) {
-        //             e->speed.y *= -1;
-        //         }
-        //     } 
-        //     if (e->speed.y > 0) {
+        else if(e->type == KFurballs || e->type == KBubbles || e->type == KFlower){
+            if(e->type == KBubbles){
+                int n = rand()%500;
+                if(n == 1){
+                  e->speed.y *= -1;  
+                }
+            }
+            if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
+            if (COL::WindowsColision(e->col,COL::left,100)){e->position.x=(256*2)+32;}
+            if (COL::WindowsColision(e->col,COL::top,0) || COL::WindowsColision(e->col,COL::down,-16)){e->speed.y *= -1;}
+        }
+        else if(e->type == KUfo || e->type == KAlien){
+            if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
+            if (COL::WindowsColision(e->col,COL::left,100)){e->position.x=(256*2)+32;}
+            if (COL::WindowsColision(e->col,COL::top,0) || COL::WindowsColision(e->col,COL::down,-16)){e->speed.y *= -1;}  
+        }
+        else if(e->type == KJets){
+            e->count++;
+            if(e->count < 80) {
+                e->speed.x=0;
+                e->speed.y = sinf(esat::Time() * 0.005f) * 2.0f; 
+            } 
+            else {
+                e->Color = white;
+                e->speed.x = 4.0f;
 
-        //         e->speed.x = sinf(esat::Time() * 0.005f) * 5.0f; 
-                
-        //         if (COL::WindowsColision(e->col, COL::down, -16)) {
-        //             e->speed.y *= -1;
-        //         }
-        //     }
-        //     if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
-        //     if (COL::WindowsColision(e->col,COL::left,100)){e->position.x=(256*2)+32;}
-        // }
-        // else if(e->type == KJets) {
-        //     e->count++;
-        //     if(e->count < 80) {
-        //         e->speed.x=0;
-        //         e->speed.y = sinf(esat::Time() * 0.005f) * 2.0f; 
-        //     } 
-        //     else {
-        //         e->speed.x = 4.0f;
-        //     }
-        //     if (COL::WindowsColision(e->col, COL::down, -16) || COL::WindowsColision(e->col, COL::top, 0) || COL::WindowsColision(e->col,COL::right,0)) {
-        //         e->active = false;
-        //         ExplodeAt(e->position.x, e->position.y, e->Color);
-        //         SpawnEnemy(mgr, KJets, 0, rand() % 320);
-        //         e->count = 0;
-        //     }
-        // }
+                if (COL::WindowsColision(e->col,COL::down,-16) || COL::WindowsColision(e->col,COL::top,0)){
+                    e->active=false;
+                    ExplodeAt(e->position.x,e->position.y, e->Color);
+                    SpawnEnemy(mgr,e->type,0,rand()%320);
+                } 
+                if (COL::WindowsColision(e->col,COL::right,100)){e->position.x=-32;}
+            }
+        }
     }
 
     void BGcolor(COL::colision col, ColorType type){
@@ -288,6 +273,10 @@ namespace ENE{
 
             case blue:
             esat::DrawSetFillColor(52,198,233,255);
+                break;
+            
+            case white:
+            esat::DrawSetFillColor(255,255,255,255);
                 break;
         }
         *(P+0)=col.p1.x+1; *(P+1)=col.p1.y+1;
