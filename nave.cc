@@ -86,16 +86,18 @@ void ActualizarColisionParteNave(ParteNave *parteNave)
 
 void MoverParte(ParteNave *parteNave, Nave *nave)
 {
+    // este for es e 2 porque la base ya està posicionada
     for (int i = 0; i < 2; i++)
     {
-        
+        // si parte nave esta arriba de nave
         if (parteNave[i].colisionNave && !parteNave[i].colocada)
         {
+            // el jugador la suelta, centra la parte y la hace caer
             parteNave[i].recogido = false;
             parteNave[i].parteNaveConfig.position.x = nave->pos.x;
             parteNave[i].parteNaveConfig.position.y += 2;
-            
-        
+
+            // si la parte toca la nave entoces la monta
             if (parteNave[i].parteNaveConfig.position.y >= nave->pos.y)
             {
                 // dato curioso el indice està al reves entonces el de arriba es 0 y el de abajo es 1
@@ -107,6 +109,7 @@ void MoverParte(ParteNave *parteNave, Nave *nave)
     }
 }
 
+// esto detecta colision entre la nave y la parte
 void ColisionColocarPartes(Nave *nave, ParteNave *parte_nave, Jugador *player)
 {
     for (int i = 0; i < 2; i++)
@@ -135,7 +138,7 @@ void ActualizarPosParteNave(ParteNave *parteNave, Jugador *player)
 void ColisionPartesNaveJugador(ParteNave *parteNave, Jugador *player)
 {
     // para no agarrar la punta antes se verifica solo con la parte del centro
-    if (COL::CheckColision(player->config_colision.colision, parteNave[1].parteNaveConfig.colision) && !parteNave[1].recogido)
+    if (COL::CheckColision(player->config_colision.colision, parteNave[1].parteNaveConfig.colision) && !parteNave[1].recogido && !parteNave[1].colisionNave)
     {
         // si detecta colision y no fue puesto en la nave
         parteNave[1].recogido = true;
@@ -143,7 +146,7 @@ void ColisionPartesNaveJugador(ParteNave *parteNave, Jugador *player)
     }
     else if (parteNave[1].colocada)
     {
-        if (COL::CheckColision(player->config_colision.colision, parteNave[0].parteNaveConfig.colision) && !parteNave[0].recogido)
+        if (COL::CheckColision(player->config_colision.colision, parteNave[0].parteNaveConfig.colision) && !parteNave[0].recogido && !parteNave[0].colisionNave)
         {
             parteNave[0].recogido = true;
             // printf("Colision objeto 0\n");
