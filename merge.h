@@ -17,7 +17,7 @@
 // FPS
 const int kScreenWidth = 512;
 const int kScreenHeight = 384;
-double delta_time;
+extern double delta_time;
 
 // #include "colisiones.h"
 // #include "nave.cc"

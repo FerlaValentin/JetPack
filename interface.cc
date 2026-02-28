@@ -17,8 +17,8 @@
 #include "colisiones.h"
 
 // TODO(@jhony): Optimize this scripts
-extern const int kScreenWidth;
-extern const int kScreenHeight;
+// extern const int kScreenWidth;
+// extern const int kScreenHeight;
 
 // (@jhony) check this
 struct TPlayerGame

@@ -15,7 +15,8 @@
 #ifndef COLISIONES_H
 #define COLISIONES_H
 
-namespace COL{
+namespace COL
+{
 
     struct vec2
     {
@@ -43,107 +44,15 @@ namespace COL{
         right,
     };
 
-    colision CreateColision(object object)
-    {   
-        colision final;
-        final.p1.x = object.position.x;
-        final.p1.y = object.position.y;
-        final.p2.x = object.position.x + object.width;
-        final.p2.y = object.position.y + object.height;
-        return final;
-    }
+    colision CreateColision(object object);
 
-    bool CheckColision(colision colision1, colision colision2)
-    {
-        if (colision1.p2.x >= colision2.p1.x && colision1.p1.x <= colision2.p2.x && colision1.p2.y >= colision2.p1.y && colision1.p1.y <= colision2.p2.y)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    bool CheckColision(colision colision1, colision colision2);
 
-    bool WindowsColision(colision colision1, dir dir, int offset){
-        colision screen={0,0,256*2,192*2};
+    bool WindowsColision(colision colision1, dir dir, int offset);
 
-        switch(dir){
-            case left:
-            if (colision1.p1.x < screen.p1.x-offset)
-            {return true;}
-            else
-            {return false;}
-            break;
+    bool SpecificColision(colision colision1, colision colision2, dir dir);
 
-            case down:
-            if (colision1.p2.y > screen.p2.y+offset)
-            {return true;}
-            else
-            {return false;}
-            break;
-
-            case top:
-            if (colision1.p1.y < screen.p1.y-offset)
-            {return true;}
-            else
-            {return false;}
-            break;
-
-            case right:
-            if (colision1.p2.x > screen.p2.x+offset)
-            {return true;}
-            else
-            {return false;}
-            break;
-        }
-
-        return false;
-    }
-
-    bool SpecificColision(colision colision1,colision colision2, dir dir){
-    
-        switch(dir){
-            case left:
-            if (colision1.p1.x < colision2.p1.x)
-            {return true;}
-            else
-            {return false;}
-            break;
-
-            case down:
-            if (colision1.p2.y > colision2.p2.y)
-            {return true;}
-            else
-            {return false;}
-            break;
-
-            case top:
-            if (colision1.p1.y < colision2.p1.y)
-            {return true;}
-            else
-            {return false;}
-            break;
-
-            case right:
-            if (colision1.p2.x > colision2.p2.x)
-            {return true;}
-            else
-            {return false;}
-            break;
-        }
-
-        return false;
-    }
-
-    void ShowColision(colision colision){
-        esat::DrawSetStrokeColor(255,255,255,255);
-
-        esat::DrawLine(colision.p1.x,colision.p1.y,colision.p2.x,colision.p1.y);
-        esat::DrawLine(colision.p2.x,colision.p1.y,colision.p2.x,colision.p2.y);
-        esat::DrawLine(colision.p2.x,colision.p2.y,colision.p1.x,colision.p2.y);
-        esat::DrawLine(colision.p1.x,colision.p2.y,colision.p1.x,colision.p1.y);
-    }
+    void ShowColision(colision colision);
 
 }
 

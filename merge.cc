@@ -29,6 +29,7 @@
 unsigned char fps = 25;
 double current_time;
 double last_time = 0;
+double delta_time;
 
 void InitiateFrame()
 {
