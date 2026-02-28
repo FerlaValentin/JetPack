@@ -90,17 +90,17 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     ENE::InitVFXSystem(g_fx_pool, g_fx_sprites);
 }
 
-void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBalas, Jugador player,
+void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBalas, Jugador *player,
               TGame *game, int *menu_selection_player, int *menu_selection_control)
 {
     if (game->current_screen == TScreen::GAME_SCREEN)
     {
-        if (!player.muerto)
+        if (!player->muerto)
         {
             *moverLeft = (esat::IsKeyPressed('A') || esat::IsKeyPressed('a'));
             *moverRight = (esat::IsKeyPressed('D') || esat::IsKeyPressed('d'));
             *ascender = (esat::IsKeyPressed('W') || esat::IsKeyPressed('w'));
-            CrearDisparos(punteroBalas, player);
+            CrearDisparos(punteroBalas, *player);
         }
     }
     if (game->current_screen == TScreen::MAIN_MENU)
@@ -115,6 +115,7 @@ void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBa
             *menu_selection_control = 1;
         if (esat::IsKeyPressed('5'))
         {
+            InstanciarPlayer(player);
             if (*menu_selection_player == 1)
             {
                 // Save player 2 data
@@ -124,11 +125,11 @@ void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBa
                 player2.isActive = false;
                 player2.muerto = true;
                 player2.colisiona = false;
-                SavePlayerDataToFile(&player, &player2);
+                SavePlayerDataToFile(player, &player2);
             }
             else
             {
-                SavePlayerDataToFile(&player);
+                SavePlayerDataToFile(player);
             }
             game->current_screen = TScreen::GAME_SCREEN;
         }
@@ -340,7 +341,7 @@ int esat::main(int argc, char **argv)
     {
         InitiateFrame();
 
-        GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, player, &game, &menu_selection_player, &menu_selection_control);
+        GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, &player, &game, &menu_selection_player, &menu_selection_control);
         Update(&player, &ascender, punteroBalas, &moverLeft, &moverRight, &frame, gasofa, &itemdrop, spritesItems, g_platforms, &game, &timer,
                &menu_blink_timer, &menu_highlight_white, &nave, enemies, level, parteNave, g_fx_pool, g_fx_sprites);
         DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, gasofa, spritesItems, itemdrop, g_platforms, platform_sprite,
