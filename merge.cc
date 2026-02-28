@@ -88,6 +88,11 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
     // enemigos
     ENE::InitManager(mgr, 10);
     ENE::InitVFXSystem(g_fx_pool, g_fx_sprites);
+
+    // Load game data and player data if exists
+    LoadGameDataFromFile(game);
+    LoadPlayerDataFromFile(player);
+    LoadHiScoreFromFile(&game->hi_socore);
 }
 
 void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBalas, Jugador *player,
@@ -348,6 +353,17 @@ int esat::main(int argc, char **argv)
                 game, loading_sprite, menu_selection_player, menu_selection_control, menu_highlight_white, sprite_lives, &nave, SpritesNaves, *enemies, g_fx_pool, g_fx_sprites, parteNave);
 
         FinishFrame();
+    }
+
+    // Save game data and player data if game is close on mid game
+    // Save hi-score always when game is closed
+    SaveHiScoreToFile(game.hi_socore);
+    if(game.current_screen == TScreen::GAME_SCREEN){
+      SavePlayerDataToFile(&player);
+      SaveGameDataToFile(&game);
+    }else{
+      DeleteGameDataFiles();
+      DeletePlayerDataFiles();
     }
 
     // Destroy window
