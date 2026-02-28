@@ -91,7 +91,10 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
 
     // Load game data and player data if exists
     LoadGameDataFromFile(game);
-    LoadPlayerDataFromFile(player);
+    if (LoadPlayerDataFromFile(player))
+    {
+      player->isActive = true; // sirve de algo??
+    }
     LoadHiScoreFromFile(&game->hi_socore);
 }
 
@@ -226,7 +229,7 @@ void Update(Jugador *player, bool *ascender, Bala *punteroBalas, bool *moverLeft
         else
         {
             ENE::UpdateEnemies(mgr, g_fx_pool, g_fx_sprites);
-            EnemiesCollision(mgr, player, *frame, game, g_fx_pool, g_fx_sprites);
+            EnemiesCollision(mgr, player, &gasofa, *frame, game, g_fx_pool, g_fx_sprites);
         }
     }
 }

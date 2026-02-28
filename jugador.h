@@ -65,14 +65,14 @@ void MoverJugador(Jugador *jugador, bool moverLeft, bool moverRight);
 void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player);
 void Ascender_Gravedad(Jugador *jugador, bool ascendiendo);
 void ColisionJugador(Jugador *player);
-void SwitchPlayer(Jugador *player);
+bool SwitchPlayer(Jugador *player);
 void ControlarLimitesPantalla(Jugador *player, Bala *bala);
 int ActualizarAnimacionJugador(Jugador jugador);
 void ResetPlayer_OnDead(Jugador *player, bool *ascender, bool *izquierda, bool *derecha);
 void ColisionPlayerPlatforma(Jugador &player, TPlatform *g_platforms);
 
 // enemigos
-void EnemiesCollision(ENE::EnemyManager *mgr, Jugador *player, int frame, TGame *game, ENE::VisualEffect *g_fx_pool_pointer, esat::SpriteHandle *g_fx_sprites_pointer);
+void EnemiesCollision(ENE::EnemyManager *mgr, Jugador *player, ItemDrop *gasofa, int frame, TGame *game, ENE::VisualEffect *g_fx_pool_pointer, esat::SpriteHandle *g_fx_sprites_pointer);
 
 // --- Balas ---
 void InstanciarBalas(Bala *bala);

@@ -291,15 +291,30 @@ void ColisionDisparos(Bala *bala, ENE::EnemyManager *punteroEnemy, ENE::VisualEf
   }
 }
 
-void SwitchPlayer(Jugador *player)
+bool SwitchPlayer(Jugador *player)
 {
+  bool is_switching = false;
   Jugador tmp;
   tmp = *player;
-  LoadPlayerDataFromFile(player, player->player_id == 1 ? 2 : 1);
+  if (LoadPlayerDataFromFile(player, player->player_id == 1 ? 2 : 1))
+  {
+    is_switching = true;
+  }
   SavePlayerDataToFile(&tmp, player);
+
+  return is_switching;
 }
 
-void EnemiesCollision(ENE::EnemyManager *mgr, Jugador *player, int frame, TGame *game, ENE::VisualEffect *g_fx_pool_pointer, esat::SpriteHandle *g_fx_sprites_pointer)
+static void ResetPlayerVariablesAfterDeath(Jugador *player, ItemDrop *gasofa){
+  player->muerto = true;
+  player->colisiona = false;
+  player->tiene_gasofa = false;
+
+  // check if its necessary to reset the gasofa
+  gasofa->recogido = false;
+}
+
+void EnemiesCollision(ENE::EnemyManager *mgr, Jugador *player, ItemDrop *gasofa, int frame, TGame *game, ENE::VisualEffect *g_fx_pool_pointer, esat::SpriteHandle *g_fx_sprites_pointer)
 {
   if (!player->muerto && player->colisiona)
   {
@@ -314,12 +329,17 @@ void EnemiesCollision(ENE::EnemyManager *mgr, Jugador *player, int frame, TGame 
           player->vidas--;
           ENE::ExplodeAt(e->position.x, e->position.y, e->Color, g_fx_pool_pointer, g_fx_sprites_pointer);
           ENE::ExplodeAt(player->pos.x, player->pos.y, static_cast<ENE::ColorType>(frame), g_fx_pool_pointer, g_fx_sprites_pointer);
-          player->muerto = true;
-          player->colisiona = false;
 
-          SwitchPlayer(player);
+          // Reset player variables after death
+          ResetPlayerVariablesAfterDeath(player, gasofa);
+
+          if (SwitchPlayer(player)){
+            // Aqui se tiene que hacer el cambio de niveles entre jugadores (se reinicia los enemigos correspondientes y la nave)
+            ENE::ResetEnemies(mgr);
+          }
           game->current_player_id = player->player_id;
           game->label_timer_blink = 3.0f;
+
           if (player->vidas <= 0)
           {
             DeletePlayerDataFiles();
