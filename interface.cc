@@ -87,7 +87,7 @@ void ReserveMemory(esat::SpriteHandle **platform_sprite)
 
 void InitGameVariables(TGame *game_data)
 {
-  *game_data = {TScreen::IMAGE, 0, 0, 0, 0};
+  *game_data = {TScreen::IMAGE, 0, 0, 0, 0, 0, 0.0f};
 }
 
 void InitLoadingSprites(esat::SpriteHandle **loading_sprite)
@@ -123,22 +123,30 @@ void LoadFonts()
 
 void UpdateInterface(int *score, int *lives, int *player_id, TGame *game_data)
 {
-  (*game_data).current_lives = *lives;
+  game_data->current_lives = *lives;
+  game_data->current_player_id = *player_id;
   if (*player_id == 1)
   {
-    (*game_data).score_p1 = *score;
+    game_data->score_p1 = *score;
   }
   else
   {
-    (*game_data).score_p2 = *score;
+    game_data->score_p2 = *score;
   }
-  if ((*game_data).score_p1 > (*game_data).hi_socore)
+  if (game_data->score_p1 > game_data->hi_socore)
   {
-    (*game_data).hi_socore = (*game_data).score_p1;
+    game_data->hi_socore = game_data->score_p1;
   }
-  if ((*game_data).score_p2 > (*game_data).hi_socore)
+  if (game_data->score_p2 > game_data->hi_socore)
   {
-    (*game_data).hi_socore = (*game_data).score_p2;
+    game_data->hi_socore = game_data->score_p2;
+  }
+
+  if (game_data->label_timer_blink > 0.0f)
+  {
+      game_data->label_timer_blink -= (float)delta_time;
+      if (game_data->label_timer_blink < 0.0f)
+          game_data->label_timer_blink = 0.0f;
   }
 }
 
@@ -155,9 +163,20 @@ void DrawHeader(TGame game_data, esat::SpriteHandle sprite_lives, int lives = 0)
 
   esat::DrawSetTextSize(18);
 
+  int show_1up = 1;
+  int show_2up = 1;
+  if (game_data.current_screen == TScreen::GAME_SCREEN && game_data.label_timer_blink > 0.0f)
+  {
+    int blink_visible = ((int)((3.0f - game_data.label_timer_blink) / 0.25f) % 2) == 0;
+    show_1up = (game_data.current_player_id != 1) || blink_visible;
+    show_2up = (game_data.current_player_id != 2) || blink_visible;
+  }
+
   esat::DrawSetFillColor(255, 255, 255, 255);
-  esat::DrawText(30, 16, "1UP");
-  esat::DrawText(438, 16, "2UP");
+  if (show_1up)
+    esat::DrawText(30, 16, "1UP");
+  if (show_2up)
+    esat::DrawText(438, 16, "2UP");
 
   esat::DrawSetFillColor(0, 255, 255, 255);
   esat::DrawText(240, 16, "HI");

@@ -137,6 +137,7 @@ void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBa
                 SavePlayerDataToFile(player);
             }
             game->current_screen = TScreen::GAME_SCREEN;
+            game->label_timer_blink = 3.0f;
         }
     }
 }

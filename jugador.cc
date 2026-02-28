@@ -318,6 +318,8 @@ void EnemiesCollision(ENE::EnemyManager *mgr, Jugador *player, int frame, TGame 
           player->colisiona = false;
 
           SwitchPlayer(player);
+          game->current_player_id = player->player_id;
+          game->label_timer_blink = 3.0f;
           if (player->vidas <= 0)
           {
             DeletePlayerDataFiles();

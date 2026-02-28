@@ -59,6 +59,7 @@ void LoadGameDataFromFile(TGame *game){
   if ((fichero = fopen("game.dat", "rb")) != nullptr){
     while (fread(&tmp, sizeof(TGame), 1, fichero) != 0){
       *game = tmp;
+      game->label_timer_blink = 0.0f;
     }
     fclose(fichero);
   }
