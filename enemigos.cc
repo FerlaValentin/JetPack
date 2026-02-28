@@ -92,8 +92,8 @@ void ExplodeAt(float x, float y, ColorType color, ENE::VisualEffect *g_fx_pool_p
 void SpeedEnemies(Enemy *e)
 {
 
-    float speedX = 50;
-    float speedY = 50;
+    float speedX = rand() % 30 + 30;
+    float speedY = rand() % 30 + 30;
 
     if (rand() % 2 == 0)
         speedX *= -1;
