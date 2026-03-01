@@ -99,7 +99,8 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
 }
 
 void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBalas, Jugador *player,
-              TGame *game, int *menu_selection_player, int *menu_selection_control)
+              TGame *game, int *menu_selection_player, int *menu_selection_control, Nave *nave, ItemDrop *itemdrop, ItemDrop *gasofa, Sprites *spritesItems,
+              ENE::EnemyManager *mgr, ParteNave *punteroParteNave)
 {
     if (game->current_screen == TScreen::GAME_SCREEN)
     {
@@ -123,7 +124,13 @@ void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBa
             *menu_selection_control = 1;
         if (esat::IsKeyPressed('5'))
         {
+            InstanciarNave(nave);
+            InstanciarItems(itemdrop, spritesItems);
+            InstaciarGasofa_Nave(gasofa, spritesItems[5]);
             InstanciarPlayer(player);
+            InstanciarBalas(punteroBalas);
+            InstanciarPartesDeLaNave(punteroParteNave);
+            ENE::ResetEnemies(mgr);
             game->current_player_id = 1;
             if (*menu_selection_player == 1)
             {
@@ -356,7 +363,7 @@ int esat::main(int argc, char **argv)
     {
         InitiateFrame();
 
-        GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, &player, &game, &menu_selection_player, &menu_selection_control);
+        GetInput(&moverLeft, &moverRight, &ascender, punteroBalas, &player, &game, &menu_selection_player, &menu_selection_control, &nave, &itemdrop, &gasofa, spritesItems, enemies, parteNave);
         Update(&player, &ascender, punteroBalas, &moverLeft, &moverRight, &frame, gasofa, &itemdrop, spritesItems, g_platforms, &game, &timer,
                &menu_blink_timer, &menu_highlight_white, &nave, enemies, level, parteNave, g_fx_pool, g_fx_sprites);
         DrawAll(spritesColores, spritesPersonaje, punteroBalas, player, frame, gasofa, spritesItems, itemdrop, g_platforms, platform_sprite,

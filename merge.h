@@ -38,8 +38,9 @@ void InitiateAll(Sprites **spritesColores, Sprites **spritesPersonaje, Bala **pu
                  esat::SpriteHandle **loading_sprite, TGame *game, esat::SpriteHandle *sprite_lives, Sprites **spritesNave, Nave *nave,
                  ENE::EnemyManager **mgr, ENE::VisualEffect **g_fx_pool, esat::SpriteHandle **g_fx_sprites, ParteNave **punteroParteNave);
 
-void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBalas, Jugador player,
-              TGame *game, int *menu_selection_player, int *menu_selection_control);
+void GetInput(bool *moverLeft, bool *moverRight, bool *ascender, Bala *punteroBalas, Jugador *player,
+              TGame *game, int *menu_selection_player, int *menu_selection_control, Nave *nave, ItemDrop *itemdrop, ItemDrop *gasofa, Sprites *spritesItems,
+              ENE::EnemyManager *mgr, ParteNave *punteroParteNave);
 
 // Solo para testear luego se borra
 void TestValues(Jugador *player);
