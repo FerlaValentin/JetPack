@@ -3,6 +3,9 @@
 
 #include "colisiones.h"
 
+struct Jugador;
+struct TPlatform;
+
 namespace ENE
 {
 
@@ -64,16 +67,17 @@ namespace ENE
     };
 
     void InitVFXSystem(VisualEffect **g_fx_pool_pointer, esat::SpriteHandle **g_fx_sprites_pointer);
-    void InitManager(EnemyManager **mgr, int pool_capacity);
+    void InitManager(EnemyManager *mgr, int pool_capacity);
     void ExplodeAt(float x, float y, ColorType color, VisualEffect *g_fx_pool_pointer, esat::SpriteHandle *g_fx_sprites_pointer);
     void SpeedEnemies(Enemy *e);
     void SpawnEnemy(EnemyManager *mgr, EnemyType type, float x, float y);
     void EnemiesAI(Enemy *e, COL::colision ecol, EnemyManager *mgr, VisualEffect *g_fx_pool_pointer, esat::SpriteHandle *g_fx_sprites_pointer);
+    void EnemieAIAdvanced(ENE::EnemyManager *mgr, Jugador *Jugador, TPlatform *g_plat, VisualEffect *g_fx_pool_pointer, esat::SpriteHandle *g_fx_sprites_pointer);
     void BGcolor(COL::colision col, ColorType type);
     void UpdateEnemies(EnemyManager *mgr, VisualEffect *g_fx_pool_pointer, esat::SpriteHandle *g_fx_sprites_pointer);
     void DrawEnemies(EnemyManager mgr);
     void DrawActiveVFX(VisualEffect *g_fx_pool, esat::SpriteHandle *g_fx_sprites);
-    void FreeManager(EnemyManager **mgr);
+    void FreeManager(EnemyManager *mgr);
     void FreeVFX(VisualEffect **g_fx_pool_pointer, esat::SpriteHandle **g_fx_sprites_pointer);
     void HowManyEnemies(EnemyManager *mgr);
     void ResetEnemies(EnemyManager *mgr);

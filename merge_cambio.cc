@@ -18,6 +18,7 @@
 
 #include "nave.cc"
 #include "enemigos.h"
+#include "level_config.h"
 
 // FPS
 unsigned char fps = 25;
@@ -40,210 +41,226 @@ bool LevelCompleted(Nave *nave)
         return false;
     }
 }
+/*
+ENE::EnemyManager x2
+ENE::InitManager x2
+Jugador sube nivel: player1.currentlevel ++
+CUando? cuando toque la nave y gasofa full
+SetUp_LevelForPlayer
+*/
 
-// INCLUIR LUEGO
-void LevelManager(ENE::EnemyManager *mgr, Nave *nave)
+void SetUp_LevelForPlayer(ENE::EnemyManager *mgr, int level)
 {
-    if (LevelCompleted(nave))
+    ENE::ResetEnemies(mgr);
+    LevelConfig config = GetLevelConfig(level);
+    for (int i = 0; i < config.amount_enemies; i++)
     {
-        level++;
-        toogle ? !toogle : toogle;
-    }
-    switch (level)
-    {
-    case 1:
-        if (!toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KMeteorites, -32, rand() % 344);
-            }
-            toogle = true;
-        }
-        break;
-
-    case 2:
-        if (toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KFurballs, -32, rand() % 344);
-            }
-            toogle = false;
-        }
-        break;
-
-    case 3:
-        if (!toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KBubbles, -32, rand() % 344);
-            }
-            toogle = true;
-        }
-        break;
-
-    case 4:
-        if (toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KJets, 0, rand() % 344);
-            }
-            toogle = false;
-        }
-        break;
-
-    case 5:
-        if (!toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KUfo, -32, rand() % 344);
-            }
-            toogle = true;
-        }
-        break;
-
-    case 6:
-        if (toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KFlower, -32, rand() % 344);
-            }
-            toogle = false;
-        }
-        break;
-
-    case 7:
-        if (!toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KDarts, -32, rand() % 344);
-            }
-            toogle = true;
-        }
-        break;
-
-    case 8:
-        if (toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KAlien, -32, rand() % 344);
-            }
-            toogle = false;
-        }
-        break;
-
-    case 9:
-        if (!toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KMeteorites, -32, rand() % 344);
-            }
-            toogle = true;
-        }
-        break;
-
-    case 10:
-        if (toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KFurballs, -32, rand() % 344);
-            }
-            toogle = false;
-        }
-        break;
-
-    case 11:
-        if (!toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KBubbles, -32, rand() % 344);
-            }
-            toogle = true;
-        }
-        break;
-
-    case 12:
-        if (toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KJets, 0, rand() % 344);
-            }
-            toogle = false;
-        }
-        break;
-
-    case 13:
-        if (!toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KUfo, -32, rand() % 344);
-            }
-            toogle = true;
-        }
-        break;
-
-    case 14:
-        if (toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KFlower, -32, rand() % 344);
-            }
-            toogle = false;
-        }
-        break;
-
-    case 15:
-        if (!toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KDarts, -32, rand() % 344);
-            }
-            toogle = true;
-        }
-        break;
-
-    case 16:
-        if (toogle)
-        {
-            ENE::ResetEnemies(mgr);
-            for (int i = 0; i < 6; i++)
-            {
-                ENE::SpawnEnemy(mgr, ENE::KAlien, -32, rand() % 344);
-            }
-            toogle = false;
-        }
-        break;
+        ENE::SpawnEnemy(mgr, config.tipo, -32, rand()% 344);
     }
 }
+// INCLUIR LUEGO
+// void LevelManager(ENE::EnemyManager *mgr, Nave *nave)
+// {
+//     if (LevelCompleted(nave))
+//     {
+//         level++;
+//         toogle ? !toogle : toogle;
+//     }
+//     switch (level)
+//     {
+//     case 1:
+//         if (!toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KMeteorites, -32, rand() % 344);
+//             }
+//             toogle = true;
+//         }
+//         break;
+
+//     case 2:
+//         if (toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KFurballs, -32, rand() % 344);
+//             }
+//             toogle = false;
+//         }
+//         break;
+
+//     case 3:
+//         if (!toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KBubbles, -32, rand() % 344);
+//             }
+//             toogle = true;
+//         }
+//         break;
+
+//     case 4:
+//         if (toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KJets, 0, rand() % 344);
+//             }
+//             toogle = false;
+//         }
+//         break;
+
+//     case 5:
+//         if (!toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KUfo, -32, rand() % 344);
+//             }
+//             toogle = true;
+//         }
+//         break;
+
+//     case 6:
+//         if (toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KFlower, -32, rand() % 344);
+//             }
+//             toogle = false;
+//         }
+//         break;
+
+//     case 7:
+//         if (!toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KDarts, -32, rand() % 344);
+//             }
+//             toogle = true;
+//         }
+//         break;
+
+//     case 8:
+//         if (toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KAlien, -32, rand() % 344);
+//             }
+//             toogle = false;
+//         }
+//         break;
+
+//     case 9:
+//         if (!toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KMeteorites, -32, rand() % 344);
+//             }
+//             toogle = true;
+//         }
+//         break;
+
+//     case 10:
+//         if (toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KFurballs, -32, rand() % 344);
+//             }
+//             toogle = false;
+//         }
+//         break;
+
+//     case 11:
+//         if (!toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KBubbles, -32, rand() % 344);
+//             }
+//             toogle = true;
+//         }
+//         break;
+
+//     case 12:
+//         if (toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KJets, 0, rand() % 344);
+//             }
+//             toogle = false;
+//         }
+//         break;
+
+//     case 13:
+//         if (!toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KUfo, -32, rand() % 344);
+//             }
+//             toogle = true;
+//         }
+//         break;
+
+//     case 14:
+//         if (toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KFlower, -32, rand() % 344);
+//             }
+//             toogle = false;
+//         }
+//         break;
+
+//     case 15:
+//         if (!toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KDarts, -32, rand() % 344);
+//             }
+//             toogle = true;
+//         }
+//         break;
+
+//     case 16:
+//         if (toogle)
+//         {
+//             ENE::ResetEnemies(mgr);
+//             for (int i = 0; i < 6; i++)
+//             {
+//                 ENE::SpawnEnemy(mgr, ENE::KAlien, -32, rand() % 344);
+//             }
+//             toogle = false;
+//         }
+//         break;
+//     }
+// }
 
 // INCLUIR LUEGO
 void EnemieAIAdvanced(ENE::EnemyManager *mgr, Jugador *Jugador, TPlatform *g_plat)

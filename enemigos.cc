@@ -19,54 +19,53 @@ void InitVFXSystem(ENE::VisualEffect **g_fx_pool_pointer, esat::SpriteHandle **g
         ((*g_fx_pool_pointer) + i)->active = false;
 }
 
-void InitManager(EnemyManager **mgr, int pool_capacity)
+void InitManager(EnemyManager *mgr, int pool_capacity)
 {
-    *mgr = (ENE::EnemyManager *)malloc(sizeof(ENE::EnemyManager));
-    (*mgr)->templates = (ENE::EnemyTemplate *)malloc(ENE::EnemyType::KTypeCount * sizeof(ENE::EnemyTemplate));
+    mgr->templates = (ENE::EnemyTemplate *)malloc(ENE::EnemyType::KTypeCount * sizeof(ENE::EnemyTemplate));
 
     for (int i = 0; i < KTypeCount; i++)
     {
         if (i == 0 || i == 1 || i == 2)
         {
-            ((*mgr)->templates + i)->num_frames = 2;
+            (mgr->templates + i)->num_frames = 2;
         }
         else
         {
-            ((*mgr)->templates + i)->num_frames = 1;
+            (mgr->templates + i)->num_frames = 1;
         }
 
-        ((*mgr)->templates + i)->sprite = (esat::SpriteHandle *)malloc(((*mgr)->templates + i)->num_frames * sizeof(esat::SpriteHandle));
+        (mgr->templates + i)->sprite = (esat::SpriteHandle *)malloc((mgr->templates + i)->num_frames * sizeof(esat::SpriteHandle));
     }
 
-    *(((*mgr)->templates + 0)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo_1_1_2x.png");
-    *(((*mgr)->templates + 0)->sprite + 1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo_1_2_2x.png");
+    *((mgr->templates + 0)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo_1_1_2x.png");
+    *((mgr->templates + 0)->sprite + 1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo_1_2_2x.png");
 
-    *(((*mgr)->templates + 1)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo2_1_2x.png");
-    *(((*mgr)->templates + 1)->sprite + 1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo2_2_2x.png");
+    *((mgr->templates + 1)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo2_1_2x.png");
+    *((mgr->templates + 1)->sprite + 1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo2_2_2x.png");
 
-    *(((*mgr)->templates + 2)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo3_1_2x.png");
-    *(((*mgr)->templates + 2)->sprite + 1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo3_2_2x.png");
+    *((mgr->templates + 2)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo3_1_2x.png");
+    *((mgr->templates + 2)->sprite + 1) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo3_2_2x.png");
 
-    *(((*mgr)->templates + 3)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo7_2x.png");
-    *(((*mgr)->templates + 4)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo4_2x.png");
-    *(((*mgr)->templates + 5)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo5_2x.png");
-    *(((*mgr)->templates + 6)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo6_2x.png");
-    *(((*mgr)->templates + 7)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo8_2x.png");
+    *((mgr->templates + 3)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo7_2x.png");
+    *((mgr->templates + 4)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo4_2x.png");
+    *((mgr->templates + 5)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo5_2x.png");
+    *((mgr->templates + 6)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo6_2x.png");
+    *((mgr->templates + 7)->sprite + 0) = esat::SpriteFromFile("SPRITES/ENEMIGOS/enemigo8_2x.png");
 
     for (int i = 0; i < KTypeCount; i++)
     {
-        ((*mgr)->templates + i)->width = esat::SpriteWidth(*(((*mgr)->templates + i)->sprite));
-        printf("Width: %d\n", ((*mgr)->templates + i)->width);
-        ((*mgr)->templates + i)->height = esat::SpriteHeight(*(((*mgr)->templates + i)->sprite));
-        printf("Height: %d\n", ((*mgr)->templates + i)->height);
+        (mgr->templates + i)->width = esat::SpriteWidth(*((mgr->templates + i)->sprite));
+        printf("Width: %d\n", (mgr->templates + i)->width);
+        (mgr->templates + i)->height = esat::SpriteHeight(*((mgr->templates + i)->sprite));
+        printf("Height: %d\n", (mgr->templates + i)->height);
     }
 
-    (*mgr)->pool_size = pool_capacity;
-    (*mgr)->pool = (Enemy *)malloc(pool_capacity * sizeof(Enemy));
+    mgr->pool_size = pool_capacity;
+    mgr->pool = (Enemy *)malloc(pool_capacity * sizeof(Enemy));
 
     for (int i = 0; i < pool_capacity; i++)
     {
-        ((*mgr)->pool + i)->active = false;
+        (mgr->pool + i)->active = false;
     }
 }
 
@@ -197,11 +196,11 @@ void EnemiesAI(Enemy *e, COL::colision ecol, EnemyManager *mgr, ENE::VisualEffec
             ExplodeAt(e->position.x, e->position.y, e->Color, g_fx_pool_pointer, g_fx_sprites_pointer);
             if (e->type == KMeteorites)
             {
-                SpawnEnemy(mgr, KMeteorites, -32, rand() % 360);
+                SpawnEnemy(mgr, KMeteorites, -32, rand() % 320);
             }
             else
             {
-                SpawnEnemy(mgr, KDarts, -32, rand() % 360);
+                SpawnEnemy(mgr, KDarts, -32, rand() % 320);
             }
         }
         if (COL::WindowsColision(ecol, COL::right, 100))
@@ -289,6 +288,43 @@ void EnemiesAI(Enemy *e, COL::colision ecol, EnemyManager *mgr, ENE::VisualEffec
     }
 }
 
+void EnemieAIAdvanced(ENE::EnemyManager *mgr, Jugador *Jugador, TPlatform *g_plat, ENE::VisualEffect *g_fx_pool_pointer, esat::SpriteHandle *g_fx_sprites_pointer)
+{
+    for (int i = 0; i < mgr->pool_size; i++)
+    {
+        ENE::Enemy *e = &(*(mgr->pool + i));
+        if (e->active)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (e->type == ENE::KMeteorites || e->type == ENE::KDarts || e->type == ENE::KJets)
+                {
+                    if (COL::CheckColision(e->col, (g_plat + j)->collision_platform.colision))
+                    {
+                        e->active = false;
+                        ENE::ExplodeAt(e->position.x, e->position.y, e->Color, g_fx_pool_pointer, g_fx_sprites_pointer);
+                        if (e->type == ENE::KJets)
+                        {
+                            ENE::SpawnEnemy(mgr, e->type, 0, rand() % 344);
+                        }
+                        else
+                        {
+                            ENE::SpawnEnemy(mgr, e->type, -32, rand() % 344);
+                        }
+                    }
+                }
+                else if (e->type == ENE::KFurballs || e->type == ENE::KBubbles || e->type == ENE::KFlower)
+                {
+                    if (COL::CheckColision(e->col, (g_plat + j)->collision_platform.colision))
+                    {
+                        e->speed.y *= -1;
+                    }
+                }
+            }
+        }
+    }
+}
+
 void BGcolor(COL::colision col, ColorType type)
 {
     float *P = (float *)malloc(10 * sizeof(float));
@@ -329,14 +365,18 @@ void BGcolor(COL::colision col, ColorType type)
 
 void UpdateEnemies(EnemyManager *mgr, ENE::VisualEffect *g_fx_pool_pointer, esat::SpriteHandle *g_fx_sprites_pointer)
 {
+    int index = -1;
     for (int i = 0; i < mgr->pool_size; i++)
     {
         Enemy *e = (mgr->pool + i);
         if (e->active)
         {
+            if(index == -1)
+                index = i;
 
             e->position.y += e->speed.y * delta_time;
             e->position.x += e->speed.x * delta_time;
+            
 
             ENE::EnemyTemplate myTemplate = mgr->templates[e->type];
 
@@ -400,11 +440,11 @@ void DrawActiveVFX(ENE::VisualEffect *g_fx_pool, esat::SpriteHandle *g_fx_sprite
     }
 }
 
-void FreeManager(EnemyManager **mgr)
+void FreeManager(EnemyManager *mgr)
 {
     for (int i = 0; i < KTypeCount; i++)
     {
-        EnemyTemplate *t = ((*mgr)->templates + i);
+        EnemyTemplate *t = (mgr->templates + i);
         if (t->sprite != nullptr)
         {
             for (int j = 0; j < t->num_frames; j++)
@@ -414,10 +454,8 @@ void FreeManager(EnemyManager **mgr)
             free(t->sprite);
         }
     }
-    if ((*mgr)->pool != nullptr)
-        free((*mgr)->pool);
-    free(*mgr);
-    *mgr = nullptr;
+    if (mgr->pool != nullptr)
+        free(mgr->pool);
 }
 
 void FreeVFX(ENE::VisualEffect **g_fx_pool_pointer, esat::SpriteHandle **g_fx_sprites_pointer)

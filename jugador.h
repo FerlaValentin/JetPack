@@ -26,6 +26,7 @@ struct Jugador
     COL::object config_colision;
     int vidas;
     int puntos;
+    int level;
     int player_id;
     bool isActive;
     bool muerto;
@@ -59,7 +60,7 @@ struct ItemDrop
 };
 
 // --- Jugador ---
-void InstanciarPlayer(Jugador *player);
+void InstanciarPlayer(Jugador *player, int id = 1);
 void InstanciarSpritesPlayer(Sprites *punteroSprites);
 void MoverJugador(Jugador *jugador, bool moverLeft, bool moverRight);
 void LoopMoverJugador(bool moverLeft, bool moverRight, Jugador *player);
@@ -68,7 +69,7 @@ void ColisionJugador(Jugador *player);
 bool SwitchPlayer(Jugador *player);
 void ControlarLimitesPantalla(Jugador *player, Bala *bala);
 int ActualizarAnimacionJugador(Jugador jugador);
-void ResetPlayer_OnDead(Jugador *player, bool *ascender, bool *izquierda, bool *derecha);
+void ResetPlayer_OnDead(Jugador *player, bool *ascender, bool *izquierda, bool *derecha, bool* vida_perdida);
 void ColisionPlayerPlatforma(Jugador &player, TPlatform *g_platforms);
 
 // enemigos

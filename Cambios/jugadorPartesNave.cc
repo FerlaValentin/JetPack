@@ -109,7 +109,7 @@ void InstanciarSpritesItems(Sprites *punteroSprites)
   punteroSprites[5].sprite = esat::SpriteFromFile("SPRITES/ITEMS/fuel.png");
 }
 
-void InstanciarPlayer(Jugador *player)
+void InstanciarPlayer(Jugador *player, int id)
 {
   const int terrain_height = 16;
   player->spriteWidth = 34;
@@ -133,7 +133,8 @@ void InstanciarPlayer(Jugador *player)
 
   player->puntos = 0;
   player->vidas = 3;
-  player->player_id = 1;
+  player->level = 1;
+  player->player_id = id;
   player->isActive = true;
 }
 

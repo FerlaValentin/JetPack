@@ -16,7 +16,7 @@ set opengl_lib=opengl32.lib user32.lib gdi32.lib shell32.lib Ws2_32.lib
 set local_include=.
 
 set main_file=.\merge.cc
-set sources=.\audio.cc .\data.cc .\interface.cc .\jugador.cc .\nave.cc .\enemigos.cc .\colisiones.cc
+set sources=.\audio.cc .\data.cc .\interface.cc .\jugador.cc .\nave.cc .\enemigos.cc .\colisiones.cc .\level_config.cc
 
 cl /nologo /Zi /GR- /EHs /MD %main_file% %sources% -I%esat_include% -I%local_include% %esat_lib% %opengl_lib%
  

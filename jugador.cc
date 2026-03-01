@@ -4,6 +4,7 @@
 #include "interface.h"
 #include "audio.h"
 #include "enemigos.h"
+#include "level_config.h"
 
 /*struct Sprites
 {
@@ -102,7 +103,7 @@ void InstanciarSpritesItems(Sprites *punteroSprites)
   punteroSprites[5].sprite = esat::SpriteFromFile("SPRITES/ITEMS/fuel.png");
 }
 
-void InstanciarPlayer(Jugador *player)
+void InstanciarPlayer(Jugador *player, int id)
 {
   const int terrain_height = 16;
   player->spriteWidth = 34;
@@ -126,7 +127,8 @@ void InstanciarPlayer(Jugador *player)
 
   player->puntos = 0;
   player->vidas = 3;
-  player->player_id = 1;
+  player->player_id = id;
+  player->level = 1;
   player->isActive = true;
 }
 
@@ -154,6 +156,7 @@ void InstaciarGasofa_Nave(ItemDrop *gasofa, Sprites punteroSprites)
   gasofa->cooldown = 5.0f;
   gasofa->recogido = false;
 }
+
 void InstanciarItems(ItemDrop *item, Sprites *punteroSprites)
 {
   item->tipo = rand() % 5; // 0 1 2 3 4
@@ -296,11 +299,16 @@ bool SwitchPlayer(Jugador *player)
   bool is_switching = false;
   Jugador tmp;
   tmp = *player;
+  /// SavePlayerDataToFile(player);
   if (LoadPlayerDataFromFile(player, player->player_id == 1 ? 2 : 1))
   {
     is_switching = true;
+    SavePlayerDataToFile(&tmp, player);
   }
-  SavePlayerDataToFile(&tmp, player);
+  printf("tmp level %d\n", tmp.level);
+  printf("tmp player id %d\n", tmp.player_id);
+  printf("player level %d\n", player->level);
+  printf("player id %d\n", player->player_id);
 
   return is_switching;
 }
@@ -333,10 +341,7 @@ void EnemiesCollision(ENE::EnemyManager *mgr, Jugador *player, ItemDrop *gasofa,
           // Reset player variables after death
           ResetPlayerVariablesAfterDeath(player, gasofa);
 
-          if (SwitchPlayer(player)){
-            // Aqui se tiene que hacer el cambio de niveles entre jugadores (se reinicia los enemigos correspondientes y la nave)
-            ENE::ResetEnemies(mgr);
-          }
+          SwitchPlayer(player);
           game->current_player_id = player->player_id;
           game->label_timer_blink = 3.0f;
 
@@ -799,7 +804,7 @@ void CleanInputsOnDead(bool *ascender, bool *izquierda, bool *derecha)
 }
 
 // if(muerto == true || colisiona == false)
-void ResetPlayer_OnDead(Jugador *player, bool *ascender, bool *izquierda, bool *derecha)
+void ResetPlayer_OnDead(Jugador *player, bool *ascender, bool *izquierda, bool *derecha, bool* vida_perdida)
 {
   static float timer = 0.0f;
   static float timer_invulnerable = 0.0f;
@@ -813,6 +818,7 @@ void ResetPlayer_OnDead(Jugador *player, bool *ascender, bool *izquierda, bool *
       CleanInputsOnDead(ascender, izquierda, derecha);
       player->pos.x = kScreenWidth / 2;
       player->pos.y = kScreenHeight - player->spriteHeight - 16;
+      *vida_perdida = true;
     }
 
     timer += delta_time;

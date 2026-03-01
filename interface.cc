@@ -87,7 +87,7 @@ void ReserveMemory(esat::SpriteHandle **platform_sprite)
 
 void InitGameVariables(TGame *game_data)
 {
-  *game_data = {TScreen::IMAGE, 0, 0, 1, 0, 0, 0, 0.0f};
+  *game_data = {TScreen::IMAGE, 0, 1, 1, 0, 0, 0, 0.0f};
 }
 
 void InitLoadingSprites(esat::SpriteHandle **loading_sprite)

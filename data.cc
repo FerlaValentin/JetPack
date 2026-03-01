@@ -8,8 +8,11 @@ void SavePlayerDataToFile(Jugador *player1, Jugador *player2)
   if (fichero != NULL)
   {
     fwrite(player1, sizeof(Jugador), 1, fichero);
-    if (player2 != nullptr)
+    printf("guardar jugador %d nivel %d\n", player1->player_id, player1->level);
+    if (player2 != nullptr){
       fwrite(player2, sizeof(Jugador), 1, fichero);
+      printf("guardar jugador %d nivel %d\n", player2->player_id, player2->level);
+    }
     fclose(fichero);
   }
 }
@@ -35,7 +38,7 @@ bool LoadPlayerDataFromFile(Jugador *player, int player_id)
   {
     printf("[ERROR] Error loading player data\n");
   }
-  printf("[DEBUG] Player data loaded for player %d\n", player->player_id);
+  printf("[DEBUG] Player data loaded for player %d level %d\n", player->player_id, player->level);
   return is_loaded;
 }
 
