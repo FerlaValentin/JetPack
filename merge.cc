@@ -55,35 +55,36 @@ void SetUp_LevelForPlayer(ENE::EnemyManager *mgr, int level)
     }
 }
 
-void SwitchSessions(PlayerSession sessions[2], PlayerSession **current_session, TGame *game)
+void SwitchSessions(PlayerSession sessions[2], PlayerSession **current_session, TGame *game,
+                    Nave *nave, ParteNave *punteroParteNave)
 {
-    // printf("Cambio de sesion, jugador actual %d\n", (*current_session)->player.player_id);
-    // int indice_actual = /*game->current_player_id*/ (*current_session)->player.player_id - 1;
-    // int otro_indice = (indice_actual == 0) ? 1 : 0;
-    // if (sessions[otro_indice].player.vidas > 0)
-    // {
-    //     game->current_player_id = otro_indice + 1;
-    //     *current_session = &sessions[otro_indice];
-    //     printf("Cambio de sesion, jugador nuevo %d nivel %d\n", (*current_session)->player.player_id, (*current_session)->level);
-    // } else 
-    // {
-    //     if (sessions[indice_actual].player.vidas <= 0)
-    //     {
-    //         game->current_screen = TScreen::GAME_OVER;
-    //     }
-    // }
-    // SetUp_LevelForPlayer(&(*current_session)->enemies, (*current_session)->level);
-
     (*current_session)->player.level = (*current_session)->level;
-    int otro_indice = game->current_player_id - 1;
-    sessions[otro_indice].player = (*current_session)->player; //
+
+    Jugador *dying = &(*current_session)->player;
+    dying->muerto          = false;
+    dying->colisiona       = true;
+    dying->timer_muerte    = 0.0f;
+    dying->timer_inv_actual = 0.0f;
+    dying->pos.x = kScreenWidth / 2;
+    dying->pos.y = kScreenHeight - dying->spriteHeight - 16;
+
+    int indice_actual = dying->player_id - 1;
+    int otro_indice   = 1 - indice_actual;
+
     if (sessions[otro_indice].player.vidas > 0)
     {
+        game->current_player_id = otro_indice + 1;
         *current_session = &sessions[otro_indice];
         SetUp_LevelForPlayer(&(*current_session)->enemies, (*current_session)->level);
+        printf("Cambio de sesion, jugador nuevo %d nivel %d vidas %d\n",
+               (*current_session)->player.player_id,
+               (*current_session)->level,
+               (*current_session)->player.vidas);
     }
     else
     {
+        DeletePlayerDataFiles();
+        DeleteGameDataFiles();
         game->current_screen = TScreen::GAME_OVER;
     }
 }
@@ -342,7 +343,7 @@ void Update(PlayerSession sessions[2], PlayerSession **current_session, bool *as
         EnemiesCollision(mgr, player, &gasofa, *frame, game, g_fx_pool, g_fx_sprites);
 
         if (vida_perdida && game->num_players == 2 && nave->direccion == Direction::STATIC)
-            SwitchSessions(sessions, current_session, game);
+            SwitchSessions(sessions, current_session, game, nave, punteroParteNave);
             //SetUp_LevelForPlayer(&(*current_session)->enemies, (*current_session)->level);
     }
 }

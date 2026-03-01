@@ -32,6 +32,8 @@ struct Jugador
     bool muerto;
     float tiempo_aparicion;
     float tiempo_invulnerable;
+    float timer_muerte;
+    float timer_inv_actual;
     int spriteWidth;
     int spriteHeight;
     bool colisiona;

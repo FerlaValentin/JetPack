@@ -121,6 +121,8 @@ void InstanciarPlayer(Jugador *player, int id)
   player->muerto = false;
   player->tiempo_aparicion = 5.0f;
   player->tiempo_invulnerable = 3.0f;
+  player->timer_muerte = 0.0f;
+  player->timer_inv_actual = 0.0f;
 
   player->config_colision.width = player->spriteWidth;
   player->config_colision.height = player->spriteHeight;
@@ -340,12 +342,9 @@ void EnemiesCollision(ENE::EnemyManager *mgr, Jugador *player, ItemDrop *gasofa,
 
           // Reset player variables after death
           ResetPlayerVariablesAfterDeath(player, gasofa);
-
-          SwitchPlayer(player);
-          game->current_player_id = player->player_id;
           game->label_timer_blink = 3.0f;
 
-          if (player->vidas <= 0)
+          if (game->num_players == 1 && player->vidas <= 0)
           {
             DeletePlayerDataFiles();
             game->current_screen = TScreen::GAME_OVER;
@@ -806,14 +805,9 @@ void CleanInputsOnDead(bool *ascender, bool *izquierda, bool *derecha)
 // if(muerto == true || colisiona == false)
 void ResetPlayer_OnDead(Jugador *player, bool *ascender, bool *izquierda, bool *derecha, bool* vida_perdida)
 {
-  static float timer = 0.0f;
-  static float timer_invulnerable = 0.0f;
-  // if (player->muerto && timer > player->tiempo_aparicion)
-  //   timer = 0.0f;
-
-  if (timer <= player->tiempo_aparicion)
+  if (player->timer_muerte <= player->tiempo_aparicion)
   {
-    if (timer == 0.0f)
+    if (player->timer_muerte == 0.0f)
     {
       CleanInputsOnDead(ascender, izquierda, derecha);
       player->pos.x = kScreenWidth / 2;
@@ -821,20 +815,18 @@ void ResetPlayer_OnDead(Jugador *player, bool *ascender, bool *izquierda, bool *
       *vida_perdida = true;
     }
 
-    timer += delta_time;
+    player->timer_muerte += delta_time;
   }
   else
   {
     player->colisiona = false;
     player->muerto = false;
-    timer_invulnerable += delta_time; // 0 1 2 3 4 5
-    // no detectar colisiones con enemigos
-    if (timer_invulnerable >= player->tiempo_invulnerable)
+    player->timer_inv_actual += delta_time;
+    if (player->timer_inv_actual >= player->tiempo_invulnerable)
     {
-      timer = 0.0f;
-      timer_invulnerable = 0.0f;
+      player->timer_muerte = 0.0f;
+      player->timer_inv_actual = 0.0f;
       player->colisiona = true;
-      // empezar a detectar colisiones con enemigos
     }
   }
 }

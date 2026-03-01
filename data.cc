@@ -1,17 +1,40 @@
 // Save player data
 // Save game data
+#include "data.h"
 #include "jugador.h"
+
+static PlayerSaveData JugadorToSaveData(Jugador *player)
+{
+  PlayerSaveData sd;
+  sd.player_id = player->player_id;
+  sd.level     = player->level;
+  sd.vidas     = player->vidas;
+  sd.puntos    = player->puntos;
+  return sd;
+}
+
+static void ApplySaveDataToJugador(Jugador *player, PlayerSaveData *sd)
+{
+  player->player_id = sd->player_id;
+  player->level     = sd->level;
+  player->vidas     = sd->vidas;
+  player->puntos    = sd->puntos;
+}
+
 void SavePlayerDataToFile(Jugador *player1, Jugador *player2)
 {
   FILE *fichero;
   fichero = fopen("save.dat", "wb");
   if (fichero != NULL)
   {
-    fwrite(player1, sizeof(Jugador), 1, fichero);
-    printf("guardar jugador %d nivel %d\n", player1->player_id, player1->level);
-    if (player2 != nullptr){
-      fwrite(player2, sizeof(Jugador), 1, fichero);
-      printf("guardar jugador %d nivel %d\n", player2->player_id, player2->level);
+    PlayerSaveData sd1 = JugadorToSaveData(player1);
+    fwrite(&sd1, sizeof(PlayerSaveData), 1, fichero);
+    printf("guardar jugador %d nivel %d\n", sd1.player_id, sd1.level);
+    if (player2 != nullptr)
+    {
+      PlayerSaveData sd2 = JugadorToSaveData(player2);
+      fwrite(&sd2, sizeof(PlayerSaveData), 1, fichero);
+      printf("guardar jugador %d nivel %d\n", sd2.player_id, sd2.level);
     }
     fclose(fichero);
   }
@@ -20,15 +43,15 @@ void SavePlayerDataToFile(Jugador *player1, Jugador *player2)
 bool LoadPlayerDataFromFile(Jugador *player, int player_id)
 {
   FILE *fichero;
-  Jugador tmp;
+  PlayerSaveData tmp;
   bool is_loaded = false;
   if ((fichero = fopen("save.dat", "rb")) != nullptr)
   {
-    while (fread(&tmp, sizeof(Jugador), 1, fichero) != 0)
+    while (fread(&tmp, sizeof(PlayerSaveData), 1, fichero) != 0)
     {
       if (tmp.player_id == player_id)
       {
-        *player = tmp;
+        ApplySaveDataToJugador(player, &tmp);
         is_loaded = true;
       }
     }
@@ -38,7 +61,7 @@ bool LoadPlayerDataFromFile(Jugador *player, int player_id)
   {
     printf("[ERROR] Error loading player data\n");
   }
-  printf("[DEBUG] Player data loaded for player %d level %d\n", player->player_id, player->level);
+  printf("[DEBUG] Player data loaded for player %d level %d lives %d\n", player->player_id, player->level, player->vidas);
   return is_loaded;
 }
 

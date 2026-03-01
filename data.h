@@ -4,6 +4,14 @@
 #include <cstdio>
 #include "jugador.h"
 
+struct PlayerSaveData
+{
+  int player_id;
+  int level;
+  int vidas;
+  int puntos;
+};
+
 // Guarda uno o dos jugadores en el archivo
 void SavePlayerDataToFile(Jugador *player1, Jugador *player2 = nullptr);
 
